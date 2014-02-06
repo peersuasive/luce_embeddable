@@ -10,10 +10,8 @@ Output "oDemo.lua"
 Main "Demo.lua"
 
 -- gadokai base system
-Module "luce"      "oluce.lua"
+Module "luce"      "luce.lua"
 Module "DemoHolder" "DemoHolder.lua"
 Module "GlyphDemo" "GlyphDemo.lua"
 Module "GraphicsDemoBase" "GraphicsDemoBase.lua"
 Module "LineDemo" "LineDemo.lua"
-
---Demo.lua

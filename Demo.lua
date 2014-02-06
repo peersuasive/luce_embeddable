@@ -18,7 +18,7 @@ local usage = function()
     print(" demo: one of GlypDemo, LineDemo (default: GlyphDemo)")
     print("options:")
     print(" -d <animation> [-d ...]    disable selected animation")
-    print("                can be one of rotation, position, shear, size (default: all enabled)")  
+    print("                can be one of rotation, position, shear, size or all (default: all enabled)")  
     print()
 end
 if(#args>0)then
@@ -29,7 +29,12 @@ if(#args>0)then
     elseif(o:match("^%-"))then
         if("-d"==o)then
             local a = args[i+1]
-            if( animations[a] ) then
+            if("all"==a)then
+                animations.rotation = false
+                animations.position = false
+                animations.shear    = false
+                animations.size     = false
+            elseif( animations[a] ) then
                 animations[a] = false
             else 
                 print(string.format("unknown animation: %s, ignoring", a))

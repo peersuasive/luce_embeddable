@@ -1,0 +1,3093 @@
+#!/usr/bin/env lua
+package.preload['optlex']=(function(...)
+local s=_G
+local u=require"string"
+module"optlex"
+local i=u.match
+local e=u.sub
+local r=u.find
+local l=u.rep
+local c
+error=s.error
+warn={}
+local n,o,d
+local k={
+TK_KEYWORD=true,
+TK_NAME=true,
+TK_NUMBER=true,
+TK_STRING=true,
+TK_LSTRING=true,
+TK_OP=true,
+TK_EOS=true,
+}
+local j={
+TK_COMMENT=true,
+TK_LCOMMENT=true,
+TK_EOL=true,
+TK_SPACE=true,
+}
+local h
+local function g(e)
+local t=n[e-1]
+if e<=1 or t=="TK_EOL"then
+return true
+elseif t==""then
+return g(e-1)
+end
+return false
+end
+local function v(t)
+local e=n[t+1]
+if t>=#n or e=="TK_EOL"or e=="TK_EOS"then
+return true
+elseif e==""then
+return v(t+1)
+end
+return false
+end
+local function x(t)
+local a=#i(t,"^%-%-%[=*%[")
+local a=e(t,a+1,-(a-1))
+local e,t=1,0
+while true do
+local a,n,i,o=r(a,"([\r\n])([\r\n]?)",e)
+if not a then break end
+e=a+1
+t=t+1
+if#o>0 and i~=o then
+e=e+1
+end
+end
+return t
+end
+local function q(s,h)
+local a=i
+local t,e=n[s],n[h]
+if t=="TK_STRING"or t=="TK_LSTRING"or
+e=="TK_STRING"or e=="TK_LSTRING"then
+return""
+elseif t=="TK_OP"or e=="TK_OP"then
+if(t=="TK_OP"and(e=="TK_KEYWORD"or e=="TK_NAME"))or
+(e=="TK_OP"and(t=="TK_KEYWORD"or t=="TK_NAME"))then
+return""
+end
+if t=="TK_OP"and e=="TK_OP"then
+local t,e=o[s],o[h]
+if(a(t,"^%.%.?$")and a(e,"^%."))or
+(a(t,"^[~=<>]$")and e=="=")or
+(t=="["and(e=="["or e=="="))then
+return" "
+end
+return""
+end
+local t=o[s]
+if e=="TK_OP"then t=o[h]end
+if a(t,"^%.%.?%.?$")then
+return" "
+end
+return""
+else
+return" "
+end
+end
+local function b()
+local a,h,s={},{},{}
+local e=1
+for t=1,#n do
+local i=n[t]
+if i~=""then
+a[e],h[e],s[e]=i,o[t],d[t]
+e=e+1
+end
+end
+n,o,d=a,h,s
+end
+local function I(r)
+local t=o[r]
+local t=t
+local n
+if i(t,"^0[xX]")then
+local e=s.tostring(s.tonumber(t))
+if#e<=#t then
+t=e
+else
+return
+end
+end
+if i(t,"^%d+%.?0*$")then
+t=i(t,"^(%d+)%.?0*$")
+if t+0>0 then
+t=i(t,"^0*([1-9]%d*)$")
+local a=#i(t,"0*$")
+local o=s.tostring(a)
+if a>#o+1 then
+t=e(t,1,#t-a).."e"..o
+end
+n=t
+else
+n="0"
+end
+elseif not i(t,"[eE]")then
+local a,t=i(t,"^(%d*)%.(%d+)$")
+if a==""then a=0 end
+if t+0==0 and a==0 then
+n="0"
+else
+local o=#i(t,"0*$")
+if o>0 then
+t=e(t,1,#t-o)
+end
+if a+0>0 then
+n=a.."."..t
+else
+n="."..t
+local a=#i(t,"^0*")
+local o=#t-a
+local a=s.tostring(#t)
+if o+2+#a<1+#t then
+n=e(t,-o).."e-"..a
+end
+end
+end
+else
+local t,a=i(t,"^([^eE]+)[eE]([%+%-]?%d+)$")
+a=s.tonumber(a)
+local o,h=i(t,"^(%d*)%.(%d*)$")
+if o then
+a=a-#h
+t=o..h
+end
+if t+0==0 then
+n="0"
+else
+local o=#i(t,"^0*")
+t=e(t,o+1)
+o=#i(t,"0*$")
+if o>0 then
+t=e(t,1,#t-o)
+a=a+o
+end
+local i=s.tostring(a)
+if a==0 then
+n=t
+elseif a>0 and(a<=1+#i)then
+n=t..l("0",a)
+elseif a<0 and(a>=-#t)then
+o=#t+a
+n=e(t,1,o).."."..e(t,o+1)
+elseif a<0 and(#i>=-a-#t)then
+o=-a-#t
+n="."..l("0",o)..t
+else
+n=t.."e"..a
+end
+end
+end
+if n and n~=o[r]then
+if h then
+c("<number> (line "..d[r]..") "..o[r].." -> "..n)
+h=h+1
+end
+o[r]=n
+end
+end
+local function E(l)
+local t=o[l]
+local s=e(t,1,1)
+local f=(s=="'")and'"'or"'"
+local t=e(t,2,-2)
+local a=1
+local m,n=0,0
+while a<=#t do
+local l=e(t,a,a)
+if l=="\\"then
+local o=a+1
+local d=e(t,o,o)
+local h=r("abfnrtv\\\n\r\"\'0123456789",d,1,true)
+if not h then
+t=e(t,1,a-1)..e(t,o)
+a=a+1
+elseif h<=8 then
+a=a+2
+elseif h<=10 then
+local i=e(t,o,o+1)
+if i=="\r\n"or i=="\n\r"then
+t=e(t,1,a).."\n"..e(t,o+2)
+elseif h==10 then
+t=e(t,1,a).."\n"..e(t,o+1)
+end
+a=a+2
+elseif h<=12 then
+if d==s then
+m=m+1
+a=a+2
+else
+n=n+1
+t=e(t,1,a-1)..e(t,o)
+a=a+1
+end
+else
+local i=i(t,"^(%d%d?%d?)",o)
+o=a+1+#i
+local d=i+0
+local h=u.char(d)
+local r=r("\a\b\f\n\r\t\v",h,1,true)
+if r then
+i="\\"..e("abfnrtv",r,r)
+elseif d<32 then
+i="\\"..d
+elseif h==s then
+i="\\"..h
+m=m+1
+elseif h=="\\"then
+i="\\\\"
+else
+i=h
+if h==f then
+n=n+1
+end
+end
+t=e(t,1,a-1)..i..e(t,o)
+a=a+#i
+end
+else
+a=a+1
+if l==f then
+n=n+1
+end
+end
+end
+if m>n then
+a=1
+while a<=#t do
+local o,n,i=r(t,"([\'\"])",a)
+if not o then break end
+if i==s then
+t=e(t,1,o-2)..e(t,o)
+a=o
+else
+t=e(t,1,o-1).."\\"..e(t,o)
+a=o+2
+end
+end
+s=f
+end
+t=s..t..s
+if t~=o[l]then
+if h then
+c("<string> (line "..d[l]..") "..o[l].." -> "..t)
+h=h+1
+end
+o[l]=t
+end
+end
+local function _(u)
+local t=o[u]
+local h=i(t,"^%[=*%[")
+local a=#h
+local c=e(t,-a,-1)
+local s=e(t,a+1,-(a+1))
+local n=""
+local t=1
+while true do
+local a,o,r,h=r(s,"([\r\n])([\r\n]?)",t)
+local o
+if not a then
+o=e(s,t)
+elseif a>=t then
+o=e(s,t,a-1)
+end
+if o~=""then
+if i(o,"%s+$")then
+warn.lstring="trailing whitespace in long string near line "..d[u]
+end
+n=n..o
+end
+if not a then
+break
+end
+t=a+1
+if a then
+if#h>0 and r~=h then
+t=t+1
+end
+if not(t==1 and t==a)then
+n=n.."\n"
+end
+end
+end
+if a>=3 then
+local e,t=a-1
+while e>=2 do
+local a="%]"..l("=",e-2).."%]"
+if not i(n,a)then t=e end
+e=e-1
+end
+if t then
+a=l("=",t-2)
+h,c="["..a.."[","]"..a.."]"
+end
+end
+o[u]=h..n..c
+end
+local function y(u)
+local a=o[u]
+local s=i(a,"^%-%-%[=*%[")
+local t=#s
+local d=e(a,-t,-1)
+local h=e(a,t+1,-(t-1))
+local n=""
+local a=1
+while true do
+local o,t,r,s=r(h,"([\r\n])([\r\n]?)",a)
+local t
+if not o then
+t=e(h,a)
+elseif o>=a then
+t=e(h,a,o-1)
+end
+if t~=""then
+local a=i(t,"%s*$")
+if#a>0 then t=e(t,1,-(a+1))end
+n=n..t
+end
+if not o then
+break
+end
+a=o+1
+if o then
+if#s>0 and r~=s then
+a=a+1
+end
+n=n.."\n"
+end
+end
+t=t-2
+if t>=3 then
+local e,a=t-1
+while e>=2 do
+local t="%]"..l("=",e-2).."%]"
+if not i(n,t)then a=e end
+e=e-1
+end
+if a then
+t=l("=",a-2)
+s,d="--["..t.."[","]"..t.."]"
+end
+end
+o[u]=s..n..d
+end
+local function w(n)
+local t=o[n]
+local a=i(t,"%s*$")
+if#a>0 then
+t=e(t,1,-(a+1))
+end
+o[n]=t
+end
+local function z(o,t)
+if not o then return false end
+local a=i(t,"^%-%-%[=*%[")
+local a=#a
+local i=e(t,-a,-1)
+local e=e(t,a+1,-(a-1))
+if r(e,o,1,true)then
+return true
+end
+end
+function optimize(t,r,i,a)
+local f=t["opt-comments"]
+local u=t["opt-whitespace"]
+local m=t["opt-emptylines"]
+local p=t["opt-eols"]
+local T=t["opt-strings"]
+local A=t["opt-numbers"]
+local O=t.KEEP
+h=t.DETAILS and 0
+c=c or s.print
+if p then
+f=true
+u=true
+m=true
+end
+n,o,d
+=r,i,a
+local t=1
+local a,r
+local s
+local function i(i,a,e)
+e=e or t
+n[e]=i or""
+o[e]=a or""
+end
+while true do
+a,r=n[t],o[t]
+local h=g(t)
+if h then s=nil end
+if a=="TK_EOS"then
+break
+elseif a=="TK_KEYWORD"or
+a=="TK_NAME"or
+a=="TK_OP"then
+s=t
+elseif a=="TK_NUMBER"then
+if A then
+I(t)
+end
+s=t
+elseif a=="TK_STRING"or
+a=="TK_LSTRING"then
+if T then
+if a=="TK_STRING"then
+E(t)
+else
+_(t)
+end
+end
+s=t
+elseif a=="TK_COMMENT"then
+if f then
+if t==1 and e(r,1,1)=="#"then
+w(t)
+else
+i()
+end
+elseif u then
+w(t)
+end
+elseif a=="TK_LCOMMENT"then
+if z(O,r)then
+if u then
+y(t)
+end
+s=t
+elseif f then
+local e=x(r)
+if j[n[t+1]]then
+i()
+a=""
+else
+i("TK_SPACE"," ")
+end
+if not m and e>0 then
+i("TK_EOL",l("\n",e))
+end
+if u and a~=""then
+t=t-1
+end
+else
+if u then
+y(t)
+end
+s=t
+end
+elseif a=="TK_EOL"then
+if h and m then
+i()
+elseif r=="\r\n"or r=="\n\r"then
+i("TK_EOL","\n")
+end
+elseif a=="TK_SPACE"then
+if u then
+if h or v(t)then
+i()
+else
+local a=n[s]
+if a=="TK_LCOMMENT"then
+i()
+else
+local e=n[t+1]
+if j[e]then
+if(e=="TK_COMMENT"or e=="TK_LCOMMENT")and
+a=="TK_OP"and o[s]=="-"then
+else
+i()
+end
+else
+local e=q(s,t+1)
+if e==""then
+i()
+else
+i("TK_SPACE"," ")
+end
+end
+end
+end
+end
+else
+error("unidentified token encountered")
+end
+t=t+1
+end
+b()
+if p then
+t=1
+if n[1]=="TK_COMMENT"then
+t=3
+end
+while true do
+a,r=n[t],o[t]
+if a=="TK_EOS"then
+break
+elseif a=="TK_EOL"then
+local a,e=n[t-1],n[t+1]
+if k[a]and k[e]then
+local e=q(t-1,t+1)
+if e==""then
+i()
+end
+end
+end
+t=t+1
+end
+b()
+end
+if h and h>0 then c()end
+return n,o,d
+end
+end)
+package.preload['optparser']=(function(...)
+local e=_G
+local a=require"string"
+local m=require"table"
+module"optparser"
+local s="etaoinshrdlucmfwypvbgkqjxz_ETAOINSHRDLUCMFWYPVBGKQJXZ"
+local h="etaoinshrdlucmfwypvbgkqjxz_0123456789ETAOINSHRDLUCMFWYPVBGKQJXZ"
+local w={}
+for e in a.gmatch([[
+and break do else elseif end false for function if in
+local nil not or repeat return then true until while
+self]],"%S+")do
+w[e]=true
+end
+local d,c,
+l,o,
+u,v,
+r,
+n
+local function f(e)
+local i={}
+for n=1,#e do
+local e=e[n]
+local o=e.name
+if not i[o]then
+i[o]={
+decl=0,token=0,size=0,
+}
+end
+local t=i[o]
+t.decl=t.decl+1
+local i=e.xref
+local a=#i
+t.token=t.token+a
+t.size=t.size+a*#o
+if e.decl then
+e.id=n
+e.xcount=a
+if a>1 then
+e.first=i[2]
+e.last=i[a]
+end
+else
+t.id=n
+end
+end
+return i
+end
+local function p(e)
+local n=a.byte
+local r=a.char
+local a={
+TK_KEYWORD=true,TK_NAME=true,TK_NUMBER=true,
+TK_STRING=true,TK_LSTRING=true,
+}
+if not e["opt-comments"]then
+a.TK_COMMENT=true
+a.TK_LCOMMENT=true
+end
+local e={}
+for t=1,#d do
+e[t]=c[t]
+end
+for t=1,#o do
+local t=o[t]
+local a=t.xref
+for t=1,t.xcount do
+local t=a[t]
+e[t]=""
+end
+end
+local t={}
+for e=0,255 do t[e]=0 end
+for o=1,#d do
+local o,e=d[o],e[o]
+if a[o]then
+for a=1,#e do
+local e=n(e,a)
+t[e]=t[e]+1
+end
+end
+end
+local function i(a)
+local e={}
+for o=1,#a do
+local a=n(a,o)
+e[o]={c=a,freq=t[a],}
+end
+m.sort(e,
+function(e,t)
+return e.freq>t.freq
+end
+)
+local a={}
+for t=1,#e do
+a[t]=r(e[t].c)
+end
+return m.concat(a)
+end
+s=i(s)
+h=i(h)
+end
+local function y()
+local t
+local n,d=#s,#h
+local e=r
+if e<n then
+e=e+1
+t=a.sub(s,e,e)
+else
+local o,i=n,1
+repeat
+e=e-o
+o=o*d
+i=i+1
+until o>e
+local o=e%n
+e=(e-o)/n
+o=o+1
+t=a.sub(s,o,o)
+while i>1 do
+local o=e%d
+e=(e-o)/d
+o=o+1
+t=t..a.sub(h,o,o)
+i=i-1
+end
+end
+r=r+1
+return t,u[t]~=nil
+end
+function optimize(e,i,s,a,t)
+d,c,l,o
+=i,s,a,t
+r=0
+n={}
+u=f(l)
+v=f(o)
+if e["opt-entropy"]then
+p(e)
+end
+local e={}
+for t=1,#o do
+e[t]=o[t]
+end
+m.sort(e,
+function(t,e)
+return t.xcount>e.xcount
+end
+)
+local a,t,r={},1,false
+for o=1,#e do
+local e=e[o]
+if not e.isself then
+a[t]=e
+t=t+1
+else
+r=true
+end
+end
+e=a
+local s=#e
+while s>0 do
+local h,t
+repeat
+h,t=y()
+until not w[h]
+n[#n+1]=h
+local a=s
+if t then
+local i=l[u[h].id].xref
+local n=#i
+for t=1,s do
+local t=e[t]
+local s,e=t.act,t.rem
+while e<0 do
+e=o[-e].rem
+end
+local o
+for t=1,n do
+local t=i[t]
+if t>=s and t<=e then o=true end
+end
+if o then
+t.skip=true
+a=a-1
+end
+end
+end
+while a>0 do
+local t=1
+while e[t].skip do
+t=t+1
+end
+a=a-1
+local i=e[t]
+t=t+1
+i.newname=h
+i.skip=true
+i.done=true
+local s,h=i.first,i.last
+local r=i.xref
+if s and a>0 then
+local n=a
+while n>0 do
+while e[t].skip do
+t=t+1
+end
+n=n-1
+local e=e[t]
+t=t+1
+local n,t=e.act,e.rem
+while t<0 do
+t=o[-t].rem
+end
+if not(h<n or s>t)then
+if n>=i.act then
+for o=1,i.xcount do
+local o=r[o]
+if o>=n and o<=t then
+a=a-1
+e.skip=true
+break
+end
+end
+else
+if e.last and e.last>=i.act then
+a=a-1
+e.skip=true
+end
+end
+end
+if a==0 then break end
+end
+end
+end
+local a,t={},1
+for o=1,s do
+local e=e[o]
+if not e.done then
+e.skip=false
+a[t]=e
+t=t+1
+end
+end
+e=a
+s=#e
+end
+for e=1,#o do
+local e=o[e]
+local a=e.xref
+if e.newname then
+for t=1,e.xcount do
+local t=a[t]
+c[t]=e.newname
+end
+e.name,e.oldname
+=e.newname,e.name
+else
+e.oldname=e.name
+end
+end
+if r then
+n[#n+1]="self"
+end
+local e=f(o)
+end
+end)
+package.preload['llex']=(function(...)
+local m=_G
+local r=require"string"
+module"llex"
+local l=r.find
+local c=r.match
+local n=r.sub
+local f={}
+for e in r.gmatch([[
+and break do else elseif end false for function if in
+local nil not or repeat return then true until while]],"%S+")do
+f[e]=true
+end
+local e,
+d,
+a,
+i,
+s
+local function o(t,a)
+local e=#tok+1
+tok[e]=t
+seminfo[e]=a
+tokln[e]=s
+end
+local function h(t,h)
+local n=n
+local i=n(e,t,t)
+t=t+1
+local e=n(e,t,t)
+if(e=="\n"or e=="\r")and(e~=i)then
+t=t+1
+i=i..e
+end
+if h then o("TK_EOL",i)end
+s=s+1
+a=t
+return t
+end
+function init(i,t)
+e=i
+d=t
+a=1
+s=1
+tok={}
+seminfo={}
+tokln={}
+local i,n,e,t=l(e,"^(#[^\r\n]*)(\r?\n?)")
+if i then
+a=a+#e
+o("TK_COMMENT",e)
+if#t>0 then h(a,true)end
+end
+end
+function chunkid()
+if d and c(d,"^[=@]")then
+return n(d,2)
+end
+return"[string]"
+end
+function errorline(t,e)
+local a=error or m.error
+a(r.format("%s:%d: %s",chunkid(),e or s,t))
+end
+local r=errorline
+local function u(t)
+local i=n
+local n=i(e,t,t)
+t=t+1
+local o=#c(e,"=*",t)
+t=t+o
+a=t
+return(i(e,t,t)==n)and o or(-o)-1
+end
+local function w(d,s)
+local t=a+1
+local n=n
+local o=n(e,t,t)
+if o=="\r"or o=="\n"then
+t=h(t)
+end
+local o=t
+while true do
+local o,c,l=l(e,"([\r\n%]])",t)
+if not o then
+r(d and"unfinished long string"or
+"unfinished long comment")
+end
+t=o
+if l=="]"then
+if u(t)==s then
+i=n(e,i,a)
+a=a+1
+return i
+end
+t=a
+else
+i=i.."\n"
+t=h(t)
+end
+end
+end
+local function y(u)
+local t=a
+local s=l
+local d=n
+while true do
+local n,l,o=s(e,"([\n\r\\\"\'])",t)
+if n then
+if o=="\n"or o=="\r"then
+r("unfinished string")
+end
+t=n
+if o=="\\"then
+t=t+1
+o=d(e,t,t)
+if o==""then break end
+n=s("abfnrtv\n\r",o,1,true)
+if n then
+if n>7 then
+t=h(t)
+else
+t=t+1
+end
+elseif s(o,"%D")then
+t=t+1
+else
+local o,e,a=s(e,"^(%d%d?%d?)",t)
+t=e+1
+if a+1>256 then
+r("escape sequence too large")
+end
+end
+else
+t=t+1
+if o==u then
+a=t
+return d(e,i,t-1)
+end
+end
+else
+break
+end
+end
+r("unfinished string")
+end
+function llex()
+local s=l
+local l=c
+while true do
+local t=a
+while true do
+local c,p,d=s(e,"^([_%a][_%w]*)",t)
+if c then
+a=t+#d
+if f[d]then
+o("TK_KEYWORD",d)
+else
+o("TK_NAME",d)
+end
+break
+end
+local d,f,c=s(e,"^(%.?)%d",t)
+if d then
+if c=="."then t=t+1 end
+local u,i,h=s(e,"^%d*[%.%d]*([eE]?)",t)
+t=i+1
+if#h==1 then
+if l(e,"^[%+%-]",t)then
+t=t+1
+end
+end
+local i,t=s(e,"^[_%w]*",t)
+a=t+1
+local e=n(e,d,t)
+if not m.tonumber(e)then
+r("malformed number")
+end
+o("TK_NUMBER",e)
+break
+end
+local f,m,c,d=s(e,"^((%s)[ \t\v\f]*)",t)
+if f then
+if d=="\n"or d=="\r"then
+h(t,true)
+else
+a=m+1
+o("TK_SPACE",c)
+end
+break
+end
+local h=l(e,"^%p",t)
+if h then
+i=t
+local d=s("-[\"\'.=<>~",h,1,true)
+if d then
+if d<=2 then
+if d==1 then
+local r=l(e,"^%-%-(%[?)",t)
+if r then
+t=t+2
+local h=-1
+if r=="["then
+h=u(t)
+end
+if h>=0 then
+o("TK_LCOMMENT",w(false,h))
+else
+a=s(e,"[\n\r]",t)or(#e+1)
+o("TK_COMMENT",n(e,i,a-1))
+end
+break
+end
+else
+local e=u(t)
+if e>=0 then
+o("TK_LSTRING",w(true,e))
+elseif e==-1 then
+o("TK_OP","[")
+else
+r("invalid long string delimiter")
+end
+break
+end
+elseif d<=5 then
+if d<5 then
+a=t+1
+o("TK_STRING",y(h))
+break
+end
+h=l(e,"^%.%.?%.?",t)
+else
+h=l(e,"^%p=?",t)
+end
+end
+a=t+#h
+o("TK_OP",h)
+break
+end
+local e=n(e,t,t)
+if e~=""then
+a=t+1
+o("TK_OP",e)
+break
+end
+o("TK_EOS","")
+return
+end
+end
+end
+return m.getfenv()
+end)
+package.preload['lparser']=(function(...)
+local N=_G
+local p=require"string"
+module"lparser"
+local F=N.getfenv()
+local E,
+j,
+A,
+S,
+r,
+d,
+W,
+t,q,h,c,
+w,
+a,
+P,
+g,
+H,
+l,
+y,
+T
+local b,u,v,z,_,x
+local e=p.gmatch
+local I={}
+for e in e("else elseif end until <eof>","%S+")do
+I[e]=true
+end
+local Y={}
+for e in e("if while do for repeat function local return break","%S+")do
+Y[e]=e.."_stat"
+end
+local O={}
+local M={}
+for e,a,t in e([[
+{+ 6 6}{- 6 6}{* 7 7}{/ 7 7}{% 7 7}
+{^ 10 9}{.. 5 4}
+{~= 3 3}{== 3 3}
+{< 3 3}{<= 3 3}{> 3 3}{>= 3 3}
+{and 2 2}{or 1 1}
+]],"{(%S+)%s(%d+)%s(%d+)}")do
+O[e]=a+0
+M[e]=t+0
+end
+local Z={["not"]=true,["-"]=true,
+["#"]=true,}
+local ee=8
+local function o(t,a)
+local e=error or N.error
+e(p.format("(source):%d: %s",a or h,t))
+end
+local function e()
+W=A[r]
+t,q,h,c
+=E[r],j[r],A[r],S[r]
+r=r+1
+end
+local function X()
+return E[r]
+end
+local function n(a)
+local e=t
+if e~="<number>"and e~="<string>"then
+if e=="<name>"then e=q end
+e="'"..e.."'"
+end
+o(a.." near "..e)
+end
+local function m(e)
+n("'"..e.."' expected")
+end
+local function o(a)
+if t==a then e();return true end
+end
+local function L(e)
+if t~=e then m(e)end
+end
+local function i(t)
+L(t);e()
+end
+local function V(t,e)
+if not t then n(e)end
+end
+local function s(e,a,t)
+if not o(e)then
+if t==h then
+m(e)
+else
+n("'"..e.."' expected (to close '"..a.."' at line "..t..")")
+end
+end
+end
+local function f()
+L("<name>")
+local t=q
+w=c
+e()
+return t
+end
+local function D(e,t)
+e.k="VK"
+end
+local function U(e)
+D(e,f())
+end
+local function m(o,i)
+local t=a.bl
+local e
+if t then
+e=t.locallist
+else
+e=a.locallist
+end
+local t=#l+1
+l[t]={
+name=o,
+xref={w},
+decl=w,
+}
+if i then
+l[t].isself=true
+end
+local a=#y+1
+y[a]=t
+T[a]=e
+end
+local function k(e)
+local t=#y
+while e>0 do
+e=e-1
+local t=t-e
+local a=y[t]
+local e=l[a]
+local o=e.name
+e.act=c
+y[t]=nil
+local i=T[t]
+T[t]=nil
+local t=i[o]
+if t then
+e=l[t]
+e.rem=-a
+end
+i[o]=a
+end
+end
+local function R()
+local t=a.bl
+local e
+if t then
+e=t.locallist
+else
+e=a.locallist
+end
+for t,e in N.pairs(e)do
+local e=l[e]
+e.rem=c
+end
+end
+local function c(e,t)
+if p.sub(e,1,1)=="("then
+return
+end
+m(e,t)
+end
+local function N(o,a)
+local t=o.bl
+local e
+if t then
+e=t.locallist
+while e do
+if e[a]then return e[a]end
+t=t.prev
+e=t and t.locallist
+end
+end
+e=o.locallist
+return e[a]or-1
+end
+local function p(t,a,e)
+if t==nil then
+e.k="VGLOBAL"
+return"VGLOBAL"
+else
+local o=N(t,a)
+if o>=0 then
+e.k="VLOCAL"
+e.id=o
+return"VLOCAL"
+else
+if p(t.prev,a,e)=="VGLOBAL"then
+return"VGLOBAL"
+end
+e.k="VUPVAL"
+return"VUPVAL"
+end
+end
+end
+local function B(o)
+local t=f()
+p(a,t,o)
+if o.k=="VGLOBAL"then
+local e=H[t]
+if not e then
+e=#g+1
+g[e]={
+name=t,
+xref={w},
+}
+H[t]=e
+else
+local e=g[e].xref
+e[#e+1]=w
+end
+else
+local e=o.id
+local e=l[e].xref
+e[#e+1]=w
+end
+end
+local function w(t)
+local e={}
+e.isbreakable=t
+e.prev=a.bl
+e.locallist={}
+a.bl=e
+end
+local function p()
+local e=a.bl
+R()
+a.bl=e.prev
+end
+local function K()
+local e
+if not a then
+e=P
+else
+e={}
+end
+e.prev=a
+e.bl=nil
+e.locallist={}
+a=e
+end
+local function Q()
+R()
+a=a.prev
+end
+local function R(t)
+local a={}
+e()
+U(a)
+t.k="VINDEXED"
+end
+local function G(t)
+e()
+u(t)
+i("]")
+end
+local function C(e)
+local e,a={},{}
+if t=="<name>"then
+U(e)
+else
+G(e)
+end
+i("=")
+u(a)
+end
+local function N(e)
+if e.v.k=="VVOID"then return end
+e.v.k="VVOID"
+end
+local function N(e)
+u(e.v)
+end
+local function J(a)
+local n=h
+local e={}
+e.v={}
+e.t=a
+a.k="VRELOCABLE"
+e.v.k="VVOID"
+i("{")
+repeat
+if t=="}"then break end
+local t=t
+if t=="<name>"then
+if X()~="="then
+N(e)
+else
+C(e)
+end
+elseif t=="["then
+C(e)
+else
+N(e)
+end
+until not o(",")and not o(";")
+s("}","{",n)
+end
+local function X()
+local i=0
+if t~=")"then
+repeat
+local t=t
+if t=="<name>"then
+m(f())
+i=i+1
+elseif t=="..."then
+e()
+a.is_vararg=true
+else
+n("<name> or '...' expected")
+end
+until a.is_vararg or not o(",")
+end
+k(i)
+end
+local function C(r)
+local a={}
+local i=h
+local o=t
+if o=="("then
+if i~=W then
+n("ambiguous syntax (function call x new statement)")
+end
+e()
+if t==")"then
+a.k="VVOID"
+else
+b(a)
+end
+s(")","(",i)
+elseif o=="{"then
+J(a)
+elseif o=="<string>"then
+D(a,q)
+e()
+else
+n("function arguments expected")
+return
+end
+r.k="VCALL"
+end
+local function W(a)
+local t=t
+if t=="("then
+local t=h
+e()
+u(a)
+s(")","(",t)
+elseif t=="<name>"then
+B(a)
+else
+n("unexpected symbol")
+end
+end
+local function N(a)
+W(a)
+while true do
+local t=t
+if t=="."then
+R(a)
+elseif t=="["then
+local e={}
+G(e)
+elseif t==":"then
+local t={}
+e()
+U(t)
+C(a)
+elseif t=="("or t=="<string>"or t=="{"then
+C(a)
+else
+return
+end
+end
+end
+local function U(o)
+local t=t
+if t=="<number>"then
+o.k="VKNUM"
+elseif t=="<string>"then
+D(o,q)
+elseif t=="nil"then
+o.k="VNIL"
+elseif t=="true"then
+o.k="VTRUE"
+elseif t=="false"then
+o.k="VFALSE"
+elseif t=="..."then
+V(a.is_vararg==true,
+"cannot use '...' outside a vararg function");
+o.k="VVARARG"
+elseif t=="{"then
+J(o)
+return
+elseif t=="function"then
+e()
+_(o,false,h)
+return
+else
+N(o)
+return
+end
+e()
+end
+local function q(o,n)
+local a=t
+local i=Z[a]
+if i then
+e()
+q(o,ee)
+else
+U(o)
+end
+a=t
+local t=O[a]
+while t and t>n do
+local o={}
+e()
+local e=q(o,M[a])
+a=e
+t=O[a]
+end
+return a
+end
+function u(e)
+q(e,0)
+end
+local function O(e)
+local t={}
+local e=e.v.k
+V(e=="VLOCAL"or e=="VUPVAL"or e=="VGLOBAL"
+or e=="VINDEXED","syntax error")
+if o(",")then
+local e={}
+e.v={}
+N(e.v)
+O(e)
+else
+i("=")
+b(t)
+return
+end
+t.k="VNONRELOC"
+end
+local function q(e,t)
+i("do")
+w(false)
+k(e)
+v()
+p()
+end
+local function D(e)
+local t=d
+c("(for index)")
+c("(for limit)")
+c("(for step)")
+m(e)
+i("=")
+z()
+i(",")
+z()
+if o(",")then
+z()
+else
+end
+q(1,true)
+end
+local function U(e)
+local t={}
+c("(for generator)")
+c("(for state)")
+c("(for control)")
+m(e)
+local e=1
+while o(",")do
+m(f())
+e=e+1
+end
+i("in")
+local a=d
+b(t)
+q(e,false)
+end
+local function C(e)
+local a=false
+B(e)
+while t=="."do
+R(e)
+end
+if t==":"then
+a=true
+R(e)
+end
+return a
+end
+function z()
+local e={}
+u(e)
+end
+local function q()
+local e={}
+u(e)
+end
+local function z()
+e()
+q()
+i("then")
+v()
+end
+local function M()
+local t,e={}
+m(f())
+t.k="VLOCAL"
+k(1)
+_(e,false,h)
+end
+local function R()
+local e=0
+local t={}
+repeat
+m(f())
+e=e+1
+until not o(",")
+if o("=")then
+b(t)
+else
+t.k="VVOID"
+end
+k(e)
+end
+function b(e)
+u(e)
+while o(",")do
+u(e)
+end
+end
+function _(a,t,e)
+K()
+i("(")
+if t then
+c("self",true)
+k(1)
+end
+X()
+i(")")
+x()
+s("end","function",e)
+Q()
+end
+function v()
+w(false)
+x()
+p()
+end
+function for_stat()
+local o=d
+w(true)
+e()
+local a=f()
+local e=t
+if e=="="then
+D(a)
+elseif e==","or e=="in"then
+U(a)
+else
+n("'=' or 'in' expected")
+end
+s("end","for",o)
+p()
+end
+function while_stat()
+local t=d
+e()
+q()
+w(true)
+i("do")
+v()
+s("end","while",t)
+p()
+end
+function repeat_stat()
+local t=d
+w(true)
+w(false)
+e()
+x()
+s("until","repeat",t)
+q()
+p()
+p()
+end
+function if_stat()
+local a=d
+local o={}
+z()
+while t=="elseif"do
+z()
+end
+if t=="else"then
+e()
+v()
+end
+s("end","if",a)
+end
+function return_stat()
+local a={}
+e()
+local e=t
+if I[e]or e==";"then
+else
+b(a)
+end
+end
+function break_stat()
+local t=a.bl
+e()
+while t and not t.isbreakable do
+t=t.prev
+end
+if not t then
+n("no loop to break")
+end
+end
+function expr_stat()
+local e={}
+e.v={}
+N(e.v)
+if e.v.k=="VCALL"then
+else
+e.prev=nil
+O(e)
+end
+end
+function function_stat()
+local o=d
+local a,t={},{}
+e()
+local e=C(a)
+_(t,e,o)
+end
+function do_stat()
+local t=d
+e()
+v()
+s("end","do",t)
+end
+function local_stat()
+e()
+if o("function")then
+M()
+else
+R()
+end
+end
+local function i()
+d=h
+local e=t
+local t=Y[e]
+if t then
+F[t]()
+if e=="return"or e=="break"then return true end
+else
+expr_stat()
+end
+return false
+end
+function x()
+local e=false
+while not e and not I[t]do
+e=i()
+o(";")
+end
+end
+function parser()
+K()
+a.is_vararg=true
+e()
+x()
+L("<eof>")
+Q()
+return g,l
+end
+function init(e,o,n)
+r=1
+P={}
+local t=1
+E,j,A,S={},{},{},{}
+for a=1,#e do
+local e=e[a]
+local i=true
+if e=="TK_KEYWORD"or e=="TK_OP"then
+e=o[a]
+elseif e=="TK_NAME"then
+e="<name>"
+j[t]=o[a]
+elseif e=="TK_NUMBER"then
+e="<number>"
+j[t]=0
+elseif e=="TK_STRING"or e=="TK_LSTRING"then
+e="<string>"
+j[t]=""
+elseif e=="TK_EOS"then
+e="<eof>"
+else
+i=false
+end
+if i then
+E[t]=e
+A[t]=n[a]
+S[t]=a
+t=t+1
+end
+end
+g,H,l={},{},{}
+y,T={},{}
+end
+return F
+end)
+package.preload['minichunkspy']=(function(...)
+local m,t,u=string,table,math
+local a,p,n,e=ipairs,setmetatable,type,assert
+local a=__END_OF_GLOBALS__
+local l,c,f=m.char,m.byte,m.sub
+local k,d,g=u.frexp,u.ldexp,u.abs
+local y=t.concat
+local a=u.huge
+local w=a-a
+local o=false
+local s=4
+local h=4
+local r=8
+local t={}
+local function v()
+t[#t+1]
+={o,s,h,r}
+end
+local function b()
+o,s,h,r
+=unpack(t[#t])
+t[#t]=nil
+end
+local function t(e,t)
+return e.new(e,t)
+end
+local i={}
+local t=t{
+new=
+function(e,a)
+local a=a or{}
+local t=i[e]or{
+__index=e,
+__call=t
+}
+i[e]=t
+return p(a,t)
+end,
+}
+local x=t{
+unpack=function(t,t,e)return nil,e end,
+pack=function(e,e)return""end
+}
+local i={}
+local function p(e)
+local t=i[e]or t{
+unpack=function(o,a,t)
+return f(a,t,t+e-1),t+e
+end,
+pack=function(a,t)return f(t,1,e)end
+}
+i[e]=t
+return t
+end
+local q=t{
+unpack=function(a,t,e)
+return c(t,e,e),e+1
+end,
+pack=function(t,e)return l(e)end
+}
+local i=t{
+unpack=
+function(t,e,i)
+local n,e,a,t=c(e,i,i+3)
+if o then n,e,a,t=t,a,e,n end
+return n+e*256+a*256^2+t*256^3,i+4
+end,
+pack=
+function(t,s)
+e(n(s)=="number",
+"unexpected value type to pack as an uint32")
+local t,i,a,e
+e=s%2^32
+t=e%256;e=(e-t)/256
+i=e%256;e=(e-i)/256
+a=e%256;e=(e-a)/256
+if o then t,i,a,e=e,a,i,t end
+return l(t,i,a,e)
+end
+}
+local j=t{
+unpack=
+function(t,a,e)
+local t=i:unpack(a,e)
+local a=i:unpack(a,e+4)
+if o then t,a=a,t end
+return t+a*2^32,e+8
+end,
+pack=
+function(a,t)
+e(n(t)=="number",
+"unexpected value type to pack as an uint64")
+local e=t%2^32
+local t=(t-e)/2^32
+if o then e,t=t,e end
+return i:pack(e)..i:pack(t)
+end
+}
+local function E(e,a)
+local t=i:unpack(e,a)
+local e=i:unpack(e,a+4)
+if o then t,e=e,t end
+local a=e%2^20
+local t=t
+local o=t+a*2^32
+e=(e-a)/2^20
+local t=e%2^11
+local e=e<=t and 1 or-1
+return e,t,o
+end
+local function c(a,n,t)
+local e=t%2^32
+local s=(t-e)/2^32
+local t=e
+local e=((a<0 and 2^11 or 0)+n)*2^20+s
+if o then t,e=e,t end
+return i.pack(nil,t)..i.pack(nil,e)
+end
+local function _(e)
+if e~=e then return e end
+if e==0 then e=1/e end
+return e>0 and 1 or-1
+end
+local l=d(1,-1022-52)
+local f=l*2^52
+local z=d(2^52-1,-1022-52)
+local f=d(2^53-1,1023-52)
+e(l~=0 and l/2==0)
+e(f~=a)
+e(f*2==a)
+local d=t{
+unpack=
+function(t,e,i)
+local n,t,o=E(e,i)
+local e
+if t==0 then
+e=d(o,-1022-52)
+elseif t==2047 then
+e=o==0 and a or w
+else
+e=d(2^52+o,t-1023-52)
+end
+e=n*e
+return e,i+8
+end,
+pack=
+function(t,e)
+if e~=e then
+return c(1,2047,2^52-1)
+end
+local o=_(e)
+e=g(e)
+if e==a then return c(o,2047,0)end
+if e==0 then return c(o,0,0)end
+local a,t
+if e<=z then
+a=0
+t=e/l
+else
+local e,o=k(e)
+t=(2*e-1)*2^52
+a=o+1022
+end
+return c(o,a,t)
+end
+}
+local a=q
+local l={
+[4]=i,
+[8]=j
+}
+local w={
+[4]=float,
+[8]=d
+}
+local c=t{
+unpack=function(a,e,t)
+return l[s]:unpack(e,t)
+end,
+pack=function(t,e)
+return l[s]:pack(e)
+end,
+}
+local i=t{
+unpack=function(a,e,t)
+return l[h]:unpack(e,t)
+end,
+pack=function(t,e)
+return l[h]:pack(e)
+end,
+}
+local g=t{
+unpack=function(a,e,t)
+return w[r]:unpack(e,t)
+end,
+pack=function(t,e)
+return w[r]:pack(e)
+end,
+}
+local k=p(4)
+local f=t{
+unpack=
+function(t,s,o)
+local i={}
+local e,a=1,1
+while t[e]do
+local n=t[e]
+local t=n.name
+if not t then t,a=a,a+1 end
+i[t],o=n:unpack(s,o)
+e=e+1
+end
+return i,o
+end,
+pack=
+function(t,n)
+local i={}
+local e,a=1,1
+while t[e]do
+local o=t[e]
+local t=o.name
+if not t then t,a=a,a+1 end
+i[e]=o:pack(n[t])
+e=e+1
+end
+return y(i)
+end
+}
+local d=t{
+unpack=
+function(o,a,e)
+local i,e=i:unpack(a,e)
+local t={}
+local n=o.type
+for o=1,i do
+t[o],e=n:unpack(a,e)
+end
+return t,e
+end,
+pack=
+function(o,t)
+local a=#t
+local e={i:pack(a)}
+local o=o.type
+for a=1,a do
+e[#e+1]=o:pack(t[a])
+end
+return y(e)
+end
+}
+local q=t{
+unpack=
+function(o,a,t)
+local t,a=i:unpack(a,t)
+e(t==0 or t==1,
+"unpacked an unexpected value "..t.." for a Boolean")
+return t==1,a
+end,
+pack=
+function(a,t)
+e(n(t)=="boolean",
+"unexpected value type to pack as a Boolean")
+return i:pack(t and 1 or 0)
+end
+}
+local c=t{
+unpack=
+function(t,o,e)
+local t,e=c:unpack(o,e)
+local a=nil
+if t>0 then
+local t=t-1
+a=o:sub(e,e+t-1)
+end
+return a,e+t
+end,
+pack=
+function(a,t)
+e(n(t)=="nil"or n(t)=="string",
+"unexpected value type to pack as a String")
+if t==nil then
+return c:pack(0)
+end
+return c:pack(#t+1)..t.."\000"
+end
+}
+local y=f{
+p(4){name="signature"},
+a{name="version"},
+a{name="format"},
+a{name="endianness"},
+a{name="sizeof_int"},
+a{name="sizeof_size_t"},
+a{name="sizeof_insn"},
+a{name="sizeof_Number"},
+a{name="integral_flag"},
+}
+local p={
+[0]=x,
+[1]=q,
+[3]=g,
+[4]=c,
+}
+local g=t{
+unpack=
+function(i,o,t)
+local t,i=a:unpack(o,t)
+local a=p[t]
+e(a,"unknown constant type "..t.." to unpack")
+local a,o=a:unpack(o,i)
+if t==3 then
+e(n(a)=="number")
+end
+return{
+type=t,
+value=a
+},o
+end,
+pack=
+function(t,e)
+local e,t=e.type,e.value
+return a:pack(e)..p[e]:pack(t)
+end
+}
+local p=f{
+c{name="name"},
+i{name="startpc"},
+i{name="endpc"}
+}
+local a=f{
+c{name="name"},
+i{name="line"},
+i{name="last_line"},
+a{name="num_upvalues"},
+a{name="num_parameters"},
+a{name="is_vararg"},
+a{name="max_stack_size"},
+d{name="insns",type=k},
+d{name="constants",type=g},
+d{name="prototypes",type=nil},
+d{name="source_lines",type=i},
+d{name="locals",type=p},
+d{name="upvalues",type=c},
+}
+e(a[10].name=="prototypes",
+"missed the function prototype list")
+a[10].type=a
+local a=t{
+unpack=
+function(i,d,t)
+local n={}
+local t,i=y:unpack(d,t)
+e(t.signature=="\027Lua","signature check failed")
+e(t.version==81,"version mismatch")
+e(t.format==0,"format mismatch")
+e(t.endianness==0 or
+t.endianness==1,"endianness mismatch")
+e(l[t.sizeof_int],"int size unsupported")
+e(l[t.sizeof_size_t],"size_t size unsupported")
+e(t.sizeof_insn==4,"insn size unsupported")
+e(w[t.sizeof_Number],"number size unsupported")
+e(t.integral_flag==0,"integral flag mismatch; only floats supported")
+v()
+o=t.endianness==0
+s=t.sizeof_size_t
+h=t.sizeof_int
+r=t.sizeof_Number
+n.header=t
+n.body,i=a:unpack(d,i)
+b()
+return n,i
+end,
+pack=
+function(e,t)
+local i
+v()
+local e=t.header
+o=e.endianness==0
+s=e.sizeof_size_t
+h=e.sizeof_int
+r=e.sizeof_Number
+i=y:pack(t.header)..a:pack(t.body)
+b()
+return i
+end
+}
+local function o(e)
+if n(e)=="function"then
+return o(m.dump(e))
+end
+local t=a:unpack(e,1)
+local a=a:pack(t)
+if e==a then return true end
+local t
+local t=u.min(#e,#a)
+for t=1,t do
+local a=e:sub(t,t)
+local e=e:sub(t,t)
+if a~=e then
+return false,("chunk roundtripping failed: "..
+"first byte difference at index %d"):format(t)
+end
+end
+return false,("chunk round tripping failed: "..
+"original length %d vs. %d"):format(#e,#a)
+end
+return{
+disassemble=function(e)return a:unpack(e,1)end,
+assemble=function(e)return a:pack(e)end,
+validate=o
+}
+end)
+do local e={};
+e["vio"]="local vio = {};\
+vio.__index = vio; \
+	\
+function vio.open(string)\
+	return setmetatable({ pos = 1, data = string }, vio);\
+end\
+\
+function vio:read(format, ...)\
+	if self.pos >= #self.data then return; end\
+	if format == \"*a\" then\
+		local oldpos = self.pos;\
+		self.pos = #self.data;\
+		return self.data:sub(oldpos, self.pos);\
+	elseif format == \"*l\" then\
+		local data;\
+		data, self.pos = self.data:match(\"([^\\r\\n]*)\\r?\\n?()\", self.pos)\
+		return data;\
+	elseif format == \"*n\" then\
+		local data;\
+		data, self.pos = self.data:match(\"(%d+)()\", self.pos)\
+		return tonumber(data);	\
+	elseif type(format) == \"number\" then\
+		local oldpos = self.pos;\
+		self.pos = self.pos + format;\
+		return self.data:sub(oldpos, self.pos-1);\
+	end\
+end\
+\
+function vio:seek(whence, offset)\
+	if type(whence) == \"number\" then\
+		whence, offset = \"cur\", whence;\
+	end\
+	offset = offset or 0;\
+	\
+	if whence == \"cur\" then\
+		self.pos = self.pos + offset;\
+	elseif whence == \"set\" then\
+		self.pos = offset + 1;\
+	elseif whence == \"end\" then\
+		self.pos = #self.data - offset;\
+	end\
+	\
+	return self.pos;\
+end\
+\
+local function _readline(f) return f:read(\"*l\"); end\
+function vio:lines()\
+	return _readline, self;\
+end\
+\
+function vio:write(...)\
+	for i=1,select('#', ...) do\
+		local dat = tostring(select(i, ...));\
+		self.data = self.data:sub(1, self.pos-1)..dat..self.data:sub(self.pos+#dat, -1);\
+	end\
+end\
+\
+function vio:close()\
+	self.pos, self.data = nil, nil;\
+end\
+\
+"e["gunzip.lua"]="local base_char,keywords=128,{\"and\",\"break\",\"do\",\"else\",\"elseif\",\"end\",\"false\",\"for\",\"function\",\"if\",\"in\",\"local\",\"nil\",\"not\",\"or\",\"repeat\",\"return\",\"then\",\"true\",\"until\",\"while\",\"read\",\"nbits\",\"nbits_left_in_byte\",\"wnd_pos\",\"output\",\"val\",\"input\",}; function prettify(code) return code:gsub(\"[\"..string.char(base_char)..\"-\"..string.char(base_char+#keywords)..\"]\", \
+	function (c) return keywords[c:byte()-base_char]; end) end return assert(loadstring(prettify[===[Œ i,h,b,m,l,d,e,y,r,w,u,v,l,l=assert,error,ipairs,pairs,tostring,type,setmetatable,io,math,table.sort,math.max,string.char,io.open,_G;Œ ‰ p(n)Œ l={};Œ e=e({},l)‰ l:__index(l)Œ n=n(l);e[l]=n\
+‘ n\
+†\
+‘ e\
+†\
+Œ ‰ l(n,l)l=l  1\
+h({n},l+1)†\
+Œ ‰ _(n)Œ l={}l.outbs=n\
+l.wnd={}l.™=1\
+‘ l\
+†\
+Œ ‰ t(l,e)Œ n=l.™\
+l.outbs(e)l.wnd[n]=e\
+l.™=n%32768+1\
+†\
+Œ ‰ n(l)‘ i(l,'unexpected end of file')†\
+Œ ‰ o(n,l)‘ n%(l+l)>=l\
+†\
+Œ a=p(‰(l)‘ 2^l †)Œ c=e({},{__mode='k'})Œ ‰ g(o)Œ l=1\
+Œ e={}‰ e:–()Œ n\
+Š l<=#o ’\
+n=o:byte(l)l=l+1\
+†\
+‘ n\
+†\
+‘ e\
+†\
+Œ l\
+Œ ‰ s(d)Œ n,l,o=0,0,{};‰ o:˜()‘ l\
+†\
+‰ o:–(e)e=e  1\
+• l<e ƒ\
+Œ e=d:–()Š Ž e ’ ‘ †\
+n=n+a[l]*e\
+l=l+8\
+†\
+Œ o=a[e]Œ a=n%o\
+n=(n-a)/o\
+l=l-e\
+‘ a\
+†\
+c[o]=“\
+‘ o\
+†\
+Œ ‰ f(l)‘ c[l] l  s(g(l))†\
+Œ ‰ s(l)Œ n\
+Š y.type(l)=='file'’\
+n=‰(n)l:write(v(n))†\
+… d(l)=='function'’\
+n=l\
+†\
+‘ n\
+†\
+Œ ‰ d(e,o)Œ l={}Š o ’\
+ˆ e,n ‹ m(e)ƒ\
+Š n~=0 ’\
+l[#l+1]={›=e,—=n}†\
+†\
+„\
+ˆ n=1,#e-2,2 ƒ\
+Œ o,n,e=e[n],e[n+1],e[n+2]Š n~=0 ’\
+ˆ e=o,e-1 ƒ\
+l[#l+1]={›=e,—=n}†\
+†\
+†\
+†\
+w(l,‰(n,l)‘ n.—==l.—  n.›<l.›  n.—<l.—\
+†)Œ e=1\
+Œ o=0\
+ˆ n,l ‹ b(l)ƒ\
+Š l.—~=o ’\
+e=e*a[l.—-o]o=l.—\
+†\
+l.code=e\
+e=e+1\
+†\
+Œ e=r.huge\
+Œ c={}ˆ n,l ‹ b(l)ƒ\
+e=r.min(e,l.—)c[l.code]=l.›\
+†\
+Œ ‰ o(n,e)Œ l=0\
+ˆ e=1,e ƒ\
+Œ e=n%2\
+n=(n-e)/2\
+l=l*2+e\
+†\
+‘ l\
+†\
+Œ d=p(‰(l)‘ a[e]+o(l,e)†)‰ l:–(a)Œ o,l=1,0\
+• 1 ƒ\
+Š l==0 ’\
+o=d[n(a:–(e))]l=l+e\
+„\
+Œ n=n(a:–())l=l+1\
+o=o*2+n\
+†\
+Œ l=c[o]Š l ’\
+‘ l\
+†\
+†\
+†\
+‘ l\
+†\
+Œ ‰ b(l)Œ a=2^1\
+Œ e=2^2\
+Œ c=2^3\
+Œ d=2^4\
+Œ n=l:–(8)Œ n=l:–(8)Œ n=l:–(8)Œ n=l:–(8)Œ t=l:–(32)Œ t=l:–(8)Œ t=l:–(8)Š o(n,e)’\
+Œ n=l:–(16)Œ e=0\
+ˆ n=1,n ƒ\
+e=l:–(8)†\
+†\
+Š o(n,c)’\
+• l:–(8)~=0 ƒ †\
+†\
+Š o(n,d)’\
+• l:–(8)~=0 ƒ †\
+†\
+Š o(n,a)’\
+l:–(16)†\
+†\
+Œ ‰ p(l)Œ f=l:–(5)Œ i=l:–(5)Œ e=n(l:–(4))Œ a=e+4\
+Œ e={}Œ o={16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15}ˆ n=1,a ƒ\
+Œ l=l:–(3)Œ n=o[n]e[n]=l\
+†\
+Œ e=d(e,“)Œ ‰ r(o)Œ t={}Œ a\
+Œ c=0\
+• c<o ƒ\
+Œ o=e:–(l)Œ e\
+Š o<=15 ’\
+e=1\
+a=o\
+… o==16 ’\
+e=3+n(l:–(2))… o==17 ’\
+e=3+n(l:–(3))a=0\
+… o==18 ’\
+e=11+n(l:–(7))a=0\
+„\
+h'ASSERT'†\
+ˆ l=1,e ƒ\
+t[c]=a\
+c=c+1\
+†\
+†\
+Œ l=d(t,“)‘ l\
+†\
+Œ n=f+257\
+Œ l=i+1\
+Œ n=r(n)Œ l=r(l)‘ n,l\
+†\
+Œ a\
+Œ o\
+Œ c\
+Œ r\
+Œ ‰ h(e,n,l,d)Œ l=l:–(e)Š l<256 ’\
+t(n,l)… l==256 ’\
+‘ “\
+„\
+Š Ž a ’\
+Œ l={[257]=3}Œ e=1\
+ˆ n=258,285,4 ƒ\
+ˆ n=n,n+3 ƒ l[n]=l[n-1]+e †\
+Š n~=258 ’ e=e*2 †\
+†\
+l[285]=258\
+a=l\
+†\
+Š Ž o ’\
+Œ l={}ˆ e=257,285 ƒ\
+Œ n=u(e-261,0)l[e]=(n-(n%4))/4\
+†\
+l[285]=0\
+o=l\
+†\
+Œ a=a[l]Œ l=o[l]Œ l=e:–(l)Œ o=a+l\
+Š Ž c ’\
+Œ e={[0]=1}Œ l=1\
+ˆ n=1,29,2 ƒ\
+ˆ n=n,n+1 ƒ e[n]=e[n-1]+l †\
+Š n~=1 ’ l=l*2 †\
+†\
+c=e\
+†\
+Š Ž r ’\
+Œ n={}ˆ e=0,29 ƒ\
+Œ l=u(e-2,0)n[e]=(l-(l%2))/2\
+†\
+r=n\
+†\
+Œ l=d:–(e)Œ a=c[l]Œ l=r[l]Œ l=e:–(l)Œ l=a+l\
+ˆ e=1,o ƒ\
+Œ l=(n.™-1-l)%32768+1\
+t(n,i(n.wnd[l],'invalid distance'))†\
+†\
+‘ ‡\
+†\
+Œ ‰ u(l,a)Œ i=l:–(1)Œ e=l:–(2)Œ r=0\
+Œ o=1\
+Œ c=2\
+Œ f=3\
+Š e==r ’\
+l:–(l:˜())Œ e=l:–(16)Œ o=n(l:–(16))ˆ e=1,e ƒ\
+Œ l=n(l:–(8))t(a,l)†\
+… e==o  e==c ’\
+Œ n,o\
+Š e==c ’\
+n,o=p(l)„\
+n=d{0,8,144,9,256,7,280,8,288,}o=d{0,5,32,}†\
+ ” h(l,a,n,o);†\
+‘ i~=0\
+†\
+Œ ‰ e(l)Œ n,l=f(l.œ),_(s(l.š)) ” u(n,l)†\
+‘ ‰(n)Œ l=f(n.œ)Œ n=s(n.š)b(l)e{œ=l,š=n}l:–(l:˜())l:–()†\
+]===], '@gunzip.lua'))()"e["squish.debug"]="package.preload['minichunkspy']=(function(...)local string,table,math=string,table,math\
+local ipairs,setmetatable,type,assert=ipairs,setmetatable,type,assert\
+local _=__END_OF_GLOBALS__\
+local string_char,string_byte,string_sub=string.char,string.byte,string.sub\
+local table_concat=table.concat\
+local math_abs,math_ldexp,math_frexp=math.abs,math.ldexp,math.frexp\
+local Inf=math.huge\
+local Nan=Inf-Inf\
+local BIG_ENDIAN=false\
+local function construct(class,...)return class.new(class,...)end\
+local mt_memo={}local Field=construct{new=function(class,self)local self=self or{}local mt=mt_memo[class]or{__index=class,__call=construct}mt_memo[class]=mt\
+return setmetatable(self,mt)end,}local None=Field{unpack=function(self,bytes,ix)return nil,ix end,pack=function(self,val)return\"\"end}local char_memo={}local function char(n)local field=char_memo[n]or Field{unpack=function(self,bytes,ix)return string_sub(bytes,ix,ix+n-1),ix+n\
+end,pack=function(self,val)return string_sub(val,1,n)end}char_memo[n]=field\
+return field\
+end\
+local uint8=Field{unpack=function(self,bytes,ix)return string_byte(bytes,ix,ix),ix+1\
+end,pack=function(self,val)return string_char(val)end}local uint32=Field{unpack=function(self,bytes,ix)local a,b,c,d=string_byte(bytes,ix,ix+3)if BIG_ENDIAN then a,b,c,d=d,c,b,a end\
+return a+b*256+c*256^2+d*256^3,ix+4\
+end,pack=function(self,val)assert(type(val)==\"number\",\"unexpected value type to pack as an uint32\")local a,b,c,d\
+d=val%2^32\
+a=d%256;d=(d-a)/256\
+b=d%256;d=(d-b)/256\
+c=d%256;d=(d-c)/256\
+if BIG_ENDIAN then a,b,c,d=d,c,b,a end\
+return string_char(a,b,c,d)end}local int32=uint32{unpack=function(self,bytes,ix)local val,ix=uint32:unpack(bytes,ix)return val<2^32 and val or(val-2^31),ix\
+end}local Byte=uint8\
+local Size_t=uint32\
+local Integer=int32\
+local Number=char(8)local Insn=char(4)local Struct=Field{unpack=function(self,bytes,ix)local val={}local i,j=1,1\
+while self[i]do\
+local field=self[i]local key=field.name\
+if not key then key,j=j,j+1 end\
+val[key],ix=field:unpack(bytes,ix)i=i+1\
+end\
+return val,ix\
+end,pack=function(self,val)local data={}local i,j=1,1\
+while self[i]do\
+local field=self[i]local key=field.name\
+if not key then key,j=j,j+1 end\
+data[i]=field:pack(val[key])i=i+1\
+end\
+return table_concat(data)end}local List=Field{unpack=function(self,bytes,ix)local len,ix=Integer:unpack(bytes,ix)local vals={}local field=self.type\
+for i=1,len do\
+vals[i],ix=field:unpack(bytes,ix)end\
+return vals,ix\
+end,pack=function(self,vals)local len=#vals\
+local data={Integer:pack(len)}local field=self.type\
+for i=1,len do\
+data[#data+1]=field:pack(vals[i])end\
+return table_concat(data)end}local Boolean=Field{unpack=function(self,bytes,ix)local val,ix=Integer:unpack(bytes,ix)assert(val==0 or val==1,\"unpacked an unexpected value \"..val..\" for a Boolean\")return val==1,ix\
+end,pack=function(self,val)assert(type(val)==\"boolean\",\"unexpected value type to pack as a Boolean\")return Integer:pack(val and 1 or 0)end}local String=Field{unpack=function(self,bytes,ix)local len,ix=Integer:unpack(bytes,ix)local val=nil\
+if len>0 then\
+local string_len=len-1\
+val=bytes:sub(ix,ix+string_len-1)end\
+return val,ix+len\
+end,pack=function(self,val)assert(type(val)==\"nil\"or type(val)==\"string\",\"unexpected value type to pack as a String\")if val==nil then\
+return Integer:pack(0)end\
+return Integer:pack(#val+1)..val..\"\\0\"end}local ChunkHeader=Struct{char(4){name=\"signature\"},Byte{name=\"version\"},Byte{name=\"format\"},Byte{name=\"endianness\"},Byte{name=\"sizeof_int\"},Byte{name=\"sizeof_size_t\"},Byte{name=\"sizeof_insn\"},Byte{name=\"sizeof_Number\"},Byte{name=\"integral_flag\"},}local ConstantTypes={[0]=None,[1]=Boolean,[3]=Number,[4]=String,}local Constant=Field{unpack=function(self,bytes,ix)local t,ix=Byte:unpack(bytes,ix)local field=ConstantTypes[t]assert(field,\"unknown constant type \"..t..\" to unpack\")local v,ix=field:unpack(bytes,ix)return{type=t,value=v},ix\
+end,pack=function(self,val)local t,v=val.type,val.value\
+return Byte:pack(t)..ConstantTypes[t]:pack(v)end}local Local=Struct{String{name=\"name\"},Integer{name=\"startpc\"},Integer{name=\"endpc\"}}local Function=Struct{String{name=\"name\"},Integer{name=\"line\"},Integer{name=\"last_line\"},Byte{name=\"num_upvalues\"},Byte{name=\"num_parameters\"},Byte{name=\"is_vararg\"},Byte{name=\"max_stack_size\"},List{name=\"insns\",type=Insn},List{name=\"constants\",type=Constant},List{name=\"prototypes\",type=nil},List{name=\"source_lines\",type=Integer},List{name=\"locals\",type=Local},List{name=\"upvalues\",type=String},}assert(Function[10].name==\"prototypes\",\"missed the function prototype list\")Function[10].type=Function\
+local Chunk=Struct{ChunkHeader{name=\"header\"},Function{name=\"body\"}}local function validate(chunk)if type(chunk)==\"function\"then\
+return validate(string.dump(chunk))end\
+local f=Chunk:unpack(chunk,1)local chunk2=Chunk:pack(f)if chunk==chunk2 then return true end\
+local i\
+local len=math.min(#chunk,#chunk2)for i=1,len do\
+local a=chunk:sub(i,i)local b=chunk:sub(i,i)if a~=b then\
+return false,(\"chunk roundtripping failed: \"..\"first byte difference at index %d\"):format(i)end\
+end\
+return false,(\"chunk round tripping failed: \"..\"original length %d vs. %d\"):format(#chunk,#chunk2)end\
+return{disassemble=function(chunk)return Chunk:unpack(chunk,1)end,assemble=function(disassembled)return Chunk:pack(disassembled)end,validate=validate}end)local cs=require\"minichunkspy\"local function ___adjust_chunk(chunk,newname,lineshift)local c=cs.disassemble(string.dump(chunk));c.body.name=newname;lineshift=-c.body.line;local function shiftlines(c)c.line=c.line+lineshift;c.last_line=c.last_line+lineshift;for i,line in ipairs(c.source_lines)do\
+c.source_lines[i]=line+lineshift;end\
+for i,f in ipairs(c.prototypes)do\
+shiftlines(f);end\
+end\
+shiftlines(c.body);return assert(loadstring(cs.assemble(c),newname))();end\
+"function require_resource(t)return e[t]or error("resource '"..tostring(t).."' not found");end end
+pcall(require,"luarocks.require");
+local o={v="verbose",vv="very_verbose",o="output",q="quiet",qq="very_quiet",g="debug"}
+local e={use_http=false};
+for t,a in ipairs(arg)do
+if a:match("^%-")then
+local t=a:match("^%-%-?([^%s=]+)()")
+t=(o[t]or t):gsub("%-+","_");
+if t:match("^no_")then
+t=t:sub(4,-1);
+e[t]=false;
+else
+e[t]=a:match("=(.*)$")or true;
+end
+else
+base_path=a;
+end
+end
+if e.very_verbose then e.verbose=true;end
+if e.very_quiet then e.quiet=true;end
+local t=function()end
+local t,o,s,n=t,t,t,t;
+if not e.very_quiet then t=print;end
+if not e.quiet then o=print;end
+if e.verbose or e.very_verbose then s=print;end
+if e.very_verbose then n=print;end
+print=s;
+local i,l,h={},{},{};
+function Module(e)
+if i[e]then
+s("Ignoring duplicate module definition for "..e);
+return function()end
+end
+local t=#i+1;
+i[t]={name=e,url=___fetch_url};
+i[e]=i[t];
+return function(e)
+i[t].path=e;
+end
+end
+function Resource(e,a)
+local t=#h+1;
+h[t]={name=e,path=a or e};
+return function(e)
+h[t].path=e;
+end
+end
+function AutoFetchURL(e)
+___fetch_url=e;
+end
+function Main(e)
+table.insert(l,e);
+end
+function Output(t)
+if e.output==nil then
+out_fn=t;
+end
+end
+function Option(t)
+t=t:gsub("%-","_");
+if e[t]==nil then
+e[t]=true;
+return function(a)
+e[t]=a;
+end
+else
+return function()end;
+end
+end
+function GetOption(t)
+return e[t:gsub('%-','_')];
+end
+function Message(t)
+if not e.quiet then
+o(t);
+end
+end
+function Error(a)
+if not e.very_quiet then
+t(a);
+end
+end
+function Exit()
+os.exit(1);
+end
+base_path=(base_path or"."):gsub("/$","").."/"
+squishy_file=base_path.."squishy";
+out_fn=e.output;
+local a,r=pcall(dofile,squishy_file);
+if not a then
+t("Couldn't read squishy file: "..r);
+os.exit(1);
+end
+if not out_fn then
+t("No output file specified by user or squishy file");
+os.exit(1);
+elseif#l==0 and#i==0 and#h==0 then
+t("No files, modules or resources. Not going to generate an empty file.");
+os.exit(1);
+end
+local r={};
+function r.filesystem(e)
+local e,t=io.open(e);
+if not e then return false,t;end
+local t=e:read("*a");
+e:close();
+return t;
+end
+if e.use_http then
+function r.http(e)
+local t=require"socket.http";
+local t,e=t.request(e);
+if e==200 then
+return t;
+end
+return false,"HTTP status code: "..tostring(e);
+end
+else
+function r.http(e)
+return false,"Module not found. Re-squish with --use-http option to fetch it from "..e;
+end
+end
+o("Writing "..out_fn.."...");
+local a,d=io.open(out_fn,"w+");
+if not a then
+t("Couldn't open output file: "..tostring(d));
+os.exit(1);
+end
+if e.executable then
+if e.executable==true then
+a:write("#!/usr/bin/env lua\n");
+else
+a:write(e.executable,"\n");
+end
+end
+s("Resolving modules...");
+do
+local e=package.config:sub(1,1);
+local a=package.config:sub(5,5);
+local o=package.path:gsub("[^;]+",function(t)
+if not t:match("^%"..e)then
+return base_path..t;
+end
+end):gsub("/%./","/");
+local s=package.cpath:gsub("[^;]+",function(t)
+if not t:match("^%"..e)then
+return base_path..t;
+end
+end):gsub("/%./","/");
+function resolve_module(t,o)
+t=t:gsub("%.",e);
+for e in o:gmatch("[^;]+")do
+e=e:gsub("%"..a,t);
+n("Looking for "..e)
+local t=io.open(e);
+if t then
+n("Found!");
+t:close();
+return e;
+end
+end
+return nil;
+end
+for a,e in ipairs(i)do
+if not e.path then
+e.path=resolve_module(e.name,o);
+if not e.path then
+t("Couldn't resolve module: "..e.name);
+else
+e.path=e.path:gsub("^"..base_path:gsub("%p","%%%1"),"");
+end
+end
+end
+end
+s("Packing modules...");
+for i,o in ipairs(i)do
+local h,d=o.name,o.path;
+if o.path:sub(1,1)~="/"then
+d=base_path..o.path;
+end
+n("Packing "..h.." ("..d..")...");
+local i,s=r.filesystem(d);
+if(not i)and o.url then
+local e=o.url:gsub("%?",o.path);
+n("Fetching: "..e)
+if e:match("^https?://")then
+i,s=r.http(e);
+elseif e:match("^file://")or e:match("^[/%.]")then
+local e,t=io.open((e:gsub("^file://","")));
+if e then
+i,s=e:read("*a");
+e:close();
+else
+i,s=nil,t;
+end
+end
+end
+if i then
+if not e.debug then
+a:write("package.preload['",h,"'] = (function (...)\n");
+a:write(i);
+a:write(" end)\n");
+else
+a:write("package.preload['",h,"'] = assert(loadstring(\n");
+a:write(("%q\n"):format(i));
+a:write(", ",("%q"):format("@"..d),"))\n");
+end
+else
+t("Couldn't pack module '"..h.."': "..(s or"unknown error... path to module file correct?"));
+os.exit(1);
+end
+end
+if#h>0 then
+s("Packing resources...")
+a:write("do local resources = {};\n");
+for o,e in ipairs(h)do
+local i,e=e.name,e.path;
+local e,o=io.open(base_path..e,"rb");
+if not e then
+t("Couldn't load resource: "..tostring(o));
+os.exit(1);
+end
+local t=e:read("*a");
+local e=0;
+t:gsub("(=+)",function(t)e=math.max(e,#t);end);
+a:write(("resources[%q] = %q"):format(i,t));
+end
+if e.virtual_io then
+local e=require_resource("vio");
+if not e then
+t("Virtual IO requested but is not enabled in this build of squish");
+else
+a:write(e,"\n")
+a:write[[local io_open, io_lines = io.open, io.lines; function io.open(fn, mode)
+					if not resources[fn] then
+						return io_open(fn, mode);
+					else
+						return vio.open(resources[fn]);
+				end end
+				function io.lines(fn)
+					if not resources[fn] then
+						return io_lines(fn);
+					else
+						return vio.open(resources[fn]):lines()
+				end end
+				local _dofile = dofile;
+				function dofile(fn)
+					if not resources[fn] then
+						return _dofile(fn);
+					else
+						return assert(loadstring(resources[fn]))();
+				end end
+				local _loadfile = loadfile;
+				function loadfile(fn)
+					if not resources[fn] then
+						return _loadfile(fn);
+					else
+						return loadstring(resources[fn], "@"..fn);
+				end end ]]
+end
+end
+a:write[[function require_resource(name) return resources[name] or error("resource '"..tostring(name).."' not found"); end end ]]
+end
+n("Finalising...")
+for e,o in pairs(l)do
+local e,i=io.open(base_path..o);
+if not e then
+t("Failed to open "..o..": "..i);
+os.exit(1);
+else
+a:write((e:read("*a"):gsub("^#.-\n","")));
+e:close();
+end
+end
+a:close();
+o("OK!");
+local n=require"optlex"
+local r=require"optparser"
+local a=require"llex"
+local d=require"lparser"
+local i={
+none={};
+debug={"whitespace","locals","entropy","comments","numbers"};
+default={"comments","whitespace","emptylines","numbers","locals"};
+basic={"comments","whitespace","emptylines"};
+full={"comments","whitespace","emptylines","eols","strings","numbers","locals","entropy"};
+}
+if e.minify_level and not i[e.minify_level]then
+t("Unknown minify level: "..e.minify_level);
+t("Available minify levels: none, basic, default, full, debug");
+end
+for a,t in ipairs(i[e.minify_level or"default"]or{})do
+if e["minify_"..t]==nil then
+e["minify_"..t]=true;
+end
+end
+local h={
+["opt-locals"]=e.minify_locals;
+["opt-comments"]=e.minify_comments;
+["opt-entropy"]=e.minify_entropy;
+["opt-whitespace"]=e.minify_whitespace;
+["opt-emptylines"]=e.minify_emptylines;
+["opt-eols"]=e.minify_eols;
+["opt-strings"]=e.minify_strings;
+["opt-numbers"]=e.minify_numbers;
+}
+local function i(e)
+t("minify: "..e);os.exit(1);
+end
+local function l(e)
+local t=io.open(e,"rb")
+if not t then i("cannot open \""..e.."\" for reading")end
+local a=t:read("*a")
+if not a then i("cannot read from \""..e.."\"")end
+t:close()
+return a
+end
+local function u(t,a)
+local e=io.open(t,"wb")
+if not e then i("cannot open \""..t.."\" for writing")end
+local a=e:write(a)
+if not a then i("cannot write to \""..t.."\"")end
+e:close()
+end
+function minify_string(e)
+a.init(e)
+a.llex()
+local t,e,a
+=a.tok,a.seminfo,a.tokln
+if h["opt-locals"]then
+r.print=print
+d.init(t,e,a)
+local o,a=d.parser()
+r.optimize(h,t,e,o,a)
+end
+n.print=print
+t,e,a
+=n.optimize(h,t,e,a)
+local e=table.concat(e)
+if string.find(e,"\r\n",1,1)or
+string.find(e,"\n\r",1,1)then
+n.warn.mixedeol=true
+end
+return e;
+end
+function minify_file(e,t)
+local e=l(e);
+e=minify_string(e);
+u(t,e);
+end
+if e.minify~=false then
+o("Minifying "..out_fn.."...");
+minify_file(out_fn,out_fn);
+o("OK!");
+end
+local h=require"llex"
+local i=128;
+local n={"and","break","do","else","elseif",
+"end","false","for","function","if",
+"in","local","nil","not","or","repeat",
+"return","then","true","until","while"}
+function uglify_file(l,o)
+local r,a=io.open(l);
+if not r then
+t("Can't open input file for reading: "..tostring(a));
+return;
+end
+local a,s=io.open(o..".uglified","wb+");
+if not a then
+t("Can't open output file for writing: "..tostring(s));
+return;
+end
+local s=r:read("*a");
+r:close();
+local r,t=s:match("^(#.-\n)(.+)$");
+local t=t or s;
+if r then
+a:write(r)
+end
+while i+#n<=255 and t:find("["..string.char(i).."-"..string.char(i+#n-1).."]")do
+i=i+1;
+end
+if i+#n>255 then
+a:write(t);
+a:close();
+os.rename(o..".uglified",o);
+return;
+end
+local d={}
+for t,e in ipairs(n)do
+d[e]=string.char(i+t);
+end
+local r=0;
+s:gsub("(=+)",function(e)r=math.max(r,#e);end);
+h.init(t,"@"..l);
+h.llex()
+local s=h.seminfo;
+if e.uglify_level=="full"and i+#n<255 then
+local e={};
+for o,a in ipairs(h.tok)do
+if a=="TK_NAME"or a=="TK_STRING"then
+local t=string.format("%q,%q",a,s[o]);
+if not e[t]then
+e[t]={type=a,value=s[o],count=0};
+e[#e+1]=e[t];
+end
+e[t].count=e[t].count+1;
+end
+end
+for t=1,#e do
+local e=e[t];
+e.score=(e.count)*(#e.value-1)-#string.format("%q",e.value)-1;
+end
+table.sort(e,function(t,e)return t.score>e.score;end);
+local t=255-(i+#n);
+for t=t+1,#e do
+e[t]=nil;
+end
+local t=#n;
+for a,e in ipairs(e)do
+if e.score>0 then
+table.insert(n,e.value);
+d[e.value]=string.char(i+t+a);
+end
+end
+end
+a:write("local base_char,keywords=",tostring(i),",{");
+for t,e in ipairs(n)do
+a:write(string.format("%q",e),',');
+end
+a:write[[}; function prettify(code) return code:gsub("["..string.char(base_char).."-"..string.char(base_char+#keywords).."]", 
+	function (c) return keywords[c:byte()-base_char]; end) end ]]
+a:write[[return assert(loadstring(prettify]]
+a:write("[",string.rep("=",r+1),"[");
+for e,t in ipairs(h.tok)do
+if t=="TK_KEYWORD"or t=="TK_NAME"or t=="TK_STRING"then
+local t=d[s[e]];
+if t then
+a:write(t);
+else
+a:write(s[e]);
+end
+else
+a:write(s[e]);
+end
+end
+a:write("]",string.rep("=",r+1),"]");
+a:write(", '@",o,"'))()");
+a:close();
+os.rename(o..".uglified",o);
+end
+if e.uglify then
+o("Uglifying "..out_fn.."...");
+uglify_file(out_fn,out_fn);
+o("OK!");
+end
+local a=require"minichunkspy"
+function compile_string(o,t)
+local t=string.dump(loadstring(o,t));
+if((not e.debug)or e.compile_strip)and e.compile_strip~=false then
+local o=a.disassemble(t);
+local function t(e)
+e.source_lines,e.locals,e.upvalues={},{},{};
+for a,e in ipairs(e.prototypes)do
+t(e);
+end
+end
+s("Stripping debug info...");
+t(o.body);
+return a.assemble(o);
+end
+return t;
+end
+function compile_file(a,e)
+local o,a=io.open(a);
+if not o then
+t("Can't open input file for reading: "..tostring(a));
+return;
+end
+local a,i=io.open(e..".compiled","w+");
+if not a then
+t("Can't open output file for writing: "..tostring(i));
+return;
+end
+local i=o:read("*a");
+o:close();
+local t,o=i:match("^(#.-\n)(.+)$");
+local o=o or i;
+if t then
+a:write(t)
+end
+a:write(compile_string(o,e));
+os.rename(e..".compiled",e);
+end
+if e.compile then
+o("Compiling "..out_fn.."...");
+compile_file(out_fn,out_fn);
+o("OK!");
+end
+function gzip_file(e,a)
+local o,e=io.open(e);
+if not o then
+t("Can't open input file for reading: "..tostring(e));
+return;
+end
+local e,i=io.open(a..".gzipped","wb+");
+if not e then
+t("Can't open output file for writing: "..tostring(i));
+return;
+end
+local n=o:read("*a");
+o:close();
+local i,o=n:match("^(#.-\n)(.+)$");
+local o=o or n;
+if i then
+e:write(i)
+end
+local i,n=io.open(a..".pregzip","wb+");
+if not i then
+t("Can't open temp file for writing: "..tostring(n));
+return;
+end
+i:write(o);
+i:close();
+local t=io.popen("gzip -c '"..a..".pregzip'");
+o=t:read("*a");
+t:close();
+os.remove(a..".pregzip");
+local t=0;
+o:gsub("(=+)",function(e)t=math.max(t,#e);end);
+e:write("local ungz = (function ()",require_resource"gunzip.lua"," end)()\n");
+e:write[[return assert(loadstring((function (i)local o={} ungz{input=i,output=function(b)table.insert(o,string.char(b))end}return table.concat(o)end) ]];
+e:write((string.format("%q",o):gsub("\026","\\026")));
+e:write(", '@",a,"'))()");
+e:close();
+os.rename(a..".gzipped",a);
+end
+if e.gzip then
+o("Gzipping "..out_fn.."...");
+gzip_file(out_fn,out_fn);
+o("OK!");
+end

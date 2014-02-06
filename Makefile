@@ -1,6 +1,8 @@
 CC = gcc
 STRIP = strip
 RM = rm
+SQUISH = ./squish
+
 
 CFLAGS = -std=c99
 CFLAGS += -fPIC -O2
@@ -23,16 +25,16 @@ main.o: main.c libluajit.a oDemo.h
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
 oDemo.lua: squishy oluce.lua DemoHolder.lua Demo.lua GlyphDemo.lua GraphicsDemoBase.lua LineDemo.lua
-	@squish --no-executable
+	@$(SQUISH) --no-executable
 
 oDemo.h: oDemo.lua libluajit.a
 	@./luajit-2.0/src/luajit -b oDemo.lua oDemo.h
 
 ../../Source/lua/oluce.lua:
-	cd ../../Source/lua && squish --no-executable
+	@cd ../../Source/lua && $(SQUISH) --no-executable
 
 oluce.lua: ../../Source/lua/oluce.lua
-	ln -s ../../Source/lua/oluce.lua oluce.lua
+	@cp -f ../../Source/lua/oluce.lua oluce.lua
 
 demo: main.o
 	@$(CC) -Wl,-E -o demo $< $(LIBS)

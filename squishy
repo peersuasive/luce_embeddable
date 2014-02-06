@@ -1,0 +1,19 @@
+-- Set this option, same as if user specified
+-- '--executable' on the command-line. Can be 
+-- disabled by user with '--no-executable'
+Option "executable"
+
+-- Output filename
+Output "oDemo.lua"
+
+-- This is normal/main script
+Main "Demo.lua"
+
+-- gadokai base system
+Module "luce"      "luce.lua"
+Module "DemoHolder" "DemoHolder.lua"
+Module "GlyphDemo" "GlyphDemo.lua"
+Module "GraphicsDemoBase" "GraphicsDemoBase.lua"
+Module "LineDemo" "LineDemo.lua"
+
+--Demo.lua

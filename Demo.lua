@@ -6,27 +6,45 @@ local demos = {
     GlyphDemo = "GlyphDemo",
     LineDemo  = "LineDemo"
 }
+local animations = {
+    rotation = true,
+    position = true,
+    shear    = true,
+    size     = true,
+}
 local demo = "GlyphDemo"
 local usage = function()
-    print("Usage: Demo.lua [demo]")
-    print("       demo: GlypDemo LineDemo")
+    print("Usage: Demo.lua [options] [demo]")
+    print(" demo: one of GlypDemo, LineDemo (default: GlyphDemo)")
+    print("options:")
+    print(" -d <animation> [-d ...]    disable selected animation")
+    print("                can be one of rotation, position, shear, size (default: all enabled)")  
     print()
 end
-if(#args)then
-    for _,o in next, args do
+if(#args>0)then
+    for i,o in next, args do
     if("-h"==o) or ("--help"==o)then
         usage()
         os.exit()
     elseif(o:match("^%-"))then
-        if("-o"==o)then
+        if("-d"==o)then
+            local a = args[i+1]
+            if( animations[a] ) then
+                animations[a] = false
+            else 
+                print(string.format("unknown animation: %s, ignoring", a))
+            end
+            args[i+1] = ""
         else
             print(string.format("unknown option: %s\n", o))
             usage()
             os.exit(1)
         end
     else
+        if not(""==o)then
         if not(demos[o])then
             print(string.format("Unknow demo '%s', using default (%s)", o, demo))
+        end
         end
         demo = demos[o] or "GlyphDemo"
     end
@@ -43,10 +61,10 @@ mc:setSize{1,1}
 
 local demoHolder = require"DemoHolder"(demo)
 
-demoHolder.animations.animateRotation = true
-demoHolder.animations.animatePosition = true
-demoHolder.animations.animateShear    = true
-demoHolder.animations.animateSize     = true
+demoHolder.animations.animateRotation = animations.rotation
+demoHolder.animations.animatePosition = animations.position
+demoHolder.animations.animateShear    = animations.shear
+demoHolder.animations.animateSize     = animations.size
 
 mc:resized(function()
     demoHolder:setBounds( luce:Rectangle(mc:getLocalBounds()) )

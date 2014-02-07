@@ -8,3 +8,7 @@ libluajit.a
 oDemo.h
 oDemo.lua
 oluce.lua
+bin2c.bin
+dis/
+obj/
+t/

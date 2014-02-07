@@ -12,3 +12,6 @@ bin2c.bin
 dis/
 obj/
 t/
+core.dll
+demo_s
+demo_s.exe

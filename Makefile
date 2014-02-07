@@ -2,6 +2,7 @@
 CFLAGS =
 EXTRALIB  = 
 BIN2C =
+TNAME =
 
 ifndef CONFIG
 	CONFIG=Release
@@ -29,6 +30,13 @@ else
 	UPX        = echo ./upx
 endif
 
+ifeq ($(STATIC),1)
+	TNAME = demo_s
+else
+	TNAME = demo
+endif
+
+
 TARGET_JIT = libluajit.a_check
 
 CC 	   = $(X)g++
@@ -47,7 +55,7 @@ LIBS   += $(EXTRALIBS)
 LDFLAGS += -std=c++11
 LDFLAGS += -fvisibility=hidden
 
-TARGET = demo$(EXT)
+TARGET = $(TNAME)$(EXT)
 
 all: $(TARGET)
 
@@ -81,16 +89,22 @@ oDemo.h: oDemo.lua $(TARGET_JIT)
 luce.lua: ../../Source/lua/oluce.lua
 	@cp -f ../../Source/lua/oluce.lua luce.lua
 
-$(TARGET): main.o
+demo$(EXT): main.o
 	@$(CC) $(LDFLAGS) -o $(TARGET) $< $(LIBS)
-	@#$(CC) $(LDFLAGS) -o $(TARGET) $< obj/lin/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
 
-xdemo.exe: main.o
-	@$(CC) $(LDFLAGS) -o $(TARGET) $< $(LIBS)
-	@#$(CC) $(LDFLAGS) -o $(TARGET) $< obj/win/*.o $(LIBS) -lfreetype -lpthread -lws2_32 -lshlwapi -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
+demo_s: main.o
+	@echo "Unifinished config! Can't work without the library anyway!"
+	@$(CC) $(LDFLAGS) -o $(TARGET) $< obj/lin/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
+	@$(STRIP) --strip-unneeded $@
+	@$(UPX) $@
+	@echo OK
+
+demo_s.exe: main.o
+	@echo "Unifinished config! Can't work without the library anyway!"
+	@$(CC) $(LDFLAGS) -o $(TARGET) $< obj/win/*.o $(LIBS) -lfreetype -lpthread -lws2_32 -lshlwapi -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK

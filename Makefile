@@ -1,34 +1,79 @@
-CC = gcc
-STRIP = strip
-RM = rm
+
+CFLAGS =
+EXTRALIB  = 
+BIN2C =
+
+ifndef CONFIG
+	CONFIG=Release
+else
+	CFLAGS += -g
+endif
+
+ifeq ($(XCROSS),1)
+	X = /opt/mingw/usr/bin/i686-pc-mingw32-
+	EXT        = .exe
+	#CFLAGS += --export-all-symbols
+	#LDLAGS += --export-all-symbols
+	CFLAGS    += -march=i686
+	LDFLAGS   += -march=i686
+	EXTRALIBS += -llua5.1 -lstdc++ -lm
+	BIN2C      = ./bin2c
+	UPX        = echo $(X)upx.exe
+else
+	CFLAGS    += -fPIC
+	EXTRALIBS += libluajit.a -lm -ldl
+	LDFLAGS    = -Wl,-E
+	#BIN2C      = ./luajit-2.0/src/luajit -b
+	BIN2C      = ./bin2c
+	#UPX        = upx-nrv
+	UPX        = echo ./upx
+endif
+
+TARGET_JIT = libluajit.a_check
+
+CC 	   = $(X)g++
+STRIP  = $(X)strip
+RM     = rm
 SQUISH = ./squish
 
+CFLAGS += -std=c++11
+CFLAGS += -march=native
 
-CFLAGS = -std=c99
-CFLAGS += -fPIC -O2
-#CFLAGS += -g
+#CFLAGS += -std=c99
+CFLAGS += -Os
 CFLAGS += -fomit-frame-pointer -fno-stack-protector
 CFLAGS += -Iluajit-2.0/src
-LIBS = libluajit.a -lm -ldl
+LIBS   += $(EXTRALIBS)
+LDFLAGS += -std=c++11
+LDFLAGS += -fvisibility=hidden
 
-all: demo
+TARGET = demo$(EXT)
 
-libluajit.a: luajit-2.0/src/libluajit.a
+all: $(TARGET)
+
+$(TARGET_JIT): luajit-2.0/src/luajit$(EXT)
 	@ln -sf luajit-2.0/src/libluajit.a .
 	@$(RM) -f jit
 	@ln -sf luajit-2.0/src/jit .
 
-luajit-2.0/src/libluajit.a:
-	@cd luajit-2.0/src && make
+bin2c.bin: bin2c.c
+	@gcc -std=c99 -o bin2c.bin bin2c.c
 
-main.o: main.c libluajit.a oDemo.h
+luajit-2.0/src/luajit:
+	@cd luajit-2.0/src && make clean && make
+
+luajit-2.0/src/luajit.exe:
+	@echo "luajit crashes with luce (and probably many other things) under windows -- fallback to lua"
+	@#cd luajit-2.0/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
+
+main.o: main.c $(TARGET_JIT) oDemo.h
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
-oDemo.lua: squishy luce.lua DemoHolder.lua Demo.lua GlyphDemo.lua GraphicsDemoBase.lua LineDemo.lua
+oDemo.lua: squishy luce.lua DemoHolder.lua Demo.lua GlyphDemo.lua GraphicsDemoBase.lua LinesDemo.lua
 	@$(SQUISH) --no-executable
 
-oDemo.h: oDemo.lua libluajit.a
-	@./luajit-2.0/src/luajit -b oDemo.lua oDemo.h
+oDemo.h: oDemo.lua $(TARGET_JIT)
+	@$(BIN2C) oDemo.lua oDemo.h
 
 ../../Source/lua/luce.lua:
 	@cd ../../Source/lua && $(SQUISH) --no-executable
@@ -36,22 +81,32 @@ oDemo.h: oDemo.lua libluajit.a
 luce.lua: ../../Source/lua/oluce.lua
 	@cp -f ../../Source/lua/oluce.lua luce.lua
 
-demo: main.o
-	@$(CC) -Wl,-E -o demo $< $(LIBS)
-	@$(STRIP) $@
+$(TARGET): main.o
+	@$(CC) $(LDFLAGS) -o $(TARGET) $< $(LIBS)
+	@#$(CC) $(LDFLAGS) -o $(TARGET) $< obj/lin/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
+	@$(STRIP) --strip-unneeded $@
+	@$(UPX) $@
 	@echo OK
 
-test: demo
-	./demo
+xdemo.exe: main.o
+	@$(CC) $(LDFLAGS) -o $(TARGET) $< $(LIBS)
+	@#$(CC) $(LDFLAGS) -o $(TARGET) $< obj/win/*.o $(LIBS) -lfreetype -lpthread -lws2_32 -lshlwapi -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
+	@$(STRIP) --strip-unneeded $@
+	@$(UPX) $@
+	@echo OK
+
+
+test: $(TARGET)
+	./$(TARGET)
 
 clean:
-	@$(RM) -f demo main.o oDemo.h oDemo.lua
+	@$(RM) -f demo demo.exe main.o oDemo.h oDemo.lua
 
 extraclean: clean
 	@$(RM) -f luce.lua
 
 distclean: extraclean
 	@cd ./luajit-2.0/src && make clean
-	@$(RM) -f libluajit.a jit
+	@$(RM) -f libluajit.a libluajit.win.a jit
 
 

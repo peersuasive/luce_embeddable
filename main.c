@@ -11,9 +11,10 @@
 
 *************************************************************/
 
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
+//#include <lua.h>
+//#include <lualib.h>
+//#include <lauxlib.h>
+#include <lua.hpp>
 #include "oDemo.h"
 
 #include <stdio.h>
@@ -29,6 +30,9 @@ int main(int argc, char *argv[]) {
             lua_pushstring(L, argv[i]);
         if ((status = lua_pcall(L, argc-1, 0, 0)) )
             lua_error(L);
-    } else fprintf(stderr, "Missing main file: %s\n", "Demo.lua");
+    } else {
+        fprintf(stderr, "Missing main file: %s\n", "Demo.lua");
+        lua_error(L);
+    }
     return status;
 }

@@ -4,7 +4,7 @@ local args = {...}
 
 local demos = {
     GlyphDemo = "GlyphDemo",
-    LineDemo  = "LineDemo"
+    LinesDemo  = "LinesDemo"
 }
 local animations = {
     rotation = true,
@@ -15,7 +15,7 @@ local animations = {
 local demo = "GlyphDemo"
 local usage = function()
     print("Usage: Demo.lua [options] [demo]")
-    print(" demo: one of GlypDemo, LineDemo (default: GlyphDemo)")
+    print(" demo: one of GlypDemo, LinesDemo (default: GlyphDemo)")
     print("options:")
     print(" -d <animation> [-d ...]    disable selected animation")
     print("                can be one of rotation, position, shear, size or all (default: all enabled)")  

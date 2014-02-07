@@ -18,7 +18,7 @@ base component
 
 --[[ REQUIREMENTS ]]------------------------------------------------------------
 local luce = require"luce"()
-local className = "LLineDemo"
+local className = "LLinesDemo"
 
 local function new(self, name)
     -- init

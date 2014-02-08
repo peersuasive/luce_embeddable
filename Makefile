@@ -81,7 +81,7 @@ main.o: main.c $(TARGET_JIT) oDemo.h
 oDemo.lua: squishy luce.lua DemoHolder.lua Demo.lua GlyphDemo.lua GraphicsDemoBase.lua LinesDemo.lua
 	@$(SQUISH) --no-executable
 
-oDemo.h: oDemo.lua $(TARGET_JIT)
+oDemo.h: bin2c.bin oDemo.lua $(TARGET_JIT)
 	@$(BIN2C) oDemo.lua oDemo.h
 
 ../../Source/lua/luce.lua:

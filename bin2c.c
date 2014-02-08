@@ -33,7 +33,7 @@ static int fdump(const char* fn, int n) {
     }
 
     printf("/* %s */\n",fn);
-    int i = sizeof(fn)-1;
+    int i = strlen(fn)-1;
     for(;fn[i];--i)
         if(fn[i]=='.')
             break;

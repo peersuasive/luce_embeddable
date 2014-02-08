@@ -27,6 +27,8 @@ else
 	#BIN2C      = ./luajit-2.0/src/luajit -b
 	BIN2C      = ./bin2c
 	#UPX        = upx-nrv
+	CFLAGS 	   += -march=native
+	LDLAGS     += -march=native
 	UPX        = echo ./upx
 endif
 
@@ -45,7 +47,6 @@ RM     = rm
 SQUISH = ./squish
 
 CFLAGS += -std=c++11
-CFLAGS += -march=native
 
 #CFLAGS += -std=c99
 CFLAGS += -Os
@@ -84,8 +85,8 @@ oDemo.lua: squishy luce.lua DemoHolder.lua Demo.lua GlyphDemo.lua GraphicsDemoBa
 oDemo.h: bin2c.bin oDemo.lua $(TARGET_JIT)
 	@$(BIN2C) oDemo.lua oDemo.h
 
-../../Source/lua/luce.lua:
-	@cd ../../Source/lua && $(SQUISH) --no-executable
+../../Source/lua/oluce.lua:
+	@cd ../../Source/lua && make
 
 luce.lua: ../../Source/lua/oluce.lua
 	@cp -f ../../Source/lua/oluce.lua luce.lua

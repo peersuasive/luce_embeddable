@@ -51,6 +51,7 @@ CFLAGS += -march=native
 CFLAGS += -Os
 CFLAGS += -fomit-frame-pointer -fno-stack-protector
 CFLAGS += -Iluajit-2.0/src
+CFLAGS += -MMD
 LIBS   += $(EXTRALIBS)
 LDFLAGS += -std=c++11
 LDFLAGS += -fvisibility=hidden
@@ -123,4 +124,4 @@ distclean: extraclean
 	@cd ./luajit-2.0/src && make clean
 	@$(RM) -f libluajit.a libluajit.win.a jit
 
-
+-include $(OBJECTS:%.o=%.d)

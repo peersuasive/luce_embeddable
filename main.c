@@ -11,19 +11,31 @@
 
 *************************************************************/
 
-//#include <lua.h>
-//#include <lualib.h>
-//#include <lauxlib.h>
 #include <lua.hpp>
-#include "oDemo.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "oDemo.h"
 #include <stdio.h>
+
+#ifdef XSTATIC
+extern int luaopen_core(lua_State*);
+#endif
 
 int main(int argc, char *argv[]) {
     int status = 0;
     lua_State *L;
     L = luaL_newstate();
     luaL_openlibs(L);
+
+#ifdef XSTATIC
+    lua_pushcfunction(L, luaopen_core);
+    lua_pushliteral(L, "core");
+    lua_call(L, 1, 0);
+#endif
+
     status = luaL_loadbuffer(L, luaJIT_BC_oDemo, luaJIT_BC_oDemo_SIZE, NULL);
     if(!status) {
         for(int i=1;i<argc;++i)
@@ -34,5 +46,10 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Missing main file: %s\n", "Demo.lua");
         lua_error(L);
     }
+    lua_close(L);
     return status;
 }
+
+#ifdef __cplusplus
+}
+#endif

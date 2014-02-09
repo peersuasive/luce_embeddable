@@ -10,38 +10,42 @@ else
 	CFLAGS += -g
 endif
 
+ifeq ($(STATIC),1)
+	TNAME = demo_s
+	XSTATIC = -DXSTATIC
+else
+	TNAME = demo
+endif
+
+
 ifeq ($(XCROSS),1)
 	X = /opt/mingw/usr/bin/i686-pc-mingw32-
 	EXT        = .exe
 	#CFLAGS += --export-all-symbols
 	#LDLAGS += --export-all-symbols
-	CFLAGS    += -march=i686
+	CFLAGS    += -march=i686 $(XSTATIC)
 	LDFLAGS   += -march=i686
 	EXTRALIBS += -llua5.1 -lstdc++ -lm
 	BIN2C      = ./bin2c
 	UPX        = echo $(X)upx.exe
 else
-	CFLAGS    += -fPIC
+	CFLAGS    += -Wl,--wrap=memcpy -fPIC $(XSTATIC)
 	EXTRALIBS += libluajit.a -lm -ldl
-	LDFLAGS    = -Wl,-E
+	LDFLAGS   += -Wl,--wrap=memcpy -Wl,-E
+	WRAPCPY    = wrap_memcpy.o
 	#BIN2C      = ./luajit-2.0/src/luajit -b
 	BIN2C      = ./bin2c
 	#UPX        = upx-nrv
+	UPX        = echo ./upx
 	CFLAGS 	   += -march=native
 	LDLAGS     += -march=native
-	UPX        = echo ./upx
-endif
-
-ifeq ($(STATIC),1)
-	TNAME = demo_s
-else
-	TNAME = demo
 endif
 
 
 TARGET_JIT = libluajit.a_check
 
 CC 	   = $(X)g++
+LD     = $(CC)
 STRIP  = $(X)strip
 RM     = rm
 SQUISH = ./squish
@@ -91,21 +95,22 @@ oDemo.h: bin2c.bin oDemo.lua $(TARGET_JIT)
 luce.lua: ../../Source/lua/oluce.lua
 	@cp -f ../../Source/lua/oluce.lua luce.lua
 
-demo$(EXT): main.o
-	@$(CC) $(LDFLAGS) -o $(TARGET) $< $(LIBS)
+$(WRAPCPY): wrap_memcpy.c
+	gcc -c -o $@ $<
+
+demo$(EXT): main.o $(WRAPCPY)
+	$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< $(LIBS)
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
 
-demo_s: main.o
-	@echo "Unifinished config! Can't work without the library anyway!"
-	@$(CC) $(LDFLAGS) -o $(TARGET) $< obj/lin/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
+demo_s: main.o $(WRAPCPY)
+	@$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< obj/lin/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
 
 demo_s.exe: main.o
-	@echo "Unifinished config! Can't work without the library anyway!"
 	@$(CC) $(LDFLAGS) -o $(TARGET) $< obj/win/*.o $(LIBS) -lfreetype -lpthread -lws2_32 -lshlwapi -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
@@ -116,13 +121,13 @@ test: $(TARGET)
 	./$(TARGET)
 
 clean:
-	@$(RM) -f demo demo.exe main.o oDemo.h oDemo.lua
+	@$(RM) -f demo demo.exe main.o oDemo.h oDemo.lua $(WRAPCPY) *.d
 
 extraclean: clean
 	@$(RM) -f luce.lua
 
 distclean: extraclean
 	@cd ./luajit-2.0/src && make clean
-	@$(RM) -f libluajit.a libluajit.win.a jit
+	@$(RM) -f libluajit.a libluajit.win.a jit bin2c.bin
 
 -include $(OBJECTS:%.o=%.d)

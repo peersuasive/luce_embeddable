@@ -125,7 +125,7 @@ test: $(TARGET)
 	./$(TARGET)
 
 clean:
-	@$(RM) -f demo demo.exe main.o oDemo.h oDemo.lua $(WRAPCPY) *.d
+	@$(RM) -f demo demo.exe demo_s demo_s.exe main.o oDemo.h oDemo.lua $(WRAPCPY) *.d
 
 extraclean: clean
 	@$(RM) -f luce.lua

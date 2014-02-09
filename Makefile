@@ -29,10 +29,14 @@ ifeq ($(XCROSS),1)
 	BIN2C      = ./bin2c
 	UPX        = echo $(X)upx.exe
 else
-	CFLAGS    += -Wl,--wrap=memcpy -fPIC $(XSTATIC)
+	GLIBCV    := $(shell [ `ldd --version|head -n1|awk '{print $$NF}'|cut -f2 -d.` -gt 13 ] && echo true)
+	ifeq ($(GLIBCV), true)
+		LDFLAGS += -Wl,--wrap=memcpy
+		WRAPCPY  = wrap_memcpy.o
+	endif
+	CFLAGS    += -fPIC $(XSTATIC)
 	EXTRALIBS += libluajit.a -lm -ldl
-	LDFLAGS   += -Wl,--wrap=memcpy -Wl,-E
-	WRAPCPY    = wrap_memcpy.o
+	LDFLAGS   += -Wl,-E
 	#BIN2C      = ./luajit-2.0/src/luajit -b
 	BIN2C      = ./bin2c
 	#UPX        = upx-nrv

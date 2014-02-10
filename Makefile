@@ -2,7 +2,7 @@
 CFLAGS   =
 EXTRALIB = 
 BIN2C    =
-TNAME    =
+TNAME    := demo
 
 ifndef CONFIG
 	CONFIG=Release
@@ -11,10 +11,8 @@ else
 endif
 
 ifeq ($(STATIC),1)
-	TNAME = demo_s
+	TNAME := $(TNAME)_s
 	XSTATIC = -DXSTATIC
-else
-	TNAME = demo
 endif
 
 ifeq ($(LUA52),1)
@@ -112,32 +110,32 @@ luce.lua: ../../Source/lua/oluce.lua
 $(WRAPCPY): wrap_memcpy.c
 	@gcc -c -o $@ $<
 
-demo$(EXT): main.o $(WRAPCPY)
+$(TNAME)$(EXT): main.o $(WRAPCPY)
 	$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< $(LIBS)
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
-demo52$(EXT): demo$(EXT)
+$(TNAME)52$(EXT): demo$(EXT)
 
-demo_s: main.o $(WRAPCPY)
+$(TNAME)_s: main.o $(WRAPCPY)
 	@$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< obj/lin/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
 
-demo_s52: main.o $(WRAPCPY)
+$(TNAME)_s52: main.o $(WRAPCPY)
 	@$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< obj/lin52/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
 
-demo_s.exe: main.o
+$(TNAME)_s.exe: main.o
 	@$(CC) $(LDFLAGS) -o $(TARGET) $< obj/win/*.o $(LIBS) -lfreetype -lpthread -lws2_32 -lshlwapi -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
 
-demo_s52.exe: main.o
+$(TNAME)_s52.exe: main.o
 	@$(CC) $(LDFLAGS) -o $(TARGET) $< obj/win52/*.o $(LIBS) -lfreetype -lpthread -lws2_32 -lshlwapi -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
@@ -148,8 +146,8 @@ test: $(TARGET)
 	./$(TARGET)
 
 clean:
-	@$(RM) -f demo demo52 demo_s demo_s52
-	@$(RM) -f demo.exe demo52.exe demo_s.exe demo_s52.exe
+	@$(RM) -f $(TNAME) $(TNAME)52 $(TNAME)_s $(TNAME)_s52
+	@$(RM) -f $(TNAME).exe $(TNAME)52.exe $(TNAME)_s.exe $(TNAME)_s52.exe
 	@$(RM) -f main.o oDemo.h oDemo.lua $(WRAPCPY) *.d
 
 extraclean: clean

@@ -5,8 +5,8 @@ demo
 jit
 libluajit.a
 *.o
-oDemo.h
-oDemo.lua
+oResult.h
+oResult.lua
 oluce.lua
 bin2c.bin
 dis/
@@ -15,3 +15,4 @@ t/
 core.dll
 demo_s
 demo_s.exe
+luce.lua

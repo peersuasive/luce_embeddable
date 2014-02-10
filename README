@@ -11,9 +11,15 @@ Options:
     XCROSS :    compile for Win* via mingw
     STATIC :    statically compiled binary, with luce fully embedded
     LUA52  :    (mingw only): compile with lua52
-    TNAME  :    name of the binary (default: demo)
-                note: when STATIC is set, binary name results in $(TNAME)_s$(EXT)
-                      when LUA52 is set, binary name results in $(TNAME)52$(EXT)
-                      and when both are set, binary name results in $(TNAME)52_s$(EXT)
+    NAME   :    name of the binary (default: demo)
+                note: when STATIC is set, binary name results in $(NAME)_s$(EXT)
+                      when LUA52 is set, binary name results in $(NAME)52$(EXT)
+                      and when both are set, binary name results in $(NAME)52_s$(EXT)
 
 By default, compile a Linux glibc 2.13 compatible binary depending on core.so.
+
+squishy:
+
+    output filename must be "oResult.lua".
+
+

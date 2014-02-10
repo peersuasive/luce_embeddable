@@ -4,14 +4,14 @@
 --Option "no-executable"
 
 -- Output filename
-Output "oDemo.lua"
+Output "oResult.lua"
 
 -- This is normal/main script
-Main "Demo.lua"
+Main "example/Demo.lua"
 
 -- gadokai base system
-Module "luce"      "luce.lua"
-Module "DemoHolder" "DemoHolder.lua"
-Module "GlyphDemo" "GlyphDemo.lua"
-Module "GraphicsDemoBase" "GraphicsDemoBase.lua"
-Module "LinesDemo" "LinesDemo.lua"
+Module "luce"               "luce.lua"
+Module "DemoHolder"         "example/DemoHolder.lua"
+Module "GlyphDemo"          "example/GlyphDemo.lua"
+Module "GraphicsDemoBase"   "example/GraphicsDemoBase.lua"
+Module "LinesDemo"          "example/LinesDemo.lua"

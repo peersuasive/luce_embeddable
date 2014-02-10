@@ -1,8 +1,10 @@
 
+LUCE_HOME = ~/src-private/luce
+
 CFLAGS   =
 EXTRALIB = 
 BIN2C    =
-TNAME    := demo
+NAME     := demo
 
 ifndef CONFIG
 	CONFIG=Release
@@ -11,8 +13,10 @@ else
 endif
 
 ifeq ($(STATIC),1)
-	TNAME := $(TNAME)_s
+	TNAME := $(NAME)_s
 	XSTATIC = -DXSTATIC
+else
+	TNAME = $(NAME)
 endif
 
 ifeq ($(LUA52),1)
@@ -92,63 +96,70 @@ luajit-2.0/src/luajit.exe:
 	@echo "luajit crashes with luce (and probably many other things) under windows -- fallback to lua"
 	@#cd luajit-2.0/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
 
-main.o: main.c $(TARGET_JIT) oDemo.h
+main.o: main.c $(TARGET_JIT) oResult.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-oDemo.lua: squishy luce.lua DemoHolder.lua Demo.lua GlyphDemo.lua GraphicsDemoBase.lua LinesDemo.lua
+oResult.lua: squishy luce.lua
 	@$(SQUISH) --no-executable
 
-oDemo.h: bin2c.bin oDemo.lua $(TARGET_JIT)
-	@$(BIN2C) oDemo.lua oDemo.h
+oResult.h: bin2c.bin oResult.lua $(TARGET_JIT)
+	@$(BIN2C) oResult.lua oResult.h
 
-../../Source/lua/oluce.lua:
-	@cd ../../Source/lua && make
+#../../Source/lua/oluce.lua:
+#	@cd ../../Source/lua && make
 
-luce.lua: ../../Source/lua/oluce.lua
-	@cp -f ../../Source/lua/oluce.lua luce.lua
+#luce.lua: ../../Source/lua/oluce.lua
+#	@cp -f ../../Source/lua/oluce.lua luce.lua
+
+$(LUCE_HOME)/Source/lua/oluce.lua:
+	@cd "$(LUCE_HOME)/Source/lua" && make
+
+luce.lua: $(LUCE_HOME)/Source/lua/oluce.lua
+	@cp -f $(LUCE_HOME)/Source/lua/oluce.lua luce.lua
 
 $(WRAPCPY): wrap_memcpy.c
 	@gcc -c -o $@ $<
 
-$(TNAME)$(EXT): main.o $(WRAPCPY)
-	$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< $(LIBS)
-	@$(STRIP) --strip-unneeded $@
-	@$(UPX) $@
-	@echo OK
-$(TNAME)52$(EXT): demo$(EXT)
-
-$(TNAME)_s: main.o $(WRAPCPY)
+$(NAME)_s: main.o $(WRAPCPY)
+	echo "STATIC"
 	@$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< obj/lin/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
 
-$(TNAME)_s52: main.o $(WRAPCPY)
+$(NAME)_s52: main.o $(WRAPCPY)
 	@$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< obj/lin52/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
 
-$(TNAME)_s.exe: main.o
+$(NAME)_s.exe: main.o
 	@$(CC) $(LDFLAGS) -o $(TARGET) $< obj/win/*.o $(LIBS) -lfreetype -lpthread -lws2_32 -lshlwapi -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
 
-$(TNAME)_s52.exe: main.o
+$(NAME)_s52.exe: main.o
 	@$(CC) $(LDFLAGS) -o $(TARGET) $< obj/win52/*.o $(LIBS) -lfreetype -lpthread -lws2_32 -lshlwapi -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
+
+$(NAME)$(EXT): main.o $(WRAPCPY)
+	$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< $(LIBS)
+	@$(STRIP) --strip-unneeded $@
+	@$(UPX) $@
+	@echo OK
+$(NAME)52$(EXT): $(NAME)$(EXT)
 
 
 test: $(TARGET)
 	./$(TARGET)
 
 clean:
-	@$(RM) -f $(TNAME) $(TNAME)52 $(TNAME)_s $(TNAME)_s52
-	@$(RM) -f $(TNAME).exe $(TNAME)52.exe $(TNAME)_s.exe $(TNAME)_s52.exe
-	@$(RM) -f main.o oDemo.h oDemo.lua $(WRAPCPY) *.d
+	@$(RM) -f $(NAME) $(NAME)52 $(NAME)_s $(NAME)_s52
+	@$(RM) -f $(NAME).exe $(NAME)52.exe $(NAME)_s.exe $(NAME)_s52.exe
+	@$(RM) -f main.o oResult.h oResult.lua $(WRAPCPY) *.d
 
 extraclean: clean
 	@$(RM) -f luce.lua

@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-#include "oDemo.h"
+#include "oResult.h"
 #include <stdio.h>
 
 #ifdef XSTATIC
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     lua_call(L, 0, 0);
 #endif
  
-    status = luaL_loadbuffer(L, luaJIT_BC_oDemo, luaJIT_BC_oDemo_SIZE, NULL);
+    status = luaL_loadbuffer(L, luaJIT_BC_oResult, luaJIT_BC_oResult_SIZE, NULL);
     if(!status) {
         for(int i=1;i<argc;++i)
             lua_pushstring(L, argv[i]);

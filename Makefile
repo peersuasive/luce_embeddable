@@ -157,9 +157,9 @@ test: $(TARGET)
 	./$(TARGET)
 
 clean:
+	@$(RM) -f main.o oResult.h oResult.lua *.d $(WRAPCPY)
 	@$(RM) -f $(NAME) $(NAME)52 $(NAME)_s $(NAME)_s52
 	@$(RM) -f $(NAME).exe $(NAME)52.exe $(NAME)_s.exe $(NAME)_s52.exe
-	@$(RM) -f main.o oResult.h oResult.lua $(WRAPCPY) *.d
 
 extraclean: clean
 	@$(RM) -f luce.lua

@@ -1,8 +1,8 @@
 
-CFLAGS =
-EXTRALIB  = 
-BIN2C =
-TNAME =
+CFLAGS   =
+EXTRALIB = 
+BIN2C    =
+TNAME    =
 
 ifndef CONFIG
 	CONFIG=Release
@@ -17,15 +17,26 @@ else
 	TNAME = demo
 endif
 
+ifeq ($(LUA52),1)
+	TNAME := $(TNAME)52
+endif
 
 ifeq ($(XCROSS),1)
-	X = /opt/mingw/usr/bin/i686-pc-mingw32-
-	EXT        = .exe
+	PRE 	= i686-pc-mingw32
+	X 		= /opt/mingw/usr/bin/$(PRE)-
+	EXT     = .exe
 	#CFLAGS += --export-all-symbols
 	#LDLAGS += --export-all-symbols
+	ifeq ($(LUA52),1)
+		CFLAGS    += -I/opt/mingw/usr/$(PRE)/include/lua5.2
+		EXTRALIBS += -llua5.2
+	else
+		CFLAGS    += -I/opt/mingw/usr/$(PRE)/include/lua5.1
+		EXTRALIBS += -llua5.1
+	endif
 	CFLAGS    += -march=i686 $(XSTATIC)
 	LDFLAGS   += -march=i686
-	EXTRALIBS += -llua5.1 -lstdc++ -lm
+	EXTRALIBS += -lstdc++ -lm
 	BIN2C      = ./bin2c
 	UPX        = echo $(X)upx.exe
 else
@@ -35,6 +46,7 @@ else
 		WRAPCPY  = wrap_memcpy.o
 	endif
 	CFLAGS    += -fPIC $(XSTATIC)
+	CFLAGS    += -Iluajit-2.0/src
 	EXTRALIBS += libluajit.a -lm -ldl
 	LDFLAGS   += -Wl,-E
 	#BIN2C      = ./luajit-2.0/src/luajit -b
@@ -45,7 +57,6 @@ else
 	LDLAGS     += -march=native
 endif
 
-
 TARGET_JIT = libluajit.a_check
 
 CC 	   = $(X)g++
@@ -55,11 +66,10 @@ RM     = rm
 SQUISH = ./squish
 
 CFLAGS += -std=c++11
-
 #CFLAGS += -std=c99
+
 CFLAGS += -Os
 CFLAGS += -fomit-frame-pointer -fno-stack-protector
-CFLAGS += -Iluajit-2.0/src
 CFLAGS += -MMD
 LIBS   += $(EXTRALIBS)
 LDFLAGS += -std=c++11
@@ -85,7 +95,7 @@ luajit-2.0/src/luajit.exe:
 	@#cd luajit-2.0/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
 
 main.o: main.c $(TARGET_JIT) oDemo.h
-	@$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 oDemo.lua: squishy luce.lua DemoHolder.lua Demo.lua GlyphDemo.lua GraphicsDemoBase.lua LinesDemo.lua
 	@$(SQUISH) --no-executable
@@ -100,16 +110,23 @@ luce.lua: ../../Source/lua/oluce.lua
 	@cp -f ../../Source/lua/oluce.lua luce.lua
 
 $(WRAPCPY): wrap_memcpy.c
-	gcc -c -o $@ $<
+	@gcc -c -o $@ $<
 
 demo$(EXT): main.o $(WRAPCPY)
 	$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< $(LIBS)
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
+demo52$(EXT): demo$(EXT)
 
 demo_s: main.o $(WRAPCPY)
 	@$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< obj/lin/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
+	@$(STRIP) --strip-unneeded $@
+	@$(UPX) $@
+	@echo OK
+
+demo_s52: main.o $(WRAPCPY)
+	@$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< obj/lin52/*.o $(LIBS) -L/usr/X11R6/lib/ -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
 	@$(STRIP) --strip-unneeded $@
 	@$(UPX) $@
 	@echo OK
@@ -120,12 +137,20 @@ demo_s.exe: main.o
 	@$(UPX) $@
 	@echo OK
 
+demo_s52.exe: main.o
+	@$(CC) $(LDFLAGS) -o $(TARGET) $< obj/win52/*.o $(LIBS) -lfreetype -lpthread -lws2_32 -lshlwapi -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
+	@$(STRIP) --strip-unneeded $@
+	@$(UPX) $@
+	@echo OK
+
 
 test: $(TARGET)
 	./$(TARGET)
 
 clean:
-	@$(RM) -f demo demo.exe demo_s demo_s.exe main.o oDemo.h oDemo.lua $(WRAPCPY) *.d
+	@$(RM) -f demo demo52 demo_s demo_s52
+	@$(RM) -f demo.exe demo52.exe demo_s.exe demo_s52.exe
+	@$(RM) -f main.o oDemo.h oDemo.lua $(WRAPCPY) *.d
 
 extraclean: clean
 	@$(RM) -f luce.lua

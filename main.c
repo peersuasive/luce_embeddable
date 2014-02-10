@@ -32,10 +32,9 @@ int main(int argc, char *argv[]) {
 
 #ifdef XSTATIC
     lua_pushcfunction(L, luaopen_core);
-    lua_pushliteral(L, "core");
-    lua_call(L, 1, 0);
+    lua_call(L, 0, 0);
 #endif
-
+ 
     status = luaL_loadbuffer(L, luaJIT_BC_oDemo, luaJIT_BC_oDemo_SIZE, NULL);
     if(!status) {
         for(int i=1;i<argc;++i)

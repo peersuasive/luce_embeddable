@@ -95,5 +95,5 @@ local function new(self, name)
     })
 end
 
-module(...)
+--module(...)
 return new(...)

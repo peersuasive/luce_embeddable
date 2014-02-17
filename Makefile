@@ -1,8 +1,8 @@
 
-LUCE_HOME = ~/src-private/luce
+LUCE_HOME = $(HOME)/src-private/luce
 
 CFLAGS   =
-EXTRALIB = 
+EXTRALIBS = 
 BIN2C    =
 NAME     := demo
 
@@ -33,8 +33,8 @@ ifeq ($(XCROSS),1)
 		CFLAGS    += -I/opt/mingw/usr/$(PRE)/include/lua5.2
 		EXTRALIBS += -llua5.2
 	else
-		CFLAGS    += -I/opt/mingw/usr/$(PRE)/include/lua5.1
-		EXTRALIBS += -llua5.1
+		CFLAGS    += -I./luajit-2.0/src
+		EXTRALIBS += libluajit.a
 	endif
 	CFLAGS    += -march=i686 $(XSTATIC)
 	LDFLAGS   += -march=i686
@@ -93,11 +93,10 @@ luajit-2.0/src/luajit:
 	@cd luajit-2.0/src && make clean && make
 
 luajit-2.0/src/luajit.exe:
-	@echo "luajit crashes with luce (and probably many other things) under windows -- fallback to lua"
-	@#cd luajit-2.0/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
+	@cd luajit-2.0/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
 
 main.o: main.c $(TARGET_JIT) oResult.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+	@$(CC) $(CFLAGS) -c -o $@ $<
 
 oResult.lua: squishy luce.lua
 	@$(SQUISH) --no-executable

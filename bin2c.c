@@ -25,7 +25,7 @@ static void dump(FILE* f, const char *name) {
     printf("#define %s%s_SIZE %d\n", pre, name, size);
 }
 
-static int fdump(const char* fn, int n) {
+static int fdump(const char* fn, int n, const char* force_name) {
     FILE* f= fopen(fn,"rb");
     if (!f) {
         fprintf(stderr,"bin2c: cannot open ");
@@ -33,15 +33,20 @@ static int fdump(const char* fn, int n) {
     }
 
     printf("/* %s */\n",fn);
-    int i = strlen(fn)-1;
-    for(;fn[i];--i)
-        if(fn[i]=='.')
-            break;
-    char name[i+1];
-    strncpy(name, fn, i);
-    name[i] = '\0';
+    if(!force_name) {
+        int i = strlen(fn)-1;
+        for(;fn[i];--i)
+            if(fn[i]=='.')
+                break;
+        char name[i+1];
+        strncpy(name, fn, i);
+        name[i] = '\0';
 
-    dump(f, name);
+        dump(f, name);
+    }
+    else
+        dump(f, force_name);
+
     fclose(f);
     return 0;
 }
@@ -49,6 +54,8 @@ static int fdump(const char* fn, int n) {
 int main(int argc, char* argv[]) {
     if (argc<2)
         return 1;
-        
-    return fdump(argv[1],1);
+    if(argc>2)
+        return fdump(argv[1],1, argv[2]);
+    else
+        return fdump(argv[1],1, NULL);
 }

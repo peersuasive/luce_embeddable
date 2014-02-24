@@ -1,7 +1,16 @@
+
+
+
+## TODO: create a version with an optional oResult.h
+##       so that we can use this as a simple loader looking at specific folders
+##       for specific files (say, luce/main.lua)
+
+
 LUCE_HOME = $(HOME)/src-private/luce
 
 #OS 				= $(shell uname -a)
 CXX 			= g++
+STRIP           = strip
 BIN2C      		= ./bin2c
 UPX 		    = echo
 CFLAGS   		=
@@ -13,6 +22,8 @@ TARGET_JIT 		= libluajit.a_check
 
 ifdef $(DEBUG)
 	CFLAGS += -g
+else
+	CFLAGS += -Os
 endif
 
 ifeq ($(STATIC),1)
@@ -31,6 +42,7 @@ ifeq ($(XCROSS),win)
 	PRE 	= i686-pc-mingw32
 	X 		= /opt/mingw/usr/bin/$(PRE)-
 	CXX	    = $(X)g++
+	STRIP  = $(X)strip
 	UPX     = echo $(X)upx.exe
 	EXT     = .exe
 
@@ -56,11 +68,16 @@ ifeq ($(XCROSS),win)
 
 else
 ifeq ($(XCROSS),osx)
+	## TODO: SHOULD create an .app, at least for non-static
+	unexport CODESIGN_ALLOCATE
+	#export CODESIGN_ALLOCATE=/home/distances/src-private/luce/Builds/iOS/tmp/u/usr/bin/arm-apple-darwin11-codesign_allocate
 	X 	= x86_64-apple-darwin12-
-	OSX = _osx
+	EXT = _osx
 	CXX = o64-clang++
 	UPX = echo $(X)upx
 
+	STRIP = echo
+	# -S -x ?
 	STRIP_OPTIONS =
 	CFLAGS += -x objective-c++ 
 	#CFLAGS += -MMD -Wno-deprecated-register 
@@ -86,6 +103,61 @@ ifeq ($(XCROSS),osx)
 		STATIC_LIBS = -framework Carbon -framework Cocoa -framework IOKit 
 		STATIC_LIBS += -framework QuartzCore -framework WebKit -framework System
  		STATIC_OBJS = obj/osx$(IS52)/*.o
+	endif
+else
+ifeq ($(XCROSS),ios)
+	## TODO: MUST create an .app, anyway !
+	unexport CODESIGN_ALLOCATE
+	X 	= /opt/ios-apple-darwin-11/usr/bin/arm-apple-darwin11-
+	EXT = _ios
+	CXX = /opt/ios-apple-darwin-11/usr/bin/ios-clang++
+	UPX = echo $(X)upx
+
+	## already signed, so better skip stripping,
+	## or resign with 
+	#export CODESIGN_ALLOCATE=/home/opt/ios.../usr/bin/arm-apple-darwin11-codesign_allocate; /opt/ios.../usr/bin/ldid -S demo_ios
+	STRIP = echo
+	CFLAGS += -x objective-c++ 
+	#CFLAGS += -MMD -Wno-deprecated-register 
+	CFLAGS += -stdlib=libc++ 
+	CFLAGS += -miphoneos-version-min=5.1 
+	CFLAGS += -fpascal-strings -fmessage-length=0 -fasm-blocks -fstrict-aliasing -fvisibility-inlines-hidden 
+	CFLAGS += -Iluajit-2.0/src
+
+	## ??
+	CFLAGS += -I/usr/local/src/vcs/compiler/osxcross/ios/libcxx-3.4/include
+	## ??
+	CFLAGS += -arch armv7 
+	LDFGLAGS += -arch armv7
+	
+	## ??
+	#main.mm -o main.om
+
+	LDFLAGS += -stdlib=libc++ 
+	LDFLAGS += -fnested-functions -fmessage-length=0 -fpascal-strings -fstrict-aliasing -fasm-blocks -fobjc-link-runtime 
+	LDFLAGS += -miphoneos-version-min=5.1 
+	LDFLAGS += -stdlib=libc++ -std=c++0x -std=c++11
+	LDFLAGS += -framework CoreGraphics -framework CoreText -framework Foundation 
+	LDFLAGS += -framework QuartzCore -framework UIKit 
+	LDFLAGS += -lbundle1.o 
+	LDFLAGS += -lstdc++
+	## ??
+	LDFLAGS += 	-arch armv7 
+
+	ifeq ($(LUA52),1)
+		CFLAGS += -I/opt/zmq-ios/include/lua5.2
+		EXTRALIBS += -llua5.2
+	else
+		CFLAGS    += -I./luajit-2.0/src
+		EXTRALIBS += libluajit.a
+	endif
+
+	## always static
+	XSTATIC = -DXSTATIC=1
+	TNAME := $(NAME)
+	## always true, but if we were to compile luce as a framework, it might not be anymore -- TODO: check iOS doc
+	ifneq (,$(XSTATIC))
+ 		STATIC_OBJS = obj/ios$(IS52)/juce_*.om obj/ios$(IS52)/luce*.om
 	endif
 
 else
@@ -118,25 +190,24 @@ else
 
 endif
 endif
+endif
 
 LD     = $(CXX)
-STRIP  = $(X)strip
 RM     = rm
 SQUISH = ./squish
 
 CFLAGS += -std=c++11
-CFLAGS += -Os
 CFLAGS += -fomit-frame-pointer -fno-stack-protector
 CFLAGS += -MMD
 LIBS   += $(EXTRALIBS)
 LDFLAGS += -std=c++11
 LDFLAGS += -fvisibility=hidden
 
-TARGET = $(TNAME)$(EXT)$(OSX)
+TARGET = $(TNAME)$(EXT)
 
 all: $(TARGET)
 
-$(TARGET_JIT): luajit-2.0/src/luajit$(EXT)$(OSX)
+$(TARGET_JIT): luajit-2.0/src/luajit$(EXT)
 	@ln -sf luajit-2.0/src/libluajit.a .
 	@$(RM) -f jit
 	@ln -sf luajit-2.0/src/jit .
@@ -152,6 +223,9 @@ luajit-2.0/src/luajit.exe:
 
 luajit-2.0/src/luajit_osx:
 	@cd luajit-2.0/src && make clean && make -f Makefile.cross-macosx clean && make -f Makefile.cross-macosx
+
+luajit-2.0/src/luajit_ios:
+	@cd luajit-2.0/src && make clean && make -f Makefile.cross-ios clean && make -f Makefile.cross-ios
 
 main.o: main.c $(TARGET_JIT) oResult.h
 	$(CXX) $(CFLAGS) -c -o $@ $<
@@ -185,6 +259,7 @@ clean:
 	@$(RM) -f $(NAME) $(NAME)52 $(NAME)_s $(NAME)_s52
 	@$(RM) -f $(NAME).exe $(NAME)52.exe $(NAME)_s.exe $(NAME)_s52.exe
 	@$(RM) -f $(NAME)_osx $(NAME)_s_osx $(NAME)52_osx $(NAME)_s52_osx
+	@$(RM) -f $(NAME)_ios $(NAME)_s_ios $(NAME)52_ios $(NAME)_s52_ios
 
 extraclean: clean
 	@$(RM) -f luce.lua

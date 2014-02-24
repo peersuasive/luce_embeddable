@@ -5,7 +5,7 @@
 ##       so that we can use this as a simple loader looking at specific folders
 ##       for specific files (say, luce/main.lua)
 
-#XSTATIC ?= 1
+STATIC ?= 1
 
 LUCE_HOME = $(HOME)/src-private/luce
 
@@ -30,32 +30,32 @@ else
 endif
 
 ifeq ($(FULL_STATIC),1)
-	TNAME := $(NAME)_sf
-	FULL_XSTATIC = -DFULL_XSTATIC=1
-	XSTATIC = -DXSTATIC=1
-	CFLAGS += $(FULL_XSTATIC) $(XSTATIC)
-	ORESULT_MAIN = oResult.lua
+	TNAME 		 := $(NAME)_sf
+	FULL_XSTATIC  = -DFULL_XSTATIC=1
+	XSTATIC 	  = -DXSTATIC=1
+	CFLAGS 		 += $(FULL_XSTATIC) $(XSTATIC)
+	ORESULT_MAIN  = oResult.lua
 else
 ifeq ($(STATIC),1)
-	TNAME := $(NAME)_s
-	XSTATIC = -DXSTATIC=1
-	CFLAGS += $(XSTATIC)
+	TNAME 	:= $(NAME)_s
+	XSTATIC  = -DXSTATIC=1
+	CFLAGS 	+= $(XSTATIC)
 else
-	TNAME = $(NAME)
+	TNAME 	 = $(NAME)
 endif
 endif
 
 ifeq ($(LUA52),1)
-	IS52  = 52
-	TNAME := $(TNAME)52
-	TARGET_JIT =
+	IS52  	    = 52
+	TNAME 	   := $(TNAME)52
+	TARGET_JIT  =
 endif
 
 ifeq ($(XCROSS),win)
 	PRE 	= i686-pc-mingw32
 	X 		= /opt/mingw/usr/bin/$(PRE)-
 	CXX	    = $(X)g++
-	STRIP  = $(X)strip
+	STRIP   = $(X)strip
 	UPX     = echo $(X)upx.exe
 	EXT     = .exe
 
@@ -88,6 +88,7 @@ ifeq ($(XCROSS),osx)
 	EXT = _osx
 	CXX = o64-clang++
 	UPX = echo $(X)upx
+	CREATE_OSX_APP = osx_app
 
 	STRIP = echo
 	# -S -x ?
@@ -218,7 +219,7 @@ LDFLAGS += -fvisibility=hidden
 
 TARGET = $(TNAME)$(EXT)
 
-all: $(TARGET)
+all: $(TARGET) $(CREATE_OSX_APP)
 
 $(TARGET_JIT): luajit-2.0/src/luajit$(EXT)
 	@ln -sf luajit-2.0/src/libluajit.a .
@@ -276,6 +277,11 @@ $(TARGET): main.o $(WRAPCPY)
 	-@$(UPX) $(TARGET)
 	@echo OK
 
+osx_app: $(TARGET) create_bundle
+	@echo "Creating bundle..."
+	-@$(RM) -rf build/$(CONFIG)/$(NAME).app
+	@./create_bundle osx $(TARGET) $(NAME)
+	
 test: $(TARGET)
 	./$(TARGET)
 
@@ -288,6 +294,7 @@ clean:
 
 extraclean: clean
 	@$(RM) -f luce.lua
+	@$(RM) -rf build
 
 distclean: extraclean
 	@cd ./luajit-2.0/src && make clean

@@ -5,6 +5,7 @@
 ##       so that we can use this as a simple loader looking at specific folders
 ##       for specific files (say, luce/main.lua)
 
+#XSTATIC ?= 1
 
 LUCE_HOME = $(HOME)/src-private/luce
 
@@ -18,7 +19,9 @@ EXTRALIBS 		=
 NAME     		:= demo
 X 				= 
 STRIP_OPTIONS 	= --strip-unneeded
+
 TARGET_JIT 		= libluajit.a_check
+ORESULT_MAIN	= luce.lua
 
 ifdef $(DEBUG)
 	CFLAGS += -g
@@ -26,12 +29,22 @@ else
 	CFLAGS += -Os
 endif
 
+ifeq ($(FULL_STATIC),1)
+	TNAME := $(NAME)_sf
+	FULL_XSTATIC = -DFULL_XSTATIC=1
+	XSTATIC = -DXSTATIC=1
+	CFLAGS += $(FULL_XSTATIC) $(XSTATIC)
+	ORESULT_MAIN = oResult.lua
+else
 ifeq ($(STATIC),1)
 	TNAME := $(NAME)_s
 	XSTATIC = -DXSTATIC=1
+	CFLAGS += $(XSTATIC)
 else
 	TNAME = $(NAME)
 endif
+endif
+
 ifeq ($(LUA52),1)
 	IS52  = 52
 	TNAME := $(TNAME)52
@@ -46,7 +59,7 @@ ifeq ($(XCROSS),win)
 	UPX     = echo $(X)upx.exe
 	EXT     = .exe
 
-	CFLAGS    += -march=i686 $(XSTATIC)
+	CFLAGS    += -march=i686 
 	#CFLAGS += --export-all-symbols
 	LDFLAGS   += -march=i686
 	#LDLAGS += --export-all-symbols
@@ -153,7 +166,7 @@ ifeq ($(XCROSS),ios)
 	endif
 
 	## always static
-	XSTATIC = -DXSTATIC=1
+	FULL_XSTATIC = -DFULL_XSTATIC=1 -DXSTATIC=1
 	TNAME := $(NAME)
 	## always true, but if we were to compile luce as a framework, it might not be anymore -- TODO: check iOS doc
 	ifneq (,$(XSTATIC))
@@ -161,7 +174,7 @@ ifeq ($(XCROSS),ios)
 	endif
 
 else
-	UPX        = ./upx
+	UPX        = echo ./upx
 	## force compatibility with glibc >= 2.12
 	GLIBCV    := $(shell [ `ldd --version|head -n1|awk '{print $$NF}'|cut -f2 -d.` -gt 13 ] && echo true)
 	ifeq ($(GLIBCV), true)
@@ -169,7 +182,7 @@ else
 		WRAPCPY  = wrap_memcpy.o
 	endif
 
-	CFLAGS += -fPIC $(XSTATIC)
+	CFLAGS += -fPIC 
 	CFLAGS += -march=native
 	LDLAGS += -march=native
 	LDFLAGS   += -Wl,-E
@@ -212,43 +225,55 @@ $(TARGET_JIT): luajit-2.0/src/luajit$(EXT)
 	@$(RM) -f jit
 	@ln -sf luajit-2.0/src/jit .
 
+bin2c: bin2c.bin
+
 bin2c.bin: bin2c.c
+	@echo "Compiling bin2c..."
 	@gcc -std=c99 -o bin2c.bin bin2c.c
 
 luajit-2.0/src/luajit:
+	@echo "Compiling lujit for linux..."
 	@cd luajit-2.0/src && make clean && make
 
 luajit-2.0/src/luajit.exe:
+	@echo "Compiling lujit for windows..."
 	@cd luajit-2.0/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
 
 luajit-2.0/src/luajit_osx:
+	@echo "Compiling lujit for osx..."
 	@cd luajit-2.0/src && make clean && make -f Makefile.cross-macosx clean && make -f Makefile.cross-macosx
 
 luajit-2.0/src/luajit_ios:
+	@echo "Compiling lujit for ios..."
 	@cd luajit-2.0/src && make clean && make -f Makefile.cross-ios clean && make -f Makefile.cross-ios
 
-main.o: main.c $(TARGET_JIT) oResult.h
-	$(CXX) $(CFLAGS) -c -o $@ $<
+main.o: main.cpp $(TARGET_JIT) oResult.h
+	@echo "Compiling main..."
+	@$(CXX) $(CFLAGS) -c -o $@ $<
 
 oResult.lua: squishy luce.lua
 	@$(SQUISH) --no-executable
 
-oResult.h: bin2c.bin oResult.lua
-	@$(BIN2C) oResult.lua oResult.h
+oResult.h: bin2c.bin $(ORESULT_MAIN)
+	@echo "Embedding luce (with main class $(ORESULT_MAIN))"
+	@$(BIN2C) $(ORESULT_MAIN) oResult.h oResult
 
 $(LUCE_HOME)/Source/lua/oluce.lua:
 	@cd "$(LUCE_HOME)/Source/lua" && make
 
 luce.lua: $(LUCE_HOME)/Source/lua/oluce.lua
+	@echo "Building embedded lua class..."
 	@cp -f $(LUCE_HOME)/Source/lua/oluce.lua luce.lua
 
 $(WRAPCPY): wrap_memcpy.c
+	@echo "Adding memcpy wrapper..."
 	@gcc -c -o $@ $<
 
 $(TARGET): main.o $(WRAPCPY)
-	$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< $(STATIC_OBJS) $(LIBS) $(STATIC_LIBS)
+	@echo "Linking... (static ? $(or $(and $(XSTATIC), yes), no))"
+	@$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< $(STATIC_OBJS) $(LIBS) $(STATIC_LIBS)
 	@$(STRIP) $(STRIP_OPTIONS) $(TARGET)
-	@$(UPX) $(TARGET)
+	-@$(UPX) $(TARGET)
 	@echo OK
 
 test: $(TARGET)
@@ -256,10 +281,10 @@ test: $(TARGET)
 
 clean:
 	@$(RM) -f main.o oResult.h oResult.lua *.d $(WRAPCPY)
-	@$(RM) -f $(NAME) $(NAME)52 $(NAME)_s $(NAME)_s52
-	@$(RM) -f $(NAME).exe $(NAME)52.exe $(NAME)_s.exe $(NAME)_s52.exe
-	@$(RM) -f $(NAME)_osx $(NAME)_s_osx $(NAME)52_osx $(NAME)_s52_osx
-	@$(RM) -f $(NAME)_ios $(NAME)_s_ios $(NAME)52_ios $(NAME)_s52_ios
+	@$(RM) -f $(NAME) $(NAME)52 $(NAME)_s $(NAME)_s52 $(NAME)_sf $(NAME)_sf52
+	@$(RM) -f $(NAME)*.exe
+	@$(RM) -f $(NAME)*_osx
+	@$(RM) -f $(NAME)*_ios
 
 extraclean: clean
 	@$(RM) -f luce.lua

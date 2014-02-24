@@ -12,15 +12,17 @@
 *************************************************************/
 
 #include <lua.hpp>
+#include <string>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "oResult.h"
 #include <stdio.h>
 
-#ifdef XSTATIC
+#include "oResult.h"
+
+#if defined XSTATIC || FULL_XSTATIC
 extern int luaopen_core(lua_State*);
 #endif
 
@@ -30,19 +32,41 @@ int main(int argc, char *argv[]) {
     L = luaL_newstate();
     luaL_openlibs(L);
 
-#ifdef XSTATIC
+#if defined XSTATIC || FULL_XSTATIC
     lua_pushcfunction(L, luaopen_core);
     lua_call(L, 0, 0);
+    lua_pop(L,1);
 #endif
- 
+
     status = luaL_loadbuffer(L, luaJIT_BC_oResult, luaJIT_BC_oResult_SIZE, NULL);
+    if(status) {
+        fprintf(stderr, "Error while loading luce class\n");
+        lua_error(L);
+    }
+
+#ifndef FULL_XSTATIC
+    printf("top: %d\n", lua_gettop(L));
+    lua_getglobal( L, "package" );
+    lua_getfield( L, -1, "path" );
+
+    std::string cur_path( "./?.lua;classes/?.lua;" );
+    cur_path.append( lua_tostring( L, -1 ) );
+
+    lua_pushstring( L, cur_path.c_str() );
+    lua_setfield( L, -3, "path" );
+    lua_pop( L, 2 ); // field + package
+
+    printf("top: %d\n", lua_gettop(L));
+    status = luaL_loadfile(L, "main.lua");
+#endif
+
     if(!status) {
         for(int i=1;i<argc;++i)
             lua_pushstring(L, argv[i]);
         if ((status = lua_pcall(L, argc-1, 0, 0)) )
             lua_error(L);
     } else {
-        fprintf(stderr, "Missing main file: %s\n", "Demo.lua");
+        fprintf(stderr, "Missing or error with main file: %s\n", "main.lua");
         lua_error(L);
     }
     lua_close(L);

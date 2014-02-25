@@ -22,6 +22,8 @@ STRIP_OPTIONS 	= --strip-unneeded
 
 TARGET_JIT 		= libluajit.a_check
 ORESULT_MAIN	= luce.lua
+LUA_DEPS    	= $(shell ./get_lua_deps)
+EXTRA_SOURCES   = 
 
 ifdef $(DEBUG)
 	CFLAGS += -g
@@ -81,6 +83,8 @@ ifeq ($(XCROSS),win)
 
 else
 ifeq ($(XCROSS),osx)
+	SKK_VER=10.8
+	SDK_MIN=10.6
 	## TODO: SHOULD create an .app, at least for non-static
 	unexport CODESIGN_ALLOCATE
 	#export CODESIGN_ALLOCATE=/home/distances/src-private/luce/Builds/iOS/tmp/u/usr/bin/arm-apple-darwin11-codesign_allocate
@@ -96,14 +100,15 @@ ifeq ($(XCROSS),osx)
 	CFLAGS += -x objective-c++ 
 	#CFLAGS += -MMD -Wno-deprecated-register 
 	CFLAGS += -stdlib=libc++ 
-	CFLAGS += -mmacosx-version-min=10.5 
+	CFLAGS += -mmacosx-version-min=$(SDK_MIN)
 	CFLAGS += -fpascal-strings -fmessage-length=0 -fasm-blocks -fstrict-aliasing -fvisibility-inlines-hidden 
 	CFLAGS += -Iluajit-2.0/src
 
 	LDFLAGS += -stdlib=libc++ 
 	LDFLAGS += -pagezero_size 10000 -image_base 100000000 
 	LDFLAGS += -fnested-functions 
-	LDFLAGS += -mmacosx-version-min=10.5
+	LDFLAGS += -mmacosx-version-min=$(SDK_MIN)
+	LDFLAGS += -demangle
 
 	ifeq ($(LUA52),1)
 		CFLAGS += -I/opt/zmq-osx/include/lua5.2
@@ -114,10 +119,14 @@ ifeq ($(XCROSS),osx)
 	endif
 
 	ifneq (,$(XSTATIC))
-		STATIC_LIBS = -framework Carbon -framework Cocoa -framework IOKit 
-		STATIC_LIBS += -framework QuartzCore -framework WebKit -framework System
+		FRAMEWORKS = -framework Carbon -framework Cocoa -framework IOKit 
+		FRAMEWORKS += -framework QuartzCore -framework WebKit -framework System
+		FRAMEWORKS += -framework AppKit
+		STATIC_LIBS = $(FRAMEWORKS)
  		STATIC_OBJS = obj/osx$(IS52)/*.o
 	endif
+ 	#EXTRA_SOURCES = osx_main.o
+
 else
 ifeq ($(XCROSS),ios)
 	## TODO: MUST create an .app, anyway !
@@ -206,6 +215,8 @@ endif
 endif
 endif
 
+include Makefile.extra
+
 LD     = $(CXX)
 RM     = rm
 SQUISH = ./squish
@@ -252,7 +263,7 @@ main.o: main.cpp $(TARGET_JIT) oResult.h
 	@echo "Compiling main..."
 	@$(CXX) $(CFLAGS) -c -o $@ $<
 
-oResult.lua: squishy luce.lua
+oResult.lua: $(LUA_DEPS) squishy luce.lua
 	@$(SQUISH) --no-executable
 
 oResult.h: bin2c.bin $(ORESULT_MAIN)
@@ -270,9 +281,9 @@ $(WRAPCPY): wrap_memcpy.c
 	@echo "Adding memcpy wrapper..."
 	@gcc -c -o $@ $<
 
-$(TARGET): main.o $(WRAPCPY)
+$(TARGET): main.o $(WRAPCPY) $(EXTRA_SOURCES) 
 	@echo "Linking... (static ? $(or $(and $(XSTATIC), yes), no))"
-	@$(LD) $(LDFLAGS) -o $(TARGET) $(WRAPCPY) $< $(STATIC_OBJS) $(LIBS) $(STATIC_LIBS)
+	$(LD) $(LDFLAGS) -o $(TARGET) $< $(WRAPCPY) $(EXTRA_SOURCES) $(STATIC_OBJS) $(LIBS) $(STATIC_LIBS)
 	@$(STRIP) $(STRIP_OPTIONS) $(TARGET)
 	-@$(UPX) $(TARGET)
 	@echo OK
@@ -291,6 +302,7 @@ clean:
 	@$(RM) -f $(NAME)*.exe
 	@$(RM) -f $(NAME)*_osx
 	@$(RM) -f $(NAME)*_ios
+	@$(RM) -f $(EXTRA_SOURCES)
 
 extraclean: clean
 	@$(RM) -f luce.lua

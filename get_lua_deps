@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+modules=$(cat squishy |grep -E '(^Main|^Module)'|awk '{print $NF}'|xargs)
+echo "$modules"

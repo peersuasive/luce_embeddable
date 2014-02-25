@@ -1,0 +1,13 @@
+#ex:
+#ifeq ($(XCROSS),osx)
+#	EXTRALIBS += libzzip_static_osx.a -lz
+#	ifneq (,$(XSTATIC))
+#		STATIC_OBJS := libcore_osx.a
+#	endif
+#else
+#	EXTRALIBS += libzzip_static_lin.a -lz
+#	ifneq (,$(XSTATIC))
+#		STATIC_OBJS := libcore_lin.a
+#	endif
+#endif
+

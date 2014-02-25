@@ -1502,3 +1502,95 @@ index 0000000..5aef40e
 +	$(E) "OK        Successfully built LuaJIT"
 +
 +##############################################################################
+diff --git a/src/Makefile.dep b/src/Makefile.dep
+index 8ca3315..6182773 100644
+--- a/src/Makefile.dep
++++ b/src/Makefile.dep
+@@ -224,3 +224,5 @@ host/buildvm_lib.o: host/buildvm_lib.c host/buildvm.h lj_def.h lua.h luaconf.h \
+ host/buildvm_peobj.o: host/buildvm_peobj.c host/buildvm.h lj_def.h lua.h \
+  luaconf.h lj_arch.h lj_bc.h lj_def.h lj_arch.h
+ host/minilua.o: host/minilua.c
++
++include Makefile.extra
+diff --git a/src/Makefile.extra b/src/Makefile.extra
+new file mode 100644
+index 0000000..87d8f88
+--- /dev/null
++++ b/src/Makefile.extra
+@@ -0,0 +1 @@
++#ex: LJLIB_O+= modules/zzip/luazip.o
+diff --git a/src/extra_lib_init.c b/src/extra_lib_init.c
+new file mode 100644
+index 0000000..02fb20c
+--- /dev/null
++++ b/src/extra_lib_init.c
+@@ -0,0 +1,6 @@
++#include "extra_lualib.h"
++
++static const luaL_Reg extra_lj_lib_load[] = {
++  //ex: { LUA_ZZIPLIBNAME, luaopen_zzip },
++  { NULL,		NULL }
++};
+diff --git a/src/extra_lualib.h b/src/extra_lualib.h
+new file mode 100644
+index 0000000..3186d0d
+--- /dev/null
++++ b/src/extra_lualib.h
+@@ -0,0 +1,10 @@
++#ifndef _EXTRA_LUALIB_H
++#define _EXTRA_LUALIB_H
++
++#include "lua.h"
++
++//ex:
++//#define LUA_ZZIPLIBNAME	"zzip"
++//LUALIB_API int luaopen_zzip(lua_State *L);
++
++#endif
+diff --git a/src/lib_init.c b/src/lib_init.c
+index a729d12..e1f41c6 100644
+--- a/src/lib_init.c
++++ b/src/lib_init.c
+@@ -15,6 +15,8 @@
+ 
+ #include "lj_arch.h"
+ 
++#include "extra_lib_init.c"
++
+ static const luaL_Reg lj_lib_load[] = {
+   { "",			luaopen_base },
+   { LUA_LOADLIBNAME,	luaopen_package },
+@@ -26,6 +28,7 @@ static const luaL_Reg lj_lib_load[] = {
+   { LUA_DBLIBNAME,	luaopen_debug },
+   { LUA_BITLIBNAME,	luaopen_bit },
+   { LUA_JITLIBNAME,	luaopen_jit },
++
+   { NULL,		NULL }
+ };
+ 
+@@ -44,6 +47,13 @@ LUALIB_API void luaL_openlibs(lua_State *L)
+     lua_pushstring(L, lib->name);
+     lua_call(L, 1, 0);
+   }
++
++  for (lib = extra_lj_lib_load; lib->func; lib++) {
++    lua_pushcfunction(L, lib->func);
++    lua_pushstring(L, lib->name);
++    lua_call(L, 1, 0);
++  }
++
+   luaL_findtable(L, LUA_REGISTRYINDEX, "_PRELOAD",
+ 		 sizeof(lj_lib_preload)/sizeof(lj_lib_preload[0])-1);
+   for (lib = lj_lib_preload; lib->func; lib++) {
+diff --git a/src/lualib.h b/src/lualib.h
+index 1c1e317..917327b 100644
+--- a/src/lualib.h
++++ b/src/lualib.h
+@@ -7,6 +7,7 @@
+ #define _LUALIB_H
+ 
+ #include "lua.h"
++#include "extra_lualib.h"
+ 
+ #define LUA_FILEHANDLE	"FILE*"
+ 

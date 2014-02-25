@@ -45,7 +45,6 @@ int main(int argc, char *argv[]) {
     }
 
 #ifndef FULL_XSTATIC
-    printf("top: %d\n", lua_gettop(L));
     lua_getglobal( L, "package" );
     lua_getfield( L, -1, "path" );
 
@@ -56,7 +55,6 @@ int main(int argc, char *argv[]) {
     lua_setfield( L, -3, "path" );
     lua_pop( L, 2 ); // field + package
 
-    printf("top: %d\n", lua_gettop(L));
     status = luaL_loadfile(L, "main.lua");
 #endif
 

@@ -250,7 +250,7 @@ luajit-2.0/src/luajit:
 
 luajit-2.0/src/luajit.exe:
 	@echo "Compiling lujit for windows..."
-	@cd luajit-2.0/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
+	@cd luajit-2.0/src && make clean && make CC="gcc -m32" HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
 
 luajit-2.0/src/luajit_osx:
 	@echo "Compiling lujit for osx..."

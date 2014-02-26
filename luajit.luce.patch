@@ -1,3 +1,13 @@
+diff --git a/src/.gitignore b/src/.gitignore
+index fc94e82..de594be 100644
+--- a/src/.gitignore
++++ b/src/.gitignore
+@@ -5,3 +5,5 @@ lj_libdef.h
+ lj_recdef.h
+ lj_folddef.h
+ lj_vm.s
++luajit
++luajit_*
 diff --git a/src/Makefile b/src/Makefile
 index 72bc912..dfd4594 100644
 --- a/src/Makefile
@@ -782,7 +792,7 @@ index 0000000..cf89278
 +##############################################################################
 diff --git a/src/Makefile.cross-macosx b/src/Makefile.cross-macosx
 new file mode 100644
-index 0000000..5aef40e
+index 0000000..a5d5eeb
 --- /dev/null
 +++ b/src/Makefile.cross-macosx
 @@ -0,0 +1,716 @@
@@ -860,7 +870,7 @@ index 0000000..5aef40e
 +# as dynamic mode.
 +#
 +# Mixed mode creates a static + dynamic library and a statically linked luajit.
-+BUILDMODE= mixed
++BUILDMODE= static
 +#
 +# Static mode creates a static library and a statically linked luajit.
 +#BUILDMODE= static

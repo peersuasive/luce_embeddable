@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+(($# < 1)) && echo "Missing parameters" && exit 1
+
+TARGET=$1
+APP_NAME=${2:-$TARGET}
+TARGET_APP="$APP_NAME".app
+CONFIG=${3:-Release}
+
+DEST="build/${CONFIG}/MacOSX/${TARGET_APP}"
+mkdir -p "${DEST}/Contents/"{MacOS,Resources}
+
+INFO=
+RFMT=
+ICON=
+if [[ -f "sources/Info.plist" ]]
+then
+    INFO="sources/Info.plist"
+    cp "$INFO" "${DEST}/Contents/"
+else
+    INFO="${DEST}/Contents/Info.plist"
+    cp templates/Info.plist.tmpl "$INFO"
+    sed -i "s,%TARGET%,${TARGET},g" "$INFO"
+    sed -i "s,%APP_NAME%,${APP_NAME},g" "$INFO"
+fi
+if [[ -f "sources/RecentFilesMenuTemplate.nib" ]]
+then
+    RFMT="sources/RecentFilesMenuTemplate.nib"
+    cp "$RFMT" "${DEST}/Contents/Resources/"
+else
+    RFMT="${DEST}/Contents/Resources/RecentFilesMenuTemplate.nib"
+    cp "templates/RecentFilesMenuTemplate.nib" "$RFMT"
+fi
+if [[ -f "sources/Icon.icns" ]]
+then
+    ICON="sources/Icon.icns"
+    cp "$ICON" "${DEST}/Contents/Resources/"
+else
+    ICON="${DEST}/Contents/Resources/Icon.icns"
+    cp "templates/Icon.icns" "$ICON"
+fi
+
+echo 'APPL????' > "${DEST}/Contents/PkgInfo"
+cp "$TARGET" "${DEST}/Contents/MacOS/"

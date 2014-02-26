@@ -60,6 +60,10 @@ ifeq ($(XCROSS),win)
 	STRIP   = $(X)strip
 	UPX     = echo $(X)upx.exe
 	EXT     = .exe
+	PREPARE_APP = win_prep_app
+	# provided by PREPARE_APP
+ 	EXTRA_SOURCES = app_res.o 
+	BUNDLE_APP  = win_app
 
 	CFLAGS    += -march=i686 
 	#CFLAGS += --export-all-symbols
@@ -93,7 +97,7 @@ ifeq ($(XCROSS),osx)
 	EXT = _osx
 	CXX = o64-clang++
 	UPX = echo $(X)upx
-	CREATE_OSX_APP = osx_app
+	BUNDLE_APP = osx_app
 
 	STRIP = echo
 	# -S -x ?
@@ -231,7 +235,7 @@ LDFLAGS += -fvisibility=hidden
 
 TARGET = $(TNAME)$(EXT)
 
-all: $(TARGET) $(CREATE_OSX_APP)
+all: $(PREPARE_APP) $(TARGET) $(BUNDLE_APP)
 
 $(TARGET_JIT): luajit-2.0/src/luajit$(EXT)
 	@ln -sf luajit-2.0/src/libluajit.a .
@@ -294,6 +298,15 @@ osx_app: $(TARGET) create_bundle
 	-@$(RM) -rf build/$(CONFIG)/$(NAME).app
 	@./create_bundle osx $(TARGET) $(NAME)
 	
+win_prep_app: create_bundle
+	@echo "Compiling windows resources..."
+	@./create_bundle win prepare $(TARGET) $(NAME)
+
+win_app: $(TARGET) create_bundle
+	@echo "Creating windows application..."
+	-@$(RM) -rf build/$(CONFIG)/windows/$(NAME)
+	@./create_bundle win $(TARGET) $(NAME)
+
 test: $(TARGET)
 	./$(TARGET)
 
@@ -303,7 +316,7 @@ clean:
 	@$(RM) -f $(NAME)*.exe
 	@$(RM) -f $(NAME)*_osx
 	@$(RM) -f $(NAME)*_ios
-	@$(RM) -f $(EXTRA_SOURCES)
+	@$(RM) -f $(EXTRA_SOURCES) app_res.o
 
 extraclean: clean
 	@$(RM) -f luce.lua

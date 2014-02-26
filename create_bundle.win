@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+(($# < 1)) && echo "Missing parameters" && exit 1
+
+PREPARE=0
+[[ "$1" == prepare ]] && PREPARE=1 && shift
+
+(($# < 1)) && echo "Missing parameters" && exit 1
+WINDRES=/opt/mingw/usr/bin/i686-pc-mingw32-windres 
+
+TARGET=$1
+APP_NAME=${2:-$TARGET}
+TARGET_APP="$APP_NAME"
+CONFIG=${3:-Release}
+
+DEST="build/${CONFIG}/Win32/${TARGET_APP}"
+mkdir -p "${DEST}"
+
+if ((PREPARE))
+then
+    ICON="$DEST"/icon.ico
+    if [[ -f "sources/icon.ico" ]]
+    then
+        cp "sources/icon.ico" "$ICON"
+    elif [[ -f "sources/icon.png" ]]
+    then
+        ## could remove -bordercolor white white -border 0 by replacing -alpha off with -alpha remove
+        ## but has to be avoided with svg source as it gives "awful results"
+        ## UNTESTED !!!
+        convert sources/icon.png -bordercolor white -border 0 \
+            \( -clone 0 -resize 16x16 \) \
+            \( -clone 0 -resize 32x32 \) \
+            \( -clone 0 -resize 48x48 \) \
+            \( -clone 0 -resize 64x64 \) \
+            -delete 0 -alpha off -colors 256 "$DEST"
+    else
+        cp "templates/icon.ico" "$ICON"
+    fi
+ 
+    RC="$DEST"/info.rc
+    if [[ -f sources/res.rc ]]
+    then
+        cp sources/res.rc "$RC"
+    else
+        cp templates/res.rc.tmpl "$RC"
+        sed -i "s,%ICON%,${ICON},g" "$RC"
+        sed -i "s,%TARGET%,${TARGET},g" "$RC"
+        sed -i "s,%APP_NAME%,${APP_NAME},g" "$RC"
+        sed -i "/^\ *\/\/.*$/d" "$RC"
+    fi
+
+    "$WINDRES" "$RC" -O coff -o app_res.o
+    res=$?
+    \rm -f "$RC"
+    \rm -f "$ICON"
+    exit $res
+
+## copy to build/
+else
+    ext=.${TARGET##*.}
+    name="${APP_NAME//_sf}"
+    name="${name//_s}"
+    cp "$TARGET" "$DEST"/"$name${ext}"
+    if [[ -f "sources/README" ]]
+    then
+        cp "sources/README" "$DEST"
+    else
+        cp "templates/README.tmpl" "$DEST"/README
+        sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/README
+    fi
+    exit 0
+fi
+
+exit 1

@@ -1,0 +1,27 @@
+// @http://stackoverflow.com/questions/708238/how-do-i-add-an-icon-to-a-mingw-gcc-compiled-executable
+
+id ICON "%ICON%"
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "080904E4"
+    BEGIN
+      VALUE "CompanyName", "Peersuasive Technologies"
+      VALUE "FileDescription", "Luce Application"
+      VALUE "FileVersion", "0.1"
+      VALUE "InternalName", "%APP_NAME%"
+      VALUE "LegalCopyright", "Peersuasive Technologies, 2014"
+      VALUE "OriginalFilename", "%TARGET%"
+      VALUE "ProductName", "Luce Application"
+      VALUE "ProductVersion", "0.1"
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x809, 1252
+  END
+END

@@ -78,6 +78,7 @@ ifeq ($(XCROSS),win)
 	ifneq (,$(XSTATIC))
 		STATIC_LIBS = -lfreetype -lpthread -lws2_32 -lshlwapi 
 		STATIC_LIBS += -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
+		STATIC_LIBS += -lcomctl32 -Wl,--subsystem,windows
  		STATIC_OBJS = obj/win$(IS52)/*.o
 	endif
 

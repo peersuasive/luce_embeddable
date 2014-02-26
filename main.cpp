@@ -71,6 +71,10 @@ int main(int argc, char *argv[]) {
     return status;
 }
 
+#ifdef __MINGW32__
+#include "wmain.c"
+#endif
+
 #ifdef __cplusplus
 }
 #endif

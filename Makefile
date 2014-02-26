@@ -284,7 +284,7 @@ $(WRAPCPY): wrap_memcpy.c
 
 $(TARGET): main.o $(WRAPCPY) $(EXTRA_SOURCES) 
 	@echo "Linking... (static ? $(or $(and $(XSTATIC), yes), no))"
-	$(LD) $(LDFLAGS) -o $(TARGET) $< $(WRAPCPY) $(EXTRA_SOURCES) $(STATIC_OBJS) $(LIBS) $(STATIC_LIBS)
+	@$(LD) $(LDFLAGS) -o $(TARGET) $< $(WRAPCPY) $(EXTRA_SOURCES) $(STATIC_OBJS) $(LIBS) $(STATIC_LIBS)
 	@$(STRIP) $(STRIP_OPTIONS) $(TARGET)
 	-@$(UPX) $(TARGET)
 	@echo OK

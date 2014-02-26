@@ -19,7 +19,7 @@ then
     cp "$INFO" "${DEST}/Contents/"
 else
     INFO="${DEST}/Contents/Info.plist"
-    cp templates/Info.plist.tmpl "$INFO"
+    cp templates/osx/Info.plist.tmpl "$INFO"
     sed -i "s,%TARGET%,${TARGET},g" "$INFO"
     sed -i "s,%APP_NAME%,${APP_NAME},g" "$INFO"
 fi
@@ -29,7 +29,7 @@ then
     cp "$RFMT" "${DEST}/Contents/Resources/"
 else
     RFMT="${DEST}/Contents/Resources/RecentFilesMenuTemplate.nib"
-    cp "templates/RecentFilesMenuTemplate.nib" "$RFMT"
+    cp "templates/osx/RecentFilesMenuTemplate.nib" "$RFMT"
 fi
 if [[ -f "sources/Icon.icns" ]]
 then
@@ -37,8 +37,17 @@ then
     cp "$ICON" "${DEST}/Contents/Resources/"
 else
     ICON="${DEST}/Contents/Resources/Icon.icns"
-    cp "templates/Icon.icns" "$ICON"
+    cp "templates/osx/Icon.icns" "$ICON"
 fi
+
+if [[ -f "sources/README" ]]
+then
+    cp "sources/README" "$DEST"/
+else
+    cp "templates/README.tmpl" "$DEST"/README
+    sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/README
+fi
+
 
 echo 'APPL????' > "${DEST}/Contents/PkgInfo"
 cp "$TARGET" "${DEST}/Contents/MacOS/"

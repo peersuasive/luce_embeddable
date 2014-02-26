@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+(($# < 1)) && echo "Missing parameters" && exit 1
+
+TARGET=$1
+APP_NAME=${2:-$TARGET}
+TARGET_APP="$APP_NAME".app
+CONFIG=${3:-Release}
+
+DEST="build/${CONFIG}/iOS/${TARGET_APP}"
+mkdir -p "${DEST}"
+
+INFO=
+RFMT=
+ICON=
+#SETTINGS_BUNDLE=
+#ITUNESARTWORK=
+if [[ -f "sources/Info.plist" ]]
+then
+    INFO="sources/Info.plist"
+    cp "$INFO" "${DEST}/"
+else
+    INFO="${DEST}/Info.plist"
+    cp templates/ios/Info.plist.ios.tmpl "$INFO"
+    sed -i "s,%TARGET%,${TARGET},g" "$INFO"
+    sed -i "s,%APP_NAME%,${APP_NAME},g" "$INFO"
+fi
+# any NIB
+#if [[ -f "sources/RecentFilesMenuTemplate.nib" ]]
+#then
+#    RFMT="sources/RecentFilesMenuTemplate.nib"
+#    cp "$RFMT" "${DEST}/Contents/Resources/"
+#else
+#    RFMT="${DEST}/Contents/Resources/RecentFilesMenuTemplate.nib"
+#    cp "templates/RecentFilesMenuTemplate.nib" "$RFMT"
+#fi
+
+ICON="$DEST"/"${APP_NAME}".png
+if [[ -f "sources/Icon.png" ]]
+then
+    cp "sources/Icon.png" "$ICON"
+    bash ./templates/ios/convert_icon_to_ios.sh "sources/Icon.png" "$DEST"
+else
+    ICON="${DEST}/Icon.png"
+    cp "templates/ios/Icons/"* "$DEST"/
+fi
+
+DEFAULT_ICON="$DEST"/Default.png
+if [[ -f "sources/Default.png" ]]
+then
+    cp "sources/Default.png" "$DEFAULT_ICON"
+else
+    cp "templates/ios/Default.png" "$DEFAULT_ICON"
+fi
+
+if [[ -f "sources/README" ]]
+then
+    cp "sources/README" "$DEST"/
+else
+    cp "templates/README.tmpl" "$DEST"/README
+    sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/README
+fi
+
+
+
+## optional ? not used ? required ?
+echo 'APPL????' > "${DEST}/PkgInfo"
+cp "$TARGET" "${DEST}/"

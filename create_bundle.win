@@ -34,7 +34,7 @@ then
             \( -clone 0 -resize 64x64 \) \
             -delete 0 -alpha off -colors 256 "$DEST"
     else
-        cp "templates/icon.ico" "$ICON"
+        cp "templates/win/icon.ico" "$ICON"
     fi
  
     RC="$DEST"/info.rc
@@ -42,7 +42,7 @@ then
     then
         cp sources/res.rc "$RC"
     else
-        cp templates/res.rc.tmpl "$RC"
+        cp templates/win/res.rc.tmpl "$RC"
         sed -i "s,%ICON%,${ICON},g" "$RC"
         sed -i "s,%TARGET%,${TARGET},g" "$RC"
         sed -i "s,%APP_NAME%,${APP_NAME},g" "$RC"

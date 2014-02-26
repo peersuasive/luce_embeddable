@@ -88,7 +88,11 @@ ifeq ($(XCROSS),win)
 
 else
 ifeq ($(XCROSS),osx)
-	SKK_VER=10.8
+	#eval `/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/osxcross-env`
+	export PATH := $(PATH):/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin
+	export LD_LIBRARY_PATH := $(LD_LIBRAY_PATH):/usr/local/src/vcs/compiler/osxcross/target/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib
+
+	SDK_VER=10.8
 	SDK_MIN=10.6
 	## TODO: SHOULD create an .app, at least for non-static
 	unexport CODESIGN_ALLOCATE
@@ -134,12 +138,24 @@ ifeq ($(XCROSS),osx)
 
 else
 ifeq ($(XCROSS),ios)
+	#eval `/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/osxcross-env`
+	export PATH := $(PATH):/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin
+	export LD_LIBRARY_PATH := $(LD_LIBRAY_PATH):/usr/local/src/vcs/compiler/osxcross/target/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib
+	## always static on ios
+	FULL_XSTATIC  = -DFULL_XSTATIC=1
+	XSTATIC 	  = -DXSTATIC=1
+	CFLAGS 		 += $(FULL_XSTATIC) $(XSTATIC)
+	ORESULT_MAIN  = oResult.lua
+
 	## TODO: MUST create an .app, anyway !
 	unexport CODESIGN_ALLOCATE
+	SDK_VER=6.1
+	SDK_MIN=5.1
 	X 	= /opt/ios-apple-darwin-11/usr/bin/arm-apple-darwin11-
 	EXT = _ios
 	CXX = /opt/ios-apple-darwin-11/usr/bin/ios-clang++
 	UPX = echo $(X)upx
+	BUNDLE_APP = ios_app
 
 	## already signed, so better skip stripping,
 	## or resign with 
@@ -148,7 +164,7 @@ ifeq ($(XCROSS),ios)
 	CFLAGS += -x objective-c++ 
 	#CFLAGS += -MMD -Wno-deprecated-register 
 	CFLAGS += -stdlib=libc++ 
-	CFLAGS += -miphoneos-version-min=5.1 
+	CFLAGS += -miphoneos-version-min=$(SDK_MIN)
 	CFLAGS += -fpascal-strings -fmessage-length=0 -fasm-blocks -fstrict-aliasing -fvisibility-inlines-hidden 
 	CFLAGS += -Iluajit-2.0/src
 
@@ -163,7 +179,7 @@ ifeq ($(XCROSS),ios)
 
 	LDFLAGS += -stdlib=libc++ 
 	LDFLAGS += -fnested-functions -fmessage-length=0 -fpascal-strings -fstrict-aliasing -fasm-blocks -fobjc-link-runtime 
-	LDFLAGS += -miphoneos-version-min=5.1 
+	LDFLAGS += -miphoneos-version-min=$(SDK_MIN)
 	LDFLAGS += -stdlib=libc++ -std=c++0x -std=c++11
 	LDFLAGS += -framework CoreGraphics -framework CoreText -framework Foundation 
 	LDFLAGS += -framework QuartzCore -framework UIKit 
@@ -180,8 +196,7 @@ ifeq ($(XCROSS),ios)
 		EXTRALIBS += libluajit.a
 	endif
 
-	## always static
-	FULL_XSTATIC = -DFULL_XSTATIC=1 -DXSTATIC=1
+
 	TNAME := $(NAME)
 	## always true, but if we were to compile luce as a framework, it might not be anymore -- TODO: check iOS doc
 	ifneq (,$(XSTATIC))
@@ -298,6 +313,11 @@ osx_app: $(TARGET) create_bundle
 	-@$(RM) -rf build/$(CONFIG)/$(NAME).app
 	@./create_bundle osx $(TARGET) $(NAME)
 	
+ios_app: $(TARGET) create_bundle
+	@echo "Creating bundle..."
+	-@$(RM) -rf build/$(CONFIG)/$(NAME).app
+	@./create_bundle ios $(TARGET) $(NAME)
+
 win_prep_app: create_bundle
 	@echo "Compiling windows resources..."
 	@./create_bundle win prepare $(TARGET) $(NAME)

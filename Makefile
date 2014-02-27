@@ -11,6 +11,7 @@ LUCE_HOME = $(HOME)/src-private/luce
 
 #OS 				= $(shell uname -a)
 CXX 			= g++
+LUAC 			= luac
 STRIP           = strip
 BIN2C      		= ./bin2c
 UPX 		    = echo
@@ -28,14 +29,15 @@ LUA_DEPS    	:= $(shell ./get_lua_deps $(SQUISHY))
 ifneq ($(filter ERROR%,$(LUA_DEPS)),)
  $(error $(LUA_DEPS))
 endif
+LUA_MAIN        := $(shell cat $(SQUISHY) |grep '^\ *Main'|awk '{print $$NF}')
 
 EXTRA_SOURCES   = 
 
 ifdef $(DEBUG)
 	CFLAGS += -g
 else
-	CFLAGS += -Os #size
-	#CFLAGS += -O2 # speed, could try -O3
+	#CFLAGS += -Os #size
+	CFLAGS += -O2 # speed, could try -O3
 endif
 
 ifeq ($(FULL_STATIC),1)
@@ -52,6 +54,10 @@ ifeq ($(STATIC),1)
 else
 	TNAME 	 = $(NAME)
 endif
+endif
+
+ifeq (,$(LUA_MAIN))
+	LUA_MAIN = $(ORESULT_MAIN)
 endif
 
 ifeq ($(LUA52),1)
@@ -288,6 +294,7 @@ luajit/src/luajit_ios:
 	@cd luajit/src && make clean && make CROSS=$(X) TARGET_SYS=iOS
 
 main.o: main.cpp $(TARGET_JIT) oResult.h
+	@$(LUAC) -p $(LUA_MAIN)
 	@echo "Compiling main..."
 	@$(CXX) $(CFLAGS) -c -o $@ $<
 
@@ -298,6 +305,7 @@ oResult.lua: $(LUA_DEPS) squishy luce.lua
 	@$(SQUISH) --no-executable
 
 oResult.h: bin2c.bin $(ORESULT_MAIN)
+	@$(LUAC) -p $(LUA_MAIN)
 	@echo "Embedding luce (with main class $(ORESULT_MAIN))"
 	@$(BIN2C) $(ORESULT_MAIN) oResult.h oResult
 

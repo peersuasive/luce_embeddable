@@ -15,9 +15,9 @@ RFMT=
 ICON=
 #SETTINGS_BUNDLE=
 #ITUNESARTWORK=
-if [[ -f "sources/Info.plist" ]]
+if [[ -f "sources/ios/Info.plist" ]]
 then
-    INFO="sources/Info.plist"
+    INFO="sources/ios/Info.plist"
     cp "$INFO" "${DEST}/"
 else
     INFO="${DEST}/Info.plist"
@@ -36,26 +36,26 @@ fi
 #fi
 
 ICON="$DEST"/"${APP_NAME}".png
-if [[ -f "sources/Icon.png" ]]
+if [[ -f "sources/ios/Icon.png" ]]
 then
-    cp "sources/Icon.png" "$ICON"
-    bash ./templates/ios/convert_icon_to_ios.sh "sources/Icon.png" "$DEST"
+    cp "sources/ios/Icon.png" "$ICON"
+    bash ./templates/ios/convert_icon_to_ios.sh "sources/ios/Icon.png" "$DEST"
 else
     ICON="${DEST}/Icon.png"
     cp "templates/ios/Icons/"* "$DEST"/
 fi
 
 DEFAULT_ICON="$DEST"/Default.png
-if [[ -f "sources/Default.png" ]]
+if [[ -f "sources/ios/Default.png" ]]
 then
-    cp "sources/Default.png" "$DEFAULT_ICON"
+    cp "sources/ios/Default.png" "$DEFAULT_ICON"
 else
     cp "templates/ios/Default.png" "$DEFAULT_ICON"
 fi
 
-if [[ -f "sources/README" ]]
+if [[ -f "sources/ios/README" ]]
 then
-    cp "sources/README" "$DEST"/
+    cp "sources/ios/README" "$DEST"/
 else
     cp "templates/README.tmpl" "$DEST"/README
     sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/README

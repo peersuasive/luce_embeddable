@@ -13,9 +13,9 @@ mkdir -p "${DEST}/Contents/"{MacOS,Resources}
 INFO=
 RFMT=
 ICON=
-if [[ -f "sources/Info.plist" ]]
+if [[ -f "sources/osx/Info.plist" ]]
 then
-    INFO="sources/Info.plist"
+    INFO="sources/osx/Info.plist"
     cp "$INFO" "${DEST}/Contents/"
 else
     INFO="${DEST}/Contents/Info.plist"
@@ -23,26 +23,26 @@ else
     sed -i "s,%TARGET%,${TARGET},g" "$INFO"
     sed -i "s,%APP_NAME%,${APP_NAME},g" "$INFO"
 fi
-if [[ -f "sources/RecentFilesMenuTemplate.nib" ]]
+if [[ -f "sources/osx/RecentFilesMenuTemplate.nib" ]]
 then
-    RFMT="sources/RecentFilesMenuTemplate.nib"
+    RFMT="sources/osx/RecentFilesMenuTemplate.nib"
     cp "$RFMT" "${DEST}/Contents/Resources/"
 else
     RFMT="${DEST}/Contents/Resources/RecentFilesMenuTemplate.nib"
     cp "templates/osx/RecentFilesMenuTemplate.nib" "$RFMT"
 fi
-if [[ -f "sources/Icon.icns" ]]
+if [[ -f "sources/osx/Icon.icns" ]]
 then
-    ICON="sources/Icon.icns"
+    ICON="sources/osx/Icon.icns"
     cp "$ICON" "${DEST}/Contents/Resources/"
 else
     ICON="${DEST}/Contents/Resources/Icon.icns"
     cp "templates/osx/Icon.icns" "$ICON"
 fi
 
-if [[ -f "sources/README" ]]
+if [[ -f "sources/osx/README" ]]
 then
-    cp "sources/README" "$DEST"/
+    cp "sources/osx/README" "$DEST"/
 else
     cp "templates/README.tmpl" "$DEST"/README
     sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/README

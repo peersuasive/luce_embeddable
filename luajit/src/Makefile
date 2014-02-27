@@ -659,7 +659,7 @@ amalg:
 	$(MAKE) all "LJCORE_O=ljamalg.o"
 
 clean:
-	@$(HOST_RM) $(ALL_RM)
+	@$(HOST_RM) $(ALL_RM) modules/*/*.o
 
 depend:
 	@for file in $(ALL_HDRGEN); do \

@@ -19,3 +19,4 @@ luce.lua
 local/
 build/
 *.d
+squishy

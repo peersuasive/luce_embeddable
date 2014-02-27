@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 
-modules=$(cat squishy |grep -E '(^Main|^Module)'|awk '{print $NF}'|xargs)
+! [[ -f "$1" ]] && echo "ERROR: Missing squishy" && exit 1
+
+squishy="$1"
+
+modules=$(cat "$squishy" |grep -E '(^Main|^Module)'|awk '{print $NF}'|xargs)
 echo "$modules"

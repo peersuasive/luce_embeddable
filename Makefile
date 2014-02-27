@@ -1,4 +1,4 @@
-
+-include Makefile.config
 
 
 ## TODO: create a version with an optional oResult.h
@@ -16,13 +16,19 @@ BIN2C      		= ./bin2c
 UPX 		    = echo
 CFLAGS   		=
 EXTRALIBS 		= 
-NAME     		:= demo
+NAME     		?= demo
 X 				= 
 STRIP_OPTIONS 	= --strip-unneeded
 
+SQUISHY 		?= example/squishy
+
 TARGET_JIT 		= libluajit.a_check
 ORESULT_MAIN	= luce.lua
-LUA_DEPS    	= $(shell ./get_lua_deps)
+LUA_DEPS    	:= $(shell ./get_lua_deps $(SQUISHY))
+ifneq ($(filter ERROR%,$(LUA_DEPS)),)
+ $(error $(LUA_DEPS))
+endif
+
 EXTRA_SOURCES   = 
 
 ifdef $(DEBUG)
@@ -283,6 +289,9 @@ luajit-2.0/src/luajit_ios:
 main.o: main.cpp $(TARGET_JIT) oResult.h
 	@echo "Compiling main..."
 	@$(CXX) $(CFLAGS) -c -o $@ $<
+
+squishy: $(SQUISHY)
+	@ln -sf $(SQUISHY) squishy
 
 oResult.lua: $(LUA_DEPS) squishy luce.lua
 	@$(SQUISH) --no-executable

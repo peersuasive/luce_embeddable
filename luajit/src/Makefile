@@ -771,14 +771,14 @@ $(LUAJIT_A): $(LOCAL_O) $(LJVMCORE_O) $(EXTRA_O)
 # The dependency on _O, but linking with _DYNO is intentional.
 $(LUAJIT_SO): $(LOCAL_O) $(LJVMCORE_O) $(EXTRA_O)
 	$(E) "DYNLINK   $@"
-	$(Q)$(TARGET_LD) $(TARGET_ASHLDFLAGS) -o $@ $(LJVMCORE_DYNO) $(EXTRA_O) $(TARGET_ALIBS)
-	$(Q)$(TARGET_STRIP) $@
+	@#$(Q)$(TARGET_LD) $(TARGET_ASHLDFLAGS) -o $@ $(LJVMCORE_DYNO) $(EXTRA_O) $(TARGET_ALIBS)
+	@#$(Q)$(TARGET_STRIP) $@
 
 $(LUAJIT_T): $(TARGET_O) $(LUAJIT_O) $(TARGET_DEP)
 	$(E) "LINK      $@"
 	@touch $@
-	$(Q)$(TARGET_LD) $(TARGET_ALDFLAGS) -o $@ $(LUAJIT_O) $(TARGET_O) $(TARGET_ALIBS)
-	$(Q)$(TARGET_STRIP) $@
-	$(E) "OK        Successfully built LuaJIT"
+	@#$(Q)$(TARGET_LD) $(TARGET_ALDFLAGS) -o $@ $(LUAJIT_O) $(TARGET_O) $(TARGET_ALIBS)
+	@#$(Q)$(TARGET_STRIP) $@
+	@#$(E) "OK        Successfully built LuaJIT"
 
 ##############################################################################

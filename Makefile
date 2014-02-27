@@ -28,7 +28,8 @@ EXTRA_SOURCES   =
 ifdef $(DEBUG)
 	CFLAGS += -g
 else
-	CFLAGS += -Os
+	CFLAGS += -Os #size
+	#CFLAGS += -O2 # speed, could try -O3
 endif
 
 ifeq ($(FULL_STATIC),1)
@@ -264,19 +265,19 @@ bin2c.bin: bin2c.c
 	@gcc -std=c99 -o bin2c.bin bin2c.c
 
 luajit-2.0/src/luajit:
-	@echo "Compiling lujit for linux..."
+	@echo "Compiling luajit for linux..."
 	@cd luajit-2.0/src && make clean && make
 
 luajit-2.0/src/luajit.exe:
-	@echo "Compiling lujit for windows..."
+	@echo "Compiling luajit for windows..."
 	@cd luajit-2.0/src && make clean && make CC="gcc -m32" HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
 
 luajit-2.0/src/luajit_osx:
-	@echo "Compiling lujit for osx..."
+	@echo "Compiling luajit for osx..."
 	@cd luajit-2.0/src && make clean && make -f Makefile.cross-macosx clean && make -f Makefile.cross-macosx
 
 luajit-2.0/src/luajit_ios:
-	@echo "Compiling lujit for ios..."
+	@echo "Compiling luajit for ios..."
 	@cd luajit-2.0/src && make clean && make -f Makefile.cross-ios clean && make -f Makefile.cross-ios
 
 main.o: main.cpp $(TARGET_JIT) oResult.h

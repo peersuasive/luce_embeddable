@@ -224,5 +224,3 @@ host/buildvm_lib.o: $(S)/host/buildvm_lib.c $(S)/host/buildvm.h $(S)/lj_def.h $(
 host/buildvm_peobj.o: $(S)/host/buildvm_peobj.c $(S)/host/buildvm.h $(S)/lj_def.h $(S)/lua.h \
  $(S)/luaconf.h $(S)/lj_arch.h $(S)/lj_bc.h $(S)/lj_def.h $(S)/lj_arch.h
 host/minilua.o: $(S)/host/minilua.c
-
--include $(S)/Makefile.extra

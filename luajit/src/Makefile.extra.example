@@ -1,1 +1,4 @@
-#ex: LJLIB_O+= modules/zzip/luazip.o
+#ex:
+# WITH_EXTRA_MODULES = 1
+# CFLAGS_EXTRA += -I. -Iextra
+# EXTRA_O += modules/zzip/luazip.o

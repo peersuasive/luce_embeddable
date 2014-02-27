@@ -81,7 +81,7 @@ ifeq ($(XCROSS),win)
 		CFLAGS    += -I/opt/mingw/usr/$(PRE)/include/lua5.2
 		EXTRALIBS += -llua5.2
 	else
-		CFLAGS    += -I./luajit-2.0/src
+		CFLAGS    += -I./luajit-2.0/src -I./luajit/src
 		EXTRALIBS += libluajit.a
 		EXTRALIBS += -lstdc++ -lm
 	endif
@@ -118,7 +118,6 @@ ifeq ($(XCROSS),osx)
 	CFLAGS += -stdlib=libc++ 
 	CFLAGS += -mmacosx-version-min=$(SDK_MIN)
 	CFLAGS += -fpascal-strings -fmessage-length=0 -fasm-blocks -fstrict-aliasing -fvisibility-inlines-hidden 
-	CFLAGS += -Iluajit-2.0/src
 
 	LDFLAGS += -stdlib=libc++ 
 	LDFLAGS += -pagezero_size 10000 -image_base 100000000 
@@ -130,7 +129,7 @@ ifeq ($(XCROSS),osx)
 		CFLAGS += -I/opt/zmq-osx/include/lua5.2
 		EXTRALIBS += -llua5.2
 	else
-		CFLAGS    += -I./luajit-2.0/src
+		CFLAGS 	  += -I./luajit-2.0/src -I./luajit/src
 		EXTRALIBS += libluajit.a
 	endif
 
@@ -173,7 +172,6 @@ ifeq ($(XCROSS),ios)
 	CFLAGS += -stdlib=libc++ 
 	CFLAGS += -miphoneos-version-min=$(SDK_MIN)
 	CFLAGS += -fpascal-strings -fmessage-length=0 -fasm-blocks -fstrict-aliasing -fvisibility-inlines-hidden 
-	CFLAGS += -Iluajit-2.0/src
 
 	## ??
 	CFLAGS += -I/usr/local/src/vcs/compiler/osxcross/ios/libcxx-3.4/include
@@ -199,7 +197,7 @@ ifeq ($(XCROSS),ios)
 		CFLAGS += -I/opt/zmq-ios/include/lua5.2
 		EXTRALIBS += -llua5.2
 	else
-		CFLAGS    += -I./luajit-2.0/src
+		CFLAGS 	  += -I./luajit-2.0/src -I./luajit/src
 		EXTRALIBS += libluajit.a
 	endif
 
@@ -228,7 +226,7 @@ else
 		CFLAGS    += -I/usr/include/lua5.2
 		EXTRALIBS += -llua5.2
 	else
-		CFLAGS    += -I./luajit-2.0/src
+		CFLAGS 	  += -I./luajit-2.0/src -I./luajit/src
 		EXTRALIBS += libluajit.a -lm -ldl
 	endif
 
@@ -259,10 +257,10 @@ TARGET = $(TNAME)$(EXT)
 
 all: $(PREPARE_APP) $(TARGET) $(BUNDLE_APP)
 
-$(TARGET_JIT): luajit-2.0/src/luajit$(EXT)
-	@ln -sf luajit-2.0/src/libluajit.a .
+$(TARGET_JIT): luajit/src/luajit$(EXT)
+	@ln -sf luajit/src/libluajit.a .
 	@$(RM) -f jit
-	@ln -sf luajit-2.0/src/jit .
+	@ln -sf luajit/src/jit .
 
 bin2c: bin2c.bin
 
@@ -270,21 +268,24 @@ bin2c.bin: bin2c.c
 	@echo "Compiling bin2c..."
 	@gcc -std=c99 -o bin2c.bin bin2c.c
 
-luajit-2.0/src/luajit:
+luajit/src/luajit:
 	@echo "Compiling luajit for linux..."
-	@cd luajit-2.0/src && make clean && make
+	@cd luajit/src && make clean && make
 
-luajit-2.0/src/luajit.exe:
+luajit/src/luajit.exe:
 	@echo "Compiling luajit for windows..."
-	@cd luajit-2.0/src && make clean && make CC="gcc -m32" HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
+	@#cd luajit/src && make clean && make CC="gcc -m32" HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
+	@cd luajit/src && make clean && make CC="gcc -m32" HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows
 
-luajit-2.0/src/luajit_osx:
+luajit/src/luajit_osx:
 	@echo "Compiling luajit for osx..."
-	@cd luajit-2.0/src && make clean && make -f Makefile.cross-macosx clean && make -f Makefile.cross-macosx
+	@#cd luajit/src && make clean && make -f Makefile.cross-macosx clean && make -f Makefile.cross-macosx
+	@cd luajit/src && make clean && make CROSS=$(X) TARGET_SYS=Darwin
 
-luajit-2.0/src/luajit_ios:
+luajit/src/luajit_ios:
 	@echo "Compiling luajit for ios..."
-	@cd luajit-2.0/src && make clean && make -f Makefile.cross-ios clean && make -f Makefile.cross-ios
+	@#cd luajit/src && make clean && make -f Makefile.cross-ios clean && make -f Makefile.cross-ios
+	@cd luajit/src && make clean && make CROSS=$(X) TARGET_SYS=iOS
 
 main.o: main.cpp $(TARGET_JIT) oResult.h
 	@echo "Compiling main..."
@@ -353,7 +354,7 @@ extraclean: clean
 	@$(RM) -rf build
 
 distclean: extraclean
-	@cd ./luajit-2.0/src && make clean
+	@cd ./luajit/src && make clean
 	@$(RM) -f libluajit.a libluajit.win.a jit bin2c.bin
 
 -include $(OBJECTS:%.o=%.d)

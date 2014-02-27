@@ -1,0 +1,1 @@
+#ex: LJLIB_O+= modules/zzip/luazip.o

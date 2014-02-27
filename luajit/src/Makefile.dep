@@ -1,0 +1,228 @@
+lib_aux.o: $(S)/lib_aux.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h $(S)/lj_obj.h $(S)/lj_def.h \
+ $(S)/lj_arch.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_state.h $(S)/lj_trace.h $(S)/lj_jit.h $(S)/lj_ir.h \
+ $(S)/lj_dispatch.h $(S)/lj_bc.h $(S)/lj_traceerr.h $(S)/lj_lib.h $(S)/lj_alloc.h
+lib_base.o: $(S)/lib_base.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_obj.h \
+ $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_debug.h $(S)/lj_str.h \
+ $(S)/lj_tab.h $(S)/lj_meta.h $(S)/lj_state.h $(S)/lj_ctype.h $(S)/lj_cconv.h $(S)/lj_bc.h $(S)/lj_ff.h \
+ lj_ffdef.h $(S)/lj_dispatch.h $(S)/lj_jit.h $(S)/lj_ir.h $(S)/lj_char.h $(S)/lj_strscan.h \
+ $(S)/lj_lib.h lj_libdef.h
+lib_bit.o: $(S)/lib_bit.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_obj.h $(S)/lj_def.h \
+ $(S)/lj_arch.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_lib.h lj_libdef.h
+lib_debug.o: $(S)/lib_debug.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_obj.h \
+ $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_debug.h $(S)/lj_lib.h \
+ lj_libdef.h
+lib_ffi.o: $(S)/lib_ffi.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_obj.h $(S)/lj_def.h \
+ $(S)/lj_arch.h $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_meta.h \
+ $(S)/lj_ctype.h $(S)/lj_cparse.h $(S)/lj_cdata.h $(S)/lj_cconv.h $(S)/lj_carith.h $(S)/lj_ccall.h \
+ $(S)/lj_ccallback.h $(S)/lj_clib.h $(S)/lj_ff.h lj_ffdef.h $(S)/lj_lib.h lj_libdef.h
+lib_init.o: lib_init.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_arch.h
+lib_io.o: $(S)/lib_io.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_obj.h $(S)/lj_def.h \
+ $(S)/lj_arch.h $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_state.h $(S)/lj_ff.h \
+ lj_ffdef.h $(S)/lj_lib.h lj_libdef.h
+lib_jit.o: $(S)/lib_jit.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_arch.h \
+ $(S)/lj_obj.h $(S)/lj_def.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_debug.h $(S)/lj_str.h $(S)/lj_tab.h \
+ $(S)/lj_bc.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_ircall.h $(S)/lj_iropt.h $(S)/lj_target.h \
+ $(S)/lj_target_*.h $(S)/lj_dispatch.h $(S)/lj_vm.h $(S)/lj_vmevent.h $(S)/lj_lib.h $(S)/luajit.h \
+ lj_libdef.h
+lib_math.o: $(S)/lib_math.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_obj.h \
+ $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_lib.h $(S)/lj_vm.h lj_libdef.h
+lib_os.o: $(S)/lib_os.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_obj.h $(S)/lj_def.h \
+ $(S)/lj_arch.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_lib.h lj_libdef.h
+lib_package.o: $(S)/lib_package.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_obj.h \
+ $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_lib.h
+lib_string.o: $(S)/lib_string.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_obj.h \
+ $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h \
+ $(S)/lj_meta.h $(S)/lj_state.h $(S)/lj_ff.h lj_ffdef.h $(S)/lj_bcdump.h $(S)/lj_lex.h $(S)/lj_char.h \
+ $(S)/lj_lib.h lj_libdef.h
+lib_table.o: $(S)/lib_table.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/lj_obj.h \
+ $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_tab.h $(S)/lj_lib.h \
+ lj_libdef.h
+lj_alloc.o: $(S)/lj_alloc.c $(S)/lj_def.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_arch.h $(S)/lj_alloc.h
+lj_api.o: $(S)/lj_api.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_debug.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_func.h $(S)/lj_udata.h \
+ $(S)/lj_meta.h $(S)/lj_state.h $(S)/lj_bc.h $(S)/lj_frame.h $(S)/lj_trace.h $(S)/lj_jit.h $(S)/lj_ir.h \
+ $(S)/lj_dispatch.h $(S)/lj_traceerr.h $(S)/lj_vm.h $(S)/lj_strscan.h
+lj_asm.o: $(S)/lj_asm.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_frame.h $(S)/lj_bc.h $(S)/lj_ctype.h $(S)/lj_ir.h $(S)/lj_jit.h \
+ $(S)/lj_ircall.h $(S)/lj_iropt.h $(S)/lj_mcode.h $(S)/lj_trace.h $(S)/lj_dispatch.h $(S)/lj_traceerr.h \
+ $(S)/lj_snap.h $(S)/lj_asm.h $(S)/lj_vm.h $(S)/lj_target.h $(S)/lj_target_*.h $(S)/lj_emit_*.h \
+ $(S)/lj_asm_*.h
+lj_bc.o: $(S)/lj_bc.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_bc.h \
+ lj_bcdef.h
+lj_bcread.o: $(S)/lj_bcread.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_bc.h $(S)/lj_ctype.h \
+ $(S)/lj_cdata.h lualib.h $(S)/lj_lex.h $(S)/lj_bcdump.h $(S)/lj_state.h
+lj_bcwrite.o: $(S)/lj_bcwrite.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_str.h $(S)/lj_bc.h $(S)/lj_ctype.h $(S)/lj_dispatch.h $(S)/lj_jit.h $(S)/lj_ir.h \
+ $(S)/lj_bcdump.h $(S)/lj_lex.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_vm.h
+lj_carith.o: $(S)/lj_carith.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_tab.h $(S)/lj_meta.h $(S)/lj_ctype.h $(S)/lj_cconv.h \
+ $(S)/lj_cdata.h $(S)/lj_carith.h
+lj_ccall.o: $(S)/lj_ccall.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_ctype.h $(S)/lj_cconv.h \
+ $(S)/lj_cdata.h $(S)/lj_ccall.h $(S)/lj_trace.h $(S)/lj_jit.h $(S)/lj_ir.h $(S)/lj_dispatch.h $(S)/lj_bc.h \
+ $(S)/lj_traceerr.h
+lj_ccallback.o: $(S)/lj_ccallback.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h \
+ $(S)/lj_arch.h $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_tab.h $(S)/lj_state.h $(S)/lj_frame.h \
+ $(S)/lj_bc.h $(S)/lj_ctype.h $(S)/lj_cconv.h $(S)/lj_ccall.h $(S)/lj_ccallback.h $(S)/lj_target.h \
+ $(S)/lj_target_*.h $(S)/lj_mcode.h $(S)/lj_jit.h $(S)/lj_ir.h $(S)/lj_trace.h $(S)/lj_dispatch.h \
+ $(S)/lj_traceerr.h $(S)/lj_vm.h
+lj_cconv.o: $(S)/lj_cconv.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_tab.h $(S)/lj_ctype.h $(S)/lj_gc.h $(S)/lj_cdata.h $(S)/lj_cconv.h \
+ $(S)/lj_ccallback.h
+lj_cdata.o: $(S)/lj_cdata.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_ctype.h $(S)/lj_cconv.h \
+ $(S)/lj_cdata.h
+lj_char.o: $(S)/lj_char.c $(S)/lj_char.h $(S)/lj_def.h $(S)/lua.h $(S)/luaconf.h
+lj_clib.o: $(S)/lj_clib.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_tab.h $(S)/lj_str.h $(S)/lj_udata.h $(S)/lj_ctype.h $(S)/lj_cconv.h \
+ $(S)/lj_cdata.h $(S)/lj_clib.h
+lj_cparse.o: $(S)/lj_cparse.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_ctype.h $(S)/lj_cparse.h $(S)/lj_frame.h \
+ $(S)/lj_bc.h $(S)/lj_vm.h $(S)/lj_char.h $(S)/lj_strscan.h
+lj_crecord.o: $(S)/lj_crecord.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_frame.h $(S)/lj_bc.h $(S)/lj_ctype.h \
+ $(S)/lj_gc.h $(S)/lj_cdata.h $(S)/lj_cparse.h $(S)/lj_cconv.h $(S)/lj_clib.h $(S)/lj_ccall.h $(S)/lj_ff.h \
+ lj_ffdef.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_ircall.h $(S)/lj_iropt.h $(S)/lj_trace.h \
+ $(S)/lj_dispatch.h $(S)/lj_traceerr.h $(S)/lj_record.h $(S)/lj_ffrecord.h $(S)/lj_snap.h \
+ $(S)/lj_crecord.h
+lj_ctype.o: $(S)/lj_ctype.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_ctype.h $(S)/lj_ccallback.h
+lj_debug.o: $(S)/lj_debug.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_debug.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_state.h $(S)/lj_frame.h \
+ $(S)/lj_bc.h $(S)/lj_jit.h $(S)/lj_ir.h
+lj_dispatch.o: $(S)/lj_dispatch.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_func.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_meta.h $(S)/lj_debug.h \
+ $(S)/lj_state.h $(S)/lj_frame.h $(S)/lj_bc.h $(S)/lj_ff.h lj_ffdef.h $(S)/lj_jit.h $(S)/lj_ir.h \
+ $(S)/lj_ccallback.h $(S)/lj_ctype.h $(S)/lj_gc.h $(S)/lj_trace.h $(S)/lj_dispatch.h $(S)/lj_traceerr.h \
+ $(S)/lj_vm.h $(S)/luajit.h
+lj_err.o: $(S)/lj_err.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_err.h \
+ $(S)/lj_errmsg.h $(S)/lj_debug.h $(S)/lj_str.h $(S)/lj_func.h $(S)/lj_state.h $(S)/lj_frame.h $(S)/lj_bc.h \
+ $(S)/lj_ff.h lj_ffdef.h $(S)/lj_trace.h $(S)/lj_jit.h $(S)/lj_ir.h $(S)/lj_dispatch.h \
+ $(S)/lj_traceerr.h $(S)/lj_vm.h
+lj_ffrecord.o: $(S)/lj_ffrecord.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_frame.h $(S)/lj_bc.h $(S)/lj_ff.h \
+ lj_ffdef.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_ircall.h $(S)/lj_iropt.h $(S)/lj_trace.h \
+ $(S)/lj_dispatch.h $(S)/lj_traceerr.h $(S)/lj_record.h $(S)/lj_ffrecord.h $(S)/lj_crecord.h \
+ $(S)/lj_vm.h $(S)/lj_strscan.h lj_recdef.h
+lj_func.o: $(S)/lj_func.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_func.h $(S)/lj_trace.h $(S)/lj_jit.h $(S)/lj_ir.h $(S)/lj_dispatch.h $(S)/lj_bc.h \
+ $(S)/lj_traceerr.h $(S)/lj_vm.h
+lj_gc.o: $(S)/lj_gc.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_func.h $(S)/lj_udata.h $(S)/lj_meta.h \
+ $(S)/lj_state.h $(S)/lj_frame.h $(S)/lj_bc.h $(S)/lj_ctype.h $(S)/lj_cdata.h $(S)/lj_trace.h $(S)/lj_jit.h \
+ $(S)/lj_ir.h $(S)/lj_dispatch.h $(S)/lj_traceerr.h $(S)/lj_vm.h
+lj_gdbjit.o: $(S)/lj_gdbjit.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_debug.h $(S)/lj_frame.h $(S)/lj_bc.h $(S)/lj_jit.h \
+ $(S)/lj_ir.h $(S)/lj_dispatch.h
+lj_ir.o: $(S)/lj_ir.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_ircall.h $(S)/lj_iropt.h $(S)/lj_trace.h \
+ $(S)/lj_dispatch.h $(S)/lj_bc.h $(S)/lj_traceerr.h $(S)/lj_ctype.h $(S)/lj_cdata.h $(S)/lj_carith.h \
+ $(S)/lj_vm.h $(S)/lj_strscan.h $(S)/lj_lib.h
+lj_lex.o: $(S)/lj_lex.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_ctype.h $(S)/lj_cdata.h lualib.h \
+ $(S)/lj_state.h $(S)/lj_lex.h $(S)/lj_parse.h $(S)/lj_char.h $(S)/lj_strscan.h
+lj_lib.o: $(S)/lj_lib.c $(S)/lauxlib.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_obj.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_func.h $(S)/lj_bc.h \
+ $(S)/lj_dispatch.h $(S)/lj_jit.h $(S)/lj_ir.h $(S)/lj_vm.h $(S)/lj_strscan.h $(S)/lj_lib.h
+lj_load.o: $(S)/lj_load.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h $(S)/lj_obj.h $(S)/lj_def.h \
+ $(S)/lj_arch.h $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_func.h $(S)/lj_frame.h \
+ $(S)/lj_bc.h $(S)/lj_vm.h $(S)/lj_lex.h $(S)/lj_bcdump.h $(S)/lj_parse.h
+lj_mcode.o: $(S)/lj_mcode.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_jit.h $(S)/lj_ir.h $(S)/lj_mcode.h $(S)/lj_trace.h \
+ $(S)/lj_dispatch.h $(S)/lj_bc.h $(S)/lj_traceerr.h $(S)/lj_vm.h
+lj_meta.o: $(S)/lj_meta.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_meta.h $(S)/lj_frame.h $(S)/lj_bc.h \
+ $(S)/lj_vm.h $(S)/lj_strscan.h
+lj_obj.o: $(S)/lj_obj.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h
+lj_opt_dce.o: $(S)/lj_opt_dce.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_iropt.h
+lj_opt_fold.o: $(S)/lj_opt_fold.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_iropt.h $(S)/lj_trace.h $(S)/lj_dispatch.h \
+ $(S)/lj_bc.h $(S)/lj_traceerr.h $(S)/lj_ctype.h $(S)/lj_gc.h $(S)/lj_carith.h $(S)/lj_vm.h \
+ $(S)/lj_strscan.h lj_folddef.h
+lj_opt_loop.o: $(S)/lj_opt_loop.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_iropt.h $(S)/lj_trace.h \
+ $(S)/lj_dispatch.h $(S)/lj_bc.h $(S)/lj_traceerr.h $(S)/lj_snap.h $(S)/lj_vm.h
+lj_opt_mem.o: $(S)/lj_opt_mem.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_tab.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_iropt.h
+lj_opt_narrow.o: $(S)/lj_opt_narrow.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h \
+ $(S)/lj_arch.h $(S)/lj_bc.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_iropt.h $(S)/lj_trace.h $(S)/lj_dispatch.h \
+ $(S)/lj_traceerr.h $(S)/lj_vm.h $(S)/lj_strscan.h
+lj_opt_sink.o: $(S)/lj_opt_sink.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_iropt.h $(S)/lj_target.h $(S)/lj_target_*.h
+lj_opt_split.o: $(S)/lj_opt_split.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h \
+ $(S)/lj_arch.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_ircall.h \
+ $(S)/lj_iropt.h $(S)/lj_vm.h
+lj_parse.o: $(S)/lj_parse.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_debug.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_func.h \
+ $(S)/lj_state.h $(S)/lj_bc.h $(S)/lj_ctype.h $(S)/lj_lex.h $(S)/lj_parse.h $(S)/lj_vm.h $(S)/lj_vmevent.h
+lj_record.o: $(S)/lj_record.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_meta.h $(S)/lj_frame.h $(S)/lj_bc.h \
+ $(S)/lj_ctype.h $(S)/lj_gc.h $(S)/lj_ff.h lj_ffdef.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_ircall.h \
+ $(S)/lj_iropt.h $(S)/lj_trace.h $(S)/lj_dispatch.h $(S)/lj_traceerr.h $(S)/lj_record.h \
+ $(S)/lj_ffrecord.h $(S)/lj_snap.h $(S)/lj_vm.h
+lj_snap.o: $(S)/lj_snap.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_tab.h $(S)/lj_state.h $(S)/lj_frame.h $(S)/lj_bc.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_iropt.h \
+ $(S)/lj_trace.h $(S)/lj_dispatch.h $(S)/lj_traceerr.h $(S)/lj_snap.h $(S)/lj_target.h \
+ $(S)/lj_target_*.h $(S)/lj_ctype.h $(S)/lj_cdata.h
+lj_state.o: $(S)/lj_state.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_func.h $(S)/lj_meta.h \
+ $(S)/lj_state.h $(S)/lj_frame.h $(S)/lj_bc.h $(S)/lj_ctype.h $(S)/lj_trace.h $(S)/lj_jit.h $(S)/lj_ir.h \
+ $(S)/lj_dispatch.h $(S)/lj_traceerr.h $(S)/lj_vm.h $(S)/lj_lex.h $(S)/lj_alloc.h
+lj_str.o: $(S)/lj_str.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_state.h $(S)/lj_char.h
+lj_strscan.o: $(S)/lj_strscan.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_char.h $(S)/lj_strscan.h
+lj_tab.o: $(S)/lj_tab.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h \
+ $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_tab.h
+lj_trace.o: $(S)/lj_trace.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_debug.h $(S)/lj_str.h $(S)/lj_frame.h $(S)/lj_bc.h \
+ $(S)/lj_state.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_iropt.h $(S)/lj_mcode.h $(S)/lj_trace.h \
+ $(S)/lj_dispatch.h $(S)/lj_traceerr.h $(S)/lj_snap.h $(S)/lj_gdbjit.h $(S)/lj_record.h $(S)/lj_asm.h \
+ $(S)/lj_vm.h $(S)/lj_vmevent.h $(S)/lj_target.h $(S)/lj_target_*.h
+lj_udata.o: $(S)/lj_udata.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_gc.h $(S)/lj_udata.h
+lj_vmevent.o: $(S)/lj_vmevent.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_state.h $(S)/lj_dispatch.h $(S)/lj_bc.h $(S)/lj_jit.h $(S)/lj_ir.h \
+ $(S)/lj_vm.h $(S)/lj_vmevent.h
+lj_vmmath.o: $(S)/lj_vmmath.c $(S)/lj_obj.h $(S)/lua.h $(S)/luaconf.h $(S)/lj_def.h $(S)/lj_arch.h \
+ $(S)/lj_ir.h $(S)/lj_vm.h
+ljamalg.o: $(S)/ljamalg.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h $(S)/lj_gc.c $(S)/lj_obj.h $(S)/lj_def.h \
+ $(S)/lj_arch.h $(S)/lj_gc.h $(S)/lj_err.h $(S)/lj_errmsg.h $(S)/lj_str.h $(S)/lj_tab.h $(S)/lj_func.h \
+ $(S)/lj_udata.h $(S)/lj_meta.h $(S)/lj_state.h $(S)/lj_frame.h $(S)/lj_bc.h $(S)/lj_ctype.h $(S)/lj_cdata.h \
+ $(S)/lj_trace.h $(S)/lj_jit.h $(S)/lj_ir.h $(S)/lj_dispatch.h $(S)/lj_traceerr.h $(S)/lj_vm.h $(S)/lj_err.c \
+ $(S)/lj_debug.h $(S)/lj_ff.h lj_ffdef.h $(S)/lj_char.c $(S)/lj_char.h $(S)/lj_bc.c lj_bcdef.h \
+ $(S)/lj_obj.c $(S)/lj_str.c $(S)/lj_tab.c $(S)/lj_func.c $(S)/lj_udata.c $(S)/lj_meta.c $(S)/lj_strscan.h \
+ $(S)/lj_debug.c $(S)/lj_state.c $(S)/lj_lex.h $(S)/lj_alloc.h $(S)/lj_dispatch.c $(S)/lj_ccallback.h \
+ $(S)/luajit.h $(S)/lj_vmevent.c $(S)/lj_vmevent.h $(S)/lj_vmmath.c $(S)/lj_strscan.c $(S)/lj_api.c \
+ $(S)/lj_lex.c lualib.h $(S)/lj_parse.h $(S)/lj_parse.c $(S)/lj_bcread.c $(S)/lj_bcdump.h \
+ $(S)/lj_bcwrite.c $(S)/lj_load.c $(S)/lj_ctype.c $(S)/lj_cdata.c $(S)/lj_cconv.h $(S)/lj_cconv.c \
+ $(S)/lj_ccall.c $(S)/lj_ccall.h $(S)/lj_ccallback.c $(S)/lj_target.h $(S)/lj_target_*.h \
+ $(S)/lj_mcode.h $(S)/lj_carith.c $(S)/lj_carith.h $(S)/lj_clib.c $(S)/lj_clib.h $(S)/lj_cparse.c \
+ $(S)/lj_cparse.h $(S)/lj_lib.c $(S)/lj_lib.h $(S)/lj_ir.c $(S)/lj_ircall.h $(S)/lj_iropt.h \
+ $(S)/lj_opt_mem.c $(S)/lj_opt_fold.c lj_folddef.h $(S)/lj_opt_narrow.c $(S)/lj_opt_dce.c \
+ $(S)/lj_opt_loop.c $(S)/lj_snap.h $(S)/lj_opt_split.c $(S)/lj_opt_sink.c $(S)/lj_mcode.c \
+ $(S)/lj_snap.c $(S)/lj_record.c $(S)/lj_record.h $(S)/lj_ffrecord.h $(S)/lj_crecord.c \
+ $(S)/lj_crecord.h $(S)/lj_ffrecord.c lj_recdef.h $(S)/lj_asm.c $(S)/lj_asm.h $(S)/lj_emit_*.h \
+ $(S)/lj_asm_*.h $(S)/lj_trace.c $(S)/lj_gdbjit.h $(S)/lj_gdbjit.c $(S)/lj_alloc.c $(S)/lib_aux.c \
+ $(S)/lib_base.c lj_libdef.h $(S)/lib_math.c $(S)/lib_string.c $(S)/lib_table.c $(S)/lib_io.c \
+ $(S)/lib_os.c $(S)/lib_package.c $(S)/lib_debug.c $(S)/lib_bit.c $(S)/lib_jit.c $(S)/lib_ffi.c \
+ lib_init.c
+luajit.o: $(S)/luajit.c $(S)/lua.h $(S)/luaconf.h $(S)/lauxlib.h lualib.h $(S)/luajit.h $(S)/lj_arch.h
+host/buildvm.o: $(S)/host/buildvm.c $(S)/host/buildvm.h $(S)/lj_def.h $(S)/lua.h $(S)/luaconf.h \
+ $(S)/lj_arch.h $(S)/lj_obj.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_gc.h $(S)/lj_obj.h $(S)/lj_bc.h $(S)/lj_ir.h \
+ $(S)/lj_ircall.h $(S)/lj_ir.h $(S)/lj_jit.h $(S)/lj_frame.h $(S)/lj_bc.h $(S)/lj_dispatch.h $(S)/lj_ctype.h \
+ $(S)/lj_gc.h $(S)/lj_ccall.h $(S)/lj_ctype.h $(S)/luajit.h \
+ host/buildvm_arch.h $(S)/lj_traceerr.h
+host/buildvm_asm.o: $(S)/host/buildvm_asm.c $(S)/host/buildvm.h $(S)/lj_def.h $(S)/lua.h $(S)/luaconf.h \
+ $(S)/lj_arch.h $(S)/lj_bc.h $(S)/lj_def.h $(S)/lj_arch.h
+host/buildvm_fold.o: $(S)/host/buildvm_fold.c $(S)/host/buildvm.h $(S)/lj_def.h $(S)/lua.h \
+ $(S)/luaconf.h $(S)/lj_arch.h $(S)/lj_obj.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_ir.h $(S)/lj_obj.h
+host/buildvm_lib.o: $(S)/host/buildvm_lib.c $(S)/host/buildvm.h $(S)/lj_def.h $(S)/lua.h $(S)/luaconf.h \
+ $(S)/lj_arch.h $(S)/lj_obj.h $(S)/lj_def.h $(S)/lj_arch.h $(S)/lj_lib.h $(S)/lj_obj.h
+host/buildvm_peobj.o: $(S)/host/buildvm_peobj.c $(S)/host/buildvm.h $(S)/lj_def.h $(S)/lua.h \
+ $(S)/luaconf.h $(S)/lj_arch.h $(S)/lj_bc.h $(S)/lj_def.h $(S)/lj_arch.h
+host/minilua.o: $(S)/host/minilua.c
+
+-include $(S)/Makefile.extra

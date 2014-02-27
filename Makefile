@@ -242,7 +242,7 @@ endif
 endif
 endif
 
-include Makefile.extra
+-include Makefile.extra
 
 LD     = $(CXX)
 RM     = rm

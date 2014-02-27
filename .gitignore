@@ -20,3 +20,6 @@ local/
 build/
 *.d
 squishy
+Makefile.config
+Makefile.extra
+sources/

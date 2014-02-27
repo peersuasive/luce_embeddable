@@ -220,6 +220,10 @@ endif
 endif
 ### end
 
+ifeq ($(WITH_EXTRA_MODULES),1)
+	EXTRA_MODULES = -D"WITH_EXTRA_MODULES=1"
+endif
+
 CCOPTIONS= $(CCDEBUG) $(CCOPT) $(CCWARN) $(XCFLAGS) $(CFLAGS)
 LDOPTIONS= $(CCDEBUG) $(LDFLAGS)
 
@@ -230,7 +234,7 @@ HOST_RM= rm -f
 HOST_LUA=
 
 HOST_XCFLAGS += -I. -I$(LUAJIT_SRC) -Ihost
-TARGET_CFLAGS += -I. -I$(LUAJIT_SRC) -Ihost
+TARGET_CFLAGS += -I. -I$(LUAJIT_SRC) -Ihost $(EXTRA_MODULES)
 HOST_XLDFLAGS=
 HOST_XLIBS=
 HOST_ACFLAGS= $(CCOPTIONS) $(HOST_XCFLAGS) $(TARGET_ARCH) $(HOST_CFLAGS)
@@ -539,9 +543,7 @@ LJCORE_O= lj_gc.o lj_err.o lj_char.o lj_bc.o lj_obj.o \
 	  lj_carith.o lj_clib.o lj_cparse.o \
 	  lj_lib.o lj_alloc.o lib_aux.o \
 	  $(LJLIB_O) 
-#lib_init.o
 
-#LJCORE_O = $(foreach obj,$(LJCORE_ORIG_O),$(LUAJIT_SRC)/$(obj))
 LOCAL_O  = lib_init.o
 
 LJVMCORE_O= $(LJVM_O) $(LJCORE_O) $(LOCAL_O)
@@ -739,7 +741,10 @@ $(LUAJIT_O):
 	$(E) "CC        $@"
 	$(Q)$(TARGET_STCC) $(TARGET_ACFLAGS) -c -o $@ $<
 
-$(LOCAL_O): %o: %c
+$(LOCAL_O):
+	$(E) "CC        $@"
+	$(Q)$(TARGET_DYNCC) $(TARGET_ACFLAGS) -c -o $(@:.o=_dyn.o) $<
+	$(Q)$(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
 
 $(HOST_O): %.o: $(S)/%.c
 	$(E) "HOSTCC    $@"
@@ -751,12 +756,12 @@ include Makefile.dep
 # Target file rules.
 ##############################################################################
 
-$(LUAJIT_A): $(LJVMCORE_O) $(LOCAL_O)
+$(LUAJIT_A): $(LOCAL_O) $(LJVMCORE_O)
 	$(E) "AR        $@"
 	$(Q)$(TARGET_AR) $@ $(LJVMCORE_O)
 
 # The dependency on _O, but linking with _DYNO is intentional.
-$(LUAJIT_SO): $(LJVMCORE_O) $(LOCAL_O)
+$(LUAJIT_SO): $(LOCAL_O) $(LJVMCORE_O)
 	$(E) "DYNLINK   $@"
 	$(Q)$(TARGET_LD) $(TARGET_ASHLDFLAGS) -o $@ $(LJVMCORE_DYNO) $(TARGET_ALIBS)
 	$(Q)$(TARGET_STRIP) $@

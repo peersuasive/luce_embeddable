@@ -9,3 +9,8 @@ luajit
 luajit_*
 modules/
 Makefile.extra
+extra*
+extra_lualib.h
+extra_lib_init.c
+!extra_lualib.h.example
+!extra_lib_init.c.example

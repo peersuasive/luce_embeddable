@@ -1,0 +1,6 @@
+#include "extra_lualib.h"
+
+static const luaL_Reg extra_lj_lib_load[] = {
+  //ex: { LUA_ZZIPLIBNAME, luaopen_zzip },
+  { NULL,		NULL }
+};

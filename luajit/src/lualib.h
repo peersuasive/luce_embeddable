@@ -7,7 +7,10 @@
 #define _LUALIB_H
 
 #include "lua.h"
+
+#ifdef WITH_EXTRA_MODULES
 #include "extra_lualib.h"
+#endif
 
 #define LUA_FILEHANDLE	"FILE*"
 

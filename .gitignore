@@ -22,4 +22,4 @@ build/
 squishy
 Makefile.config
 Makefile.extra
-sources/
+sources

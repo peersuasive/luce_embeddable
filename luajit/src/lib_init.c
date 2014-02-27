@@ -15,7 +15,9 @@
 
 #include "lj_arch.h"
 
+#ifdef WITH_EXTRA_MODULES
 #include "extra_lib_init.c"
+#endif
 
 static const luaL_Reg lj_lib_load[] = {
   { "",			luaopen_base },
@@ -48,11 +50,13 @@ LUALIB_API void luaL_openlibs(lua_State *L)
     lua_call(L, 1, 0);
   }
 
+#ifdef WITH_EXTRA_MODULES
   for (lib = extra_lj_lib_load; lib->func; lib++) {
     lua_pushcfunction(L, lib->func);
     lua_pushstring(L, lib->name);
     lua_call(L, 1, 0);
   }
+#endif
 
   luaL_findtable(L, LUA_REGISTRYINDEX, "_PRELOAD",
 		 sizeof(lj_lib_preload)/sizeof(lj_lib_preload[0])-1);

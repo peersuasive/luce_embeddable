@@ -66,6 +66,11 @@ ifeq ($(LUA52),1)
 	TARGET_JIT  =
 endif
 
+WITH_OPENGL=1
+ifeq ($(OPENGL),0)
+	WITH_OPENGL=
+endif
+
 ifeq ($(XCROSS),win)
 	PRE 	= i686-pc-mingw32
 	X 		= /opt/mingw/usr/bin/$(PRE)-
@@ -95,6 +100,9 @@ ifeq ($(XCROSS),win)
 	ifneq (,$(XSTATIC))
 		STATIC_LIBS = -lfreetype -lpthread -lws2_32 -lshlwapi 
 		STATIC_LIBS += -luuid -lversion -lwinmm -lwininet -lole32 -lgdi32 -lcomdlg32 -limm32 -loleaut32
+		ifneq (,$(WITH_OPENGL))
+			STATIC_LIBS += -lopengl32
+		endif
 		STATIC_LIBS += -lcomctl32 -Wl,--subsystem,windows
  		STATIC_OBJS = obj/win$(IS52)/*.o
 	endif
@@ -143,6 +151,9 @@ ifeq ($(XCROSS),osx)
 		FRAMEWORKS = -framework Carbon -framework Cocoa -framework IOKit 
 		FRAMEWORKS += -framework QuartzCore -framework WebKit -framework System
 		FRAMEWORKS += -framework AppKit
+		ifneq (,$(WITH_OPENGL))
+			FRAMEWORKS += -framework OpenGL
+		endif
 		STATIC_LIBS = $(FRAMEWORKS)
  		STATIC_OBJS = obj/osx$(IS52)/*.o
 	endif
@@ -194,6 +205,9 @@ ifeq ($(XCROSS),ios)
 	LDFLAGS += -stdlib=libc++ -std=c++0x -std=c++11
 	LDFLAGS += -framework CoreGraphics -framework CoreText -framework Foundation 
 	LDFLAGS += -framework QuartzCore -framework UIKit 
+	ifneq (,$(WITH_OPENGL))
+		LDFLAGS += -framework OpenGLES
+	endif
 	LDFLAGS += -lbundle1.o 
 	LDFLAGS += -lstdc++
 	## ??
@@ -239,6 +253,9 @@ else
 	ifneq (,$(XSTATIC))
 		STATIC_LIBS = -L/usr/X11R6/lib/ 
 		STATIC_LIBS += -lX11 -lXext -lXinerama -ldl -lfreetype -lpthread -lrt -lstdc++
+		ifneq (,$(WITH_OPENGL))
+			STATIC_LIBS += -lGL
+		endif
  		STATIC_OBJS = obj/lin$(IS52)/*.o
 	endif
 

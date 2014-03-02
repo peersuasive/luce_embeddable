@@ -23,3 +23,16 @@ squishy
 Makefile.config
 Makefile.extra
 sources
+*_sf
+*_s
+*_s52
+*.exe
+*52
+*_s
+*_s52
+*_sf
+*_sf52
+*.exe
+*_osx
+*_ios
+app_res.o

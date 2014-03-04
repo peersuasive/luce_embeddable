@@ -40,7 +40,12 @@ ifeq (Windows,$(TARGET_SYS))
 	HOST_CC		:= gcc -m32
 	CROSS       := /opt/mingw/usr/bin/i686-pc-mingw32-
 else
+ifeq (Android,$(TARGET_SYS))
+	CC 			= gcc
+	HOST_CC		= gcc -m32
+else
 	CC			= gcc
+endif
 endif
 endif
 endif
@@ -68,7 +73,8 @@ CCOPT= -O2 -fomit-frame-pointer
 #
 CCOPT_x86= -march=i686
 CCOPT_x64=
-CCOPT_arm= -arch armv7
+#CCOPT_arm= -arch armv7
+CCOPT_arm=
 CCOPT_ppc=
 CCOPT_ppcspe=
 CCOPT_mips=
@@ -201,8 +207,10 @@ ifeq (Darwin,$(TARGET_SYS))
 	TARGET_CFLAGS += -DSHA2_USE_INTTYPES_H -DBYTE_ORDER -DLITTLE_ENDIAN
 	TARGET_CFLAGS += -I/opt/zmq-osx/include -Isrc -I.
 	#TARGET_SHLDFLAGS = -fnested-functions
+
 else
 ifeq (iOS,$(TARGET_SYS))
+	CCOPT_arm= -arch armv7
 	SDK_VERSION=6.1
 	MIN_VERSION=5.1
 	MACOSX_DEPLOYMENT_TARGET=$(SDK_VERSION)
@@ -216,6 +224,24 @@ ifeq (iOS,$(TARGET_SYS))
 	TARGET_CFLAGS = -D__LUAJIT -Wno-return-type
 	#TARGET_CFLAGS += -DSHA2_USE_INTTYPES_H -DBYTE_ORDER -DLITTLE_ENDIAN
 	TARGET_SHLDFLAGS += -arch armv7
+else
+ifeq (Android,$(TARGET_SYS))
+	NDK 		:= /opt/android-ndk
+	NDKABI		:= 14
+	NDKVER		:= $(NDK)/toolchains/arm-linux-androideabi-4.8
+	X			:= $(NDKVER)/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
+	NDKF		:= --sysroot $(NDK)/platforms/android-$(NDKABI)/arch-arm
+	NDKARCH		:= -march=armv7-a -mfloat-abi=softfp -Wl,--fix-cortex-a8
+
+	CROSS 		:= $(NDKVER)/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
+
+	TARGET_FLAGS = $(NDKF) $(NDKARCH)
+	
+	#LUAJIT_TARGET=LUAJIT_ARCH_arm 
+	#LJ_ARCH_HASFPU=1 
+	#LJ_ABI_SOFTFP=1
+
+endif
 endif
 endif
 ### end
@@ -398,6 +424,9 @@ else
   ifeq (Linux,$(TARGET_SYS))
     TARGET_XLIBS+= -ldl
   endif
+  ifeq (Android,$(TARGET_SYS))
+    TARGET_XLIBS+= -ldl
+  endif
   ifeq (GNU/kFreeBSD,$(TARGET_SYS))
     TARGET_XLIBS+= -ldl
   endif
@@ -412,6 +441,9 @@ ifneq ($(HOST_SYS),$(TARGET_SYS))
   ifeq (Linux,$(TARGET_SYS))
     HOST_XCFLAGS+= -DLUAJIT_OS=LUAJIT_OS_LINUX
   else
+  ifeq (Android,$(TARGET_SYS))
+	#
+  else
   ifeq (Darwin,$(TARGET_SYS))
     HOST_XCFLAGS+= -DLUAJIT_OS=LUAJIT_OS_OSX
   else
@@ -419,6 +451,7 @@ ifneq ($(HOST_SYS),$(TARGET_SYS))
     HOST_XCFLAGS+= -DLUAJIT_OS=LUAJIT_OS_OSX
   else
     HOST_XCFLAGS+= -DLUAJIT_OS=LUAJIT_OS_OTHER
+  endif
   endif
   endif
   endif
@@ -565,7 +598,8 @@ ALL_GEN= $(LJVM_S) $(ALL_HDRGEN) $(LIB_VMDEFP)
 WIN_RM= *.obj *.lib *.exp *.dll *.exe *.manifest *.pdb *.ilk
 OSX_RM= *_osx
 IOS_RM= *_ios
-ALL_RM= $(ALL_T) $(ALL_GEN) *.o host/*.o $(WIN_RM) $(OSX_RM) $(IOS_RM)
+AND_RM= *_android
+ALL_RM= $(ALL_T) $(ALL_GEN) *.o host/*.o $(WIN_RM) $(OSX_RM) $(IOS_RM) $(AND_RM)
 
 ##############################################################################
 # Build mode handling.
@@ -601,6 +635,9 @@ endif
 ifeq (iOS,$(TARGET_SYS))
   LJVM_MODE= machasm
   LUAJIT_T= luajit_ios
+endif
+ifeq (Android,$(TARGET_SYS))
+  LUAJIT_T= luajit_android
 endif
 ifeq (SunOS,$(TARGET_SYS))
   BUILDMODE= static
@@ -736,7 +773,7 @@ lj_folddef.h: $(BUILDVM_T) $(S)/lj_opt_fold.c
 %.o: %.s
 	$(E) "ASM       $@"
 	$(Q)$(TARGET_DYNCC) $(TARGET_ACFLAGS) -c -o $(@:.o=_dyn.o) $<
-	$(Q)$(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
+	$(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
 
 $(LUAJIT_O):
 	$(E) "CC        $@"

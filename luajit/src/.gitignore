@@ -10,6 +10,9 @@ luajit_*
 host/
 jit/
 modules/
+modules
+local/
+dis/
 Makefile.extra
 extra*
 extra_lualib.h

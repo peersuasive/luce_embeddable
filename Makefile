@@ -33,7 +33,7 @@ LUA_MAIN        := $(shell cat $(SQUISHY) |grep '^\ *Main'|awk '{print $$NF}')
 
 EXTRA_SOURCES   = 
 
-ifdef $(DEBUG)
+ifeq (1,$(DEBUG))
 	CONFIG=Debug
 	CFLAGS += -g
 else

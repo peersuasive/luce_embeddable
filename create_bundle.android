@@ -38,7 +38,7 @@ mkdir -p "$BDEST"/src/org/peersuasive/luce/${CLASS_NAME}
 
 if [[ -f "sources/android/AndroidManifest.xml" ]]
 then
-    echo "Using providesd manifest"
+    echo "Using provided manifest"
     \cp -f "sources/android/AndroidManifest.xml" "$BDEST"/bin/
 else
     \cp -f templates/android/AndroidManifest.xml "$BDEST"/bin/

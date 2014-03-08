@@ -3,7 +3,7 @@
 print("arg")
 local android = os.getenv('ANDROID_DATA') and true
 
-local out = (android) and io.open("/data/data/org.peersuasive.luce.demo/outdebug.log", "wb") or io.stdout
+local out = (android) and io.open("/sdcard/outdebug.log", "wb") or io.stdout
 local function log(msg, ...)
     local msg = (msg or "").."\n"
     out:write(string.format(msg, ...))

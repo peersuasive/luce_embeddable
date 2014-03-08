@@ -36,8 +36,13 @@ mkdir -p "$BDEST"/libs/${ARCH}
 mkdir -p "$BDEST"/bin/{dexedLibs,classes}
 mkdir -p "$BDEST"/src/org/peersuasive/luce/${CLASS_NAME}
 
-\cp -f templates/android/AndroidManifest.xml "$BDEST"/bin/
-sed -i "s,%CLASS_NAME%,${CLASS_NAME},g" "$BDEST"/bin/AndroidManifest.xml
+if [[ -f "sources/android/AndroidManifest.xml" ]]
+then
+    \cp -f "sources/android/AndroidManifest.xml" "$BDEST"/bin
+else
+    \cp -f templates/android/AndroidManifest.xml "$BDEST"/bin/
+    sed -i "s,%CLASS_NAME%,${CLASS_NAME},g" "$BDEST"/bin/AndroidManifest.xml
+fi
 
 \cp -f templates/android/src/org/peersuasive/luce/luce.java "$BDEST"/src/org/peersuasive/luce/luce.java
 \cp -f templates/android/src/org/peersuasive/luce/luce.java.tmpl "$BDEST"/src/org/peersuasive/luce/${CLASS_NAME}/${CLASS_NAME}.java

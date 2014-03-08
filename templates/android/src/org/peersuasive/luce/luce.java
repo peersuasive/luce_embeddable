@@ -39,7 +39,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.graphics.*;
 import android.opengl.*;
-import android.text.ClipboardManager;
+import android.content.ClipboardManager;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import java.io.BufferedInputStream;

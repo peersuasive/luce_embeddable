@@ -55,12 +55,12 @@ import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 
 //==============================================================================
-public final class luce   extends Activity
+public class luce extends Activity
 {
     //==============================================================================
     static
     {
-        System.loadLibrary ("%TARGET%");
+        System.loadLibrary ("luce_jni");
     }
 
     @Override
@@ -92,7 +92,7 @@ public final class luce   extends Activity
     }
 
     @Override
-    protected final void onResume()
+    protected void onResume()
     {
         super.onResume();
 

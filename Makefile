@@ -251,8 +251,10 @@ ifeq ($(XCROSS),android)
 	AND     = .so
 	ARCH    = armeabi-v7a
 	BUNDLE_APP = android_app
+	CLASS_NAME = $(subst \ ,,$(NAME))
 
 	CFLAGS += -DLUCE_ANDROID=1
+	CFLAGS += -DCLASS_NAME=$(CLASS_NAME)
 
 	CFLAGS += --sysroot $(NDK)/platforms/android-$(SDK_VER)/arch-arm
 	CFLAGS += -I$(NDK)/sources/cxx-stl/gnu-libstdc++/4.8/include
@@ -285,8 +287,9 @@ ifeq ($(XCROSS),android)
 	endif
 
 	ifneq (,$(XSTATIC))
- 		#STATIC_OBJS = obj/and$(IS52)/juce_*.o obj/and$(IS52)/luce.o
-		STATIC_OBJS = /home/distances/src-private/luce/Builds/Android/libluce_and.a
+		#STATIC_OBJS = /home/distances/src-private/luce/Builds/Android/libluce_and.a
+		STATIC_SH_OBJS = ./obj/and/libluce.so
+		EXTRALIBS = -L./obj/and -lluce_jni
 	endif
 
 else

@@ -5,6 +5,7 @@
 TARGET_="$1"
 TARGET="${TARGET_%.so}"; TARGET="${TARGET#lib}"
 APP_NAME=${2:-$TARGET}
+CLASS_NAME=${APP_NAME// }
 CONFIG=${3:-Release}
 ARCH=${4:-armeabi}
 SDK_VER=${5:-8}
@@ -29,18 +30,30 @@ SDK_JAR="${AHOME}/tools/lib/sdklib.jar"
 
 DEST="build/${CONFIG}/Android/${APP_NAME}"
 BDEST="$DEST/build"
+rm -rf "$BDEST"
 mkdir -p "$BDEST"/{bin,res,obj,libs,gen}
 mkdir -p "$BDEST"/libs/${ARCH}
 mkdir -p "$BDEST"/bin/{dexedLibs,classes}
+mkdir -p "$BDEST"/src/org/peersuasive/luce/${CLASS_NAME}
 
 \cp -f templates/android/AndroidManifest.xml "$BDEST"/bin/
-\cp -af templates/android/src "$BDEST"/
-sed -i "s,%TARGET%,${TARGET},g" "$BDEST"/src/org/peersuasive/luce/luce.java
+sed -i "s,%CLASS_NAME%,${CLASS_NAME},g" "$BDEST"/bin/AndroidManifest.xml
+
+\cp -f templates/android/src/org/peersuasive/luce/luce.java "$BDEST"/src/org/peersuasive/luce/luce.java
+\cp -f templates/android/src/org/peersuasive/luce/luce.java.tmpl "$BDEST"/src/org/peersuasive/luce/${CLASS_NAME}/${CLASS_NAME}.java
+sed -i "s,%TARGET%,${TARGET},g" "$BDEST"/src/org/peersuasive/luce/${CLASS_NAME}/${CLASS_NAME}.java
+sed -i "s,%CLASS_NAME%,${CLASS_NAME},g" "$BDEST"/src/org/peersuasive/luce/${CLASS_NAME}/${CLASS_NAME}.java
 
 \cp -af templates/android/res/values "$BDEST"/res/
 sed -i "s,%APP_NAME%,${APP_NAME},g" "$BDEST"/res/values/strings.xml
 
 \cp "$TARGET_" "$BDEST/libs/${ARCH}/lib${TARGET}".so
+
+has_so=$( find sources/android \( -type f -or -type l \) -name "*.so" 2>/dev/null)
+if [[ "$has_so" != "" ]]
+then
+    cp $has_so "$BDEST"/libs/${ARCH}/
+fi
 
 if [[ -f "sources/android/icon.png" ]]
 then
@@ -70,7 +83,9 @@ javac -d "$BDEST"/bin/classes \
     -bootclasspath "$ANDROID_JAR" \
     -encoding UTF-8 \
     ${G} \
-    -source 1.5 "$BDEST"/src/org/peersuasive/luce/luce.java || exit 1
+    -source 1.5 \
+    "$BDEST"/src/org/peersuasive/luce/luce.java \
+    "$BDEST"/src/org/peersuasive/luce/$CLASS_NAME/${CLASS_NAME}.java || exit 1
 
 $DX --dex \
     --output "$BDEST"/bin/dexedLibs/annotations-00c0ee9fb963bc760e8dbe2e64c05b67.jar \
@@ -110,4 +125,4 @@ jarsigner \
 
 "$ALIGN" -f 4 "$BDEST"/bin/luce-${CONFIG}-unaligned.apk "$DEST"/${APP_NAME}-${CONFIG}.apk || exit 1
 
-\rm -rf "$BDEST"
+#\rm -rf "$BDEST"

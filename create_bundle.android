@@ -38,7 +38,8 @@ mkdir -p "$BDEST"/src/org/peersuasive/luce/${CLASS_NAME}
 
 if [[ -f "sources/android/AndroidManifest.xml" ]]
 then
-    \cp -f "sources/android/AndroidManifest.xml" "$BDEST"/bin
+    echo "Using providesd manifest"
+    \cp -f "sources/android/AndroidManifest.xml" "$BDEST"/bin/
 else
     \cp -f templates/android/AndroidManifest.xml "$BDEST"/bin/
     sed -i "s,%CLASS_NAME%,${CLASS_NAME},g" "$BDEST"/bin/AndroidManifest.xml
@@ -57,11 +58,13 @@ sed -i "s,%APP_NAME%,${APP_NAME},g" "$BDEST"/res/values/strings.xml
 has_so=$( find sources/android \( -type f -or -type l \) -name "*.so" 2>/dev/null)
 if [[ "$has_so" != "" ]]
 then
+    echo "Pushing provided shared libraries"
     cp $has_so "$BDEST"/libs/${ARCH}/
 fi
 
 if [[ -f "sources/android/icon.png" ]]
 then
+    echo "Using provided icon"
     bash ./templates/android/convert_icon_to_android.sh "sources/android/icon.png" "$BDEST"
 else
     cp -a "templates/android/res/drawable-"* "$BDEST"/res/
@@ -69,6 +72,7 @@ fi
 
 if [[ -f "sources/android/README" ]]
 then
+    echo "Using provided README"
     cp "sources/android/README" "$BDEST"/
 else
     cp "templates/README.tmpl" "$BDEST"/README

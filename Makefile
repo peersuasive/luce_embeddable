@@ -426,7 +426,7 @@ ios_app: $(TARGET) create_bundle
 android_app: $(TARGET) create_bundle
 	@echo "Creating bundle..."
 	-@$(RM) -rf build/$(CONFIG)/$(NAME)
-	./create_bundle android "$(TARGET)" "$(NAME)" "$(CONFIG)" "$(ARCH)" "$(SDK_VER)" "$(SDK)"
+	@./create_bundle android "$(TARGET)" "$(NAME)" "$(CONFIG)" "$(ARCH)" "$(SDK_VER)" "$(SDK)"
 
 win_prep_app: create_bundle
 	@echo "Compiling windows resources..."

@@ -34,8 +34,10 @@ LUA_MAIN        := $(shell cat $(SQUISHY) |grep '^\ *Main'|awk '{print $$NF}')
 EXTRA_SOURCES   = 
 
 ifdef $(DEBUG)
+	CONFIG=Debug
 	CFLAGS += -g
 else
+	CONFIG=Release
 	#CFLAGS += -Os #size
 	CFLAGS += -O2 # speed, could try -O3
 endif
@@ -227,6 +229,65 @@ ifeq ($(XCROSS),ios)
 	ifneq (,$(XSTATIC))
  		STATIC_OBJS = obj/ios$(IS52)/juce_*.om obj/ios$(IS52)/luce*.om
 	endif
+else
+ifeq ($(XCROSS),android)
+	## use this to select gcc instead of clang
+	export NDK_TOOLCHAIN_VERSION := 4.8
+	## OR use this to select the latest clang version:
+	#NDK_TOOLCHAIN_VERSION := clang
+	## then enable c++11 extentions in source code
+	#APP_CPPFLAGS += -std=c++11
+	## or use APP_CPPFLAGS := -std=gnu++11
+	#LOCAL_CPPFLAGS += -std=c++11
+	NDK 	= /opt/android-ndk
+	SDK 	= /opt/android-sdk
+	SDK_VER	= 14
+	NDKVER	= $(NDK)/toolchains/arm-linux-androideabi-4.8
+	X 		= $(NDKVER)/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
+	CXX	    = $(X)g++
+	STRIP   = $(X)strip
+	UPX     = echo $(X)upx.exe
+	EXT 	= _android
+	AND     = .so
+	ARCH    = armeabi-v7a
+	BUNDLE_APP = android_app
+
+	CFLAGS += -DLUCE_ANDROID=1
+
+	CFLAGS += --sysroot $(NDK)/platforms/android-$(SDK_VER)/arch-arm
+	CFLAGS += -I$(NDK)/sources/cxx-stl/gnu-libstdc++/4.8/include
+	CFLAGS += -I$(NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ARCH)/include
+	
+	CFLAGS += -fsigned-char -fexceptions -frtti -Wno-psabi
+
+	LDFLAGS += --sysroot $(NDK)/platforms/android-$(SDK_VER)/arch-arm
+	LDFLAGS	+= -march=armv7-a -mfloat-abi=softfp -Wl,--fix-cortex-a8
+	LDFLAGS += -L$(NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ARCH)
+
+	LDFLAGS += -shared
+
+	EXTRALIBS += -llog
+	EXTRALIBS += -lgnustl_static
+	EXTRALIBS += -lstdc++
+
+	ifneq (,$(WITH_OPENGL))
+		EXTRALIBS += -lGLESv2
+	endif
+
+	#LDFLAGS += -L$(NDK)/platforms/android-14/arch-arm/usr/lib 
+
+	ifeq ($(LUA52),1)
+		CFLAGS += -I/opt/zmq-android/include/lua5.2
+		EXTRALIBS += -llua5.2
+	else
+		CFLAGS 	  += -I./luajit-2.0/src -I./luajit/src
+		EXTRALIBS += libluajit.a
+	endif
+
+	ifneq (,$(XSTATIC))
+ 		#STATIC_OBJS = obj/and$(IS52)/juce_*.o obj/and$(IS52)/luce.o
+		STATIC_OBJS = /home/distances/src-private/luce/Builds/Android/libluce_and.a
+	endif
 
 else
 	UPX        = echo ./upx
@@ -259,9 +320,10 @@ else
  		STATIC_OBJS = obj/lin$(IS52)/*.o
 	endif
 
-endif
-endif
-endif
+endif # win
+endif # osx
+endif # ios
+endif # and
 
 -include Makefile.extra
 
@@ -276,7 +338,7 @@ LIBS   += $(EXTRALIBS)
 LDFLAGS += -std=c++11
 LDFLAGS += -fvisibility=hidden
 
-TARGET = $(TNAME)$(EXT)
+TARGET ?= $(TNAME)$(EXT)
 
 all: $(PREPARE_APP) $(TARGET) $(BUNDLE_APP)
 
@@ -309,6 +371,10 @@ luajit/src/luajit_ios:
 	@echo "Compiling luajit for ios..."
 	@#cd luajit/src && make clean && make -f Makefile.cross-ios clean && make -f Makefile.cross-ios
 	@cd luajit/src && make clean && make CROSS=$(X) TARGET_SYS=iOS
+
+luajit/src/luajit_android:
+	@echo "Compiling luajit for android..."
+	@cd luajit/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Android
 
 main.o: main.cpp $(TARGET_JIT) oResult.h
 	@$(LUAC) -p $(LUA_MAIN)
@@ -354,6 +420,11 @@ ios_app: $(TARGET) create_bundle
 	-@$(RM) -rf build/$(CONFIG)/$(NAME).app
 	@./create_bundle ios $(TARGET) $(NAME)
 
+android_app: $(TARGET) create_bundle
+	@echo "Creating bundle..."
+	-@$(RM) -rf build/$(CONFIG)/$(NAME)
+	./create_bundle android "$(TARGET)" "$(NAME)" "$(CONFIG)" "$(ARCH)" "$(SDK_VER)" "$(SDK)"
+
 win_prep_app: create_bundle
 	@echo "Compiling windows resources..."
 	@./create_bundle win prepare $(TARGET) $(NAME)
@@ -372,6 +443,7 @@ clean:
 	@$(RM) -f $(NAME)*.exe
 	@$(RM) -f $(NAME)*_osx
 	@$(RM) -f $(NAME)*_ios
+	@$(RM) -f $(NAME)*_android
 	@$(RM) -f $(EXTRA_SOURCES) app_res.o
 
 extraclean: clean

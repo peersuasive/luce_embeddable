@@ -10,10 +10,14 @@ case "$dest" in
     ios)
         exec bash create_bundle.ios "$@"
         break;;
+    android)
+        exec bash create_bundle.android "$@"
+        break;;
     win*)
         exec bash create_bundle.win "$@"
         break;;
     *)
+        echo "Unknown bundle target: $@"
         exit 1;
         break;;
 esac

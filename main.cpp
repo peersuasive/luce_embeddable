@@ -23,20 +23,34 @@ extern "C" {
 #include "oResult.h"
 
 #if defined XSTATIC || FULL_XSTATIC
+#if LUCE_ANDROID
+#include <jni.h>
+extern int luaopen_core_and(lua_State*, JNIEnv*, jobject);
+#else
 extern int luaopen_core(lua_State*);
 #endif
+#endif
 
+#if LUCE_ANDROID
+void Java_org_peersuasive_luce_luce_luceResumeApp( JNIEnv* env, jobject activity ) {
+    int argc = 1;
+    const char **argv;
+#else
 int main(int argc, char *argv[]) {
+#endif
     int status = 0;
     lua_State *L;
     L = luaL_newstate();
     luaL_openlibs(L);
 
-#if defined XSTATIC || FULL_XSTATIC
-    lua_pushcfunction(L, luaopen_core);
-    lua_call(L, 0, 0);
+    #if defined XSTATIC || FULL_XSTATIC
+    #if LUCE_ANDROID
+    luaopen_core_and(L, env, activity);
+    #else
+    luaopen_core(L);
+    #endif
     lua_pop(L,1);
-#endif
+    #endif
 
     status = luaL_loadbuffer(L, luaJIT_BC_oResult, luaJIT_BC_oResult_SIZE, NULL);
     if(status) {
@@ -44,7 +58,7 @@ int main(int argc, char *argv[]) {
         lua_error(L);
     }
 
-#ifndef FULL_XSTATIC
+    #ifndef FULL_XSTATIC
     lua_getglobal( L, "package" );
     lua_getfield( L, -1, "path" );
 
@@ -56,7 +70,7 @@ int main(int argc, char *argv[]) {
     lua_pop( L, 2 ); // field + package
 
     status = luaL_loadfile(L, "main.lua");
-#endif
+    #endif
 
     if(!status) {
         for(int i=1;i<argc;++i)
@@ -67,13 +81,17 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Missing or error with main file: %s\n", "main.lua");
         lua_error(L);
     }
+    #if ! LUCE_ANDROID
     lua_close(L);
     return status;
+    #endif
 }
 
 #ifdef __MINGW32__
 #include "wmain.c"
-#endif
+#endif // MINGW32
+
+//#endif // LUCE_ANDROID
 
 #ifdef __cplusplus
 }

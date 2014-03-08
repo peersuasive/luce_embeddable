@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+
+(($# < 1)) && echo "Missing parameters" && exit 1
+
+TARGET_="$1"
+TARGET="${TARGET_%.so}"; TARGET="${TARGET#lib}"
+APP_NAME=${2:-$TARGET}
+CONFIG=${3:-Release}
+ARCH=${4:-armeabi}
+SDK_VER=${5:-8}
+AHOME=${6:-$HOME/SDKs/android-sdk}
+KSTORE=${7:-$HOME/.android/debug.keystore}
+SPWD=${8:-android}
+KPWD=${9:-android}
+ALIAS=${10:-androiddebugkey}
+
+G=
+DEBUGMODE=
+: [[ "$CONFIG" != Release ]] && G=-g && DEBUGMODE=--debug-mode
+
+BT=$(find "$AHOME"/build-tools -maxdepth 1 -type d -name '[0-9]*'| sort -n | tail -n 1)
+AAPT="${BT}"/aapt
+DX="${BT}"/dx
+ALIGN="${AHOME}"/tools/zipalign
+
+ANDROID_JAR="${AHOME}/platforms/android-${SDK_VER}/android.jar"
+ANNOT_JAR="${AHOME}/tools/support/annotations.jar"
+SDK_JAR="${AHOME}/tools/lib/sdklib.jar"
+
+DEST="build/${CONFIG}/Android/${APP_NAME}"
+BDEST="$DEST/build"
+mkdir -p "$BDEST"/{bin,res,obj,libs,gen}
+mkdir -p "$BDEST"/libs/${ARCH}
+mkdir -p "$BDEST"/bin/{dexedLibs,classes}
+
+\cp -f templates/android/AndroidManifest.xml "$BDEST"/bin/
+\cp -af templates/android/src "$BDEST"/
+sed -i "s,%TARGET%,${TARGET},g" "$BDEST"/src/org/peersuasive/luce/luce.java
+
+\cp -af templates/android/res/values "$BDEST"/res/
+sed -i "s,%APP_NAME%,${APP_NAME},g" "$BDEST"/res/values/strings.xml
+
+\cp "$TARGET_" "$BDEST/libs/${ARCH}/lib${TARGET}".so
+
+if [[ -f "sources/android/icon.png" ]]
+then
+    bash ./templates/android/convert_icon_to_android.sh "sources/android/icon.png" "$BDEST"
+else
+    cp -a "templates/android/res/drawable-"* "$BDEST"/res/
+fi
+
+if [[ -f "sources/android/README" ]]
+then
+    cp "sources/android/README" "$BDEST"/
+else
+    cp "templates/README.tmpl" "$BDEST"/README
+    sed -i "s,%APP_NAME%,${APP_NAME},g" "$BDEST"/README
+fi
+
+$AAPT package -f -m -M "$BDEST"/bin/AndroidManifest.xml -S "$BDEST"/res \
+    -I "$ANDROID_JAR" \
+    -J "$BDEST"/gen \
+    --generate-dependencies \
+    -G "$BDEST"/bin/proguard.txt || exit 1
+
+javac -d "$BDEST"/bin/classes \
+    -classpath "$BDEST/bin/classes:$ANNOT_JAR" \
+    -sourcepath "$BDEST"/src:"$BDEST"/gen \
+    -target 1.5 \
+    -bootclasspath "$ANDROID_JAR" \
+    -encoding UTF-8 \
+    ${G} \
+    -source 1.5 "$BDEST"/src/org/peersuasive/luce/luce.java || exit 1
+
+$DX --dex \
+    --output "$BDEST"/bin/dexedLibs/annotations-00c0ee9fb963bc760e8dbe2e64c05b67.jar \
+    "$ANNOT_JAR" || exit 1
+
+
+$DX --dex \
+    --output "$BDEST"/bin/classes.dex \
+    "$BDEST"/bin/classes \
+    "$BDEST"/bin/dexedLibs/annotations-00c0ee9fb963bc760e8dbe2e64c05b67.jar || exit 1
+
+$AAPT crunch -v -S "$BDEST"/res -C "$BDEST"/bin/res || exit 1
+
+$AAPT package --no-crunch -f ${DEBUGMODE} \
+    -M "$BDEST"/bin/AndroidManifest.xml \
+    -S "$BDEST"/bin/res \
+    -S "$BDEST"/res \
+    -I "$ANDROID_JAR" \
+    -F "$BDEST"/bin/luce.ap_ \
+    --generate-dependencies || exit 1
+
+java -classpath "$SDK_JAR" com.android.sdklib.build.ApkBuilderMain \
+    "$BDEST"/bin/luce-${CONFIG}-unaligned_.apk -u \
+    -z "$BDEST"/bin/luce.ap_ \
+    -f "$BDEST"/bin/classes.dex \
+    -rf "$BDEST"/src \
+    -nf "$BDEST"/libs || exit 1
+
+jarsigner \
+    -verbose \
+    -keystore "$KSTORE" \
+    -storepass "$SPWD" \
+    -keypass "$KPWD" \
+    -signedjar "$BDEST"/bin/luce-${CONFIG}-unaligned.apk \
+    "$BDEST"/bin/luce-${CONFIG}-unaligned_.apk \
+    "$ALIAS" || exit 1
+
+"$ALIGN" -f 4 "$BDEST"/bin/luce-${CONFIG}-unaligned.apk "$DEST"/${APP_NAME}-${CONFIG}.apk || exit 1
+
+\rm -rf "$BDEST"

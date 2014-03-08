@@ -17,6 +17,7 @@ ALIAS=${10:-androiddebugkey}
 
 G=
 DEBUGMODE=
+VERBOSE=
 : [[ "$CONFIG" != Release ]] && G=-g && DEBUGMODE=--debug-mode
 
 BT=$(find "$AHOME"/build-tools -maxdepth 1 -type d -name '[0-9]*'| sort -n | tail -n 1)
@@ -38,7 +39,7 @@ mkdir -p "$BDEST"/src/org/peersuasive/luce/${CLASS_NAME}
 
 if [[ -f "sources/android/AndroidManifest.xml" ]]
 then
-    echo "Using provided manifest"
+    echo "++Using provided manifest"
     \cp -f "sources/android/AndroidManifest.xml" "$BDEST"/bin/
 else
     \cp -f templates/android/AndroidManifest.xml "$BDEST"/bin/
@@ -58,13 +59,13 @@ sed -i "s,%APP_NAME%,${APP_NAME},g" "$BDEST"/res/values/strings.xml
 has_so=$( find sources/android \( -type f -or -type l \) -name "*.so" 2>/dev/null)
 if [[ "$has_so" != "" ]]
 then
-    echo "Pushing provided shared libraries"
+    echo "++Pushing provided shared libraries"
     cp $has_so "$BDEST"/libs/${ARCH}/
 fi
 
 if [[ -f "sources/android/icon.png" ]]
 then
-    echo "Using provided icon"
+    echo "++Using provided icon"
     bash ./templates/android/convert_icon_to_android.sh "sources/android/icon.png" "$BDEST"
 else
     cp -a "templates/android/res/drawable-"* "$BDEST"/res/
@@ -72,7 +73,7 @@ fi
 
 if [[ -f "sources/android/README" ]]
 then
-    echo "Using provided README"
+    echo "++Using provided README"
     cp "sources/android/README" "$BDEST"/
 else
     cp "templates/README.tmpl" "$BDEST"/README
@@ -106,7 +107,7 @@ $DX --dex \
     "$BDEST"/bin/classes \
     "$BDEST"/bin/dexedLibs/annotations-00c0ee9fb963bc760e8dbe2e64c05b67.jar || exit 1
 
-$AAPT crunch -v -S "$BDEST"/res -C "$BDEST"/bin/res || exit 1
+$AAPT crunch ${VERBOSE:+-v} -S "$BDEST"/res -C "$BDEST"/bin/res || exit 1
 
 $AAPT package --no-crunch -f ${DEBUGMODE} \
     -M "$BDEST"/bin/AndroidManifest.xml \
@@ -124,7 +125,7 @@ java -classpath "$SDK_JAR" com.android.sdklib.build.ApkBuilderMain \
     -nf "$BDEST"/libs || exit 1
 
 jarsigner \
-    -verbose \
+    ${VERBOSE:+-verbose} \
     -keystore "$KSTORE" \
     -storepass "$SPWD" \
     -keypass "$KPWD" \

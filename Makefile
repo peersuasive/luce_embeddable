@@ -304,7 +304,7 @@ ifeq ($(XCROSS),android)
 	ifneq (,$(XSTATIC))
 		#STATIC_OBJS = /home/distances/src-private/luce/Builds/Android/libluce_and.a
 		STATIC_SH_OBJS = ./obj/and/libluce.so
-		EXTRALIBS += -L./obj/and -Lsources/android -lluce_jni_$(ARCH)
+		EXTRALIBS += -L./obj/and -Lsources/android -lluajit_$(ARCH) -lluce_jni_$(ARCH)
 	endif
 
 else

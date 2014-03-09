@@ -232,6 +232,7 @@ ifeq (iOS,$(TARGET_SYS))
 	TARGET_SHLDFLAGS += -arch armv7
 else
 ifeq (Android,$(TARGET_SYS))
+	BUILDMODE= mixed
 	NDK 		:= /opt/android-ndk
 	NDKABI		:= 14
 	NDKVER		:= $(NDK)/toolchains/arm-linux-androideabi-4.8
@@ -250,11 +251,11 @@ else
 ifeq (Androidx86,$(TARGET_SYS))
 	NDK 		:= /opt/android-ndk
 	NDKABI		:= 14
-	NDKVER		:= $(NDK)/toolchains/arm-linux-androideabi-4.8
-	X			:= $(NDKVER)/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
+	NDKVER		:= $(NDK)/toolchains/x86-4.8
+	X			:= $(NDKVER)/prebuilt/linux-x86_64/bin/i686-linux-android-
 	NDKF		:= --sysroot $(NDK)/platforms/android-$(NDKABI)/arch-x86
 
-	CROSS 		:= $(NDKVER)/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
+	CROSS 		:= $(NDKVER)/prebuilt/linux-x86_64/bin/i686-linux-android-
 
 	TARGET_FLAGS = $(NDKF)
 
@@ -313,6 +314,9 @@ TARGET_SONAME= libluajit-$(ABIVER).so.$(MAJVER)
 TARGET_DYLIBNAME= libluajit-$(ABIVER).$(MAJVER).dylib
 TARGET_DYLIBPATH= $(TARGET_LIBPATH)/$(TARGET_DYLIBNAME)
 TARGET_DLLNAME= lua$(NODOTABIVER).dll
+ifeq (Android,$(TARGET_SYS))
+	TARGET_SONAME := libluajit.so
+endif
 TARGET_XSHLDFLAGS= -shared -fPIC -Wl,-soname,$(TARGET_SONAME)
 TARGET_DYNXLDOPTS=
 
@@ -836,9 +840,9 @@ $(LUAJIT_A): $(LOCAL_O) $(LJVMCORE_O) $(EXTRA_O)
 
 # The dependency on _O, but linking with _DYNO is intentional.
 $(LUAJIT_SO): $(LOCAL_O) $(LJVMCORE_O) $(EXTRA_O)
-	$(E) "DYNLINK   $@"
-	@#$(Q)$(TARGET_LD) $(TARGET_ASHLDFLAGS) -o $@ $(LJVMCORE_DYNO) $(EXTRA_O) $(TARGET_ALIBS)
-	@#$(Q)$(TARGET_STRIP) $@
+	$(E) "DYNLINK   $@ $(TARGET_SONAME)"
+	$(Q)$(TARGET_LD) $(TARGET_ASHLDFLAGS) -o $@ $(LJVMCORE_DYNO) $(EXTRA_O) $(TARGET_ALIBS)
+	$(Q)$(TARGET_STRIP) $@
 
 $(LUAJIT_T): $(TARGET_O) $(LUAJIT_O) $(TARGET_DEP)
 	$(E) "LINK      $@"

@@ -61,6 +61,7 @@ public class luce extends Activity
     //==============================================================================
     static
     {
+        System.loadLibrary ("luajit");
         System.loadLibrary ("luce_jni");
     }
 

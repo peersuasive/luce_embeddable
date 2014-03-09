@@ -61,6 +61,7 @@ if [[ "${has_so[0]}" != "" ]]
 then
     for lib in ${has_so[@]}
     do
+        ! [[ -r "$lib" ]] && continue
         lib_d=${lib##*/}; lib_d=${lib_d//_${ARCH}}
         echo "++Pushing provided shared libraries '${lib##*/}' to '${lib_d}'"
         cp $lib "$BDEST"/libs/${ARCH}/"${lib_d}"

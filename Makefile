@@ -242,28 +242,41 @@ ifeq ($(XCROSS),android)
 	NDK 	= /opt/android-ndk
 	SDK 	= /opt/android-sdk
 	SDK_VER	= 14
-	NDKVER	= $(NDK)/toolchains/arm-linux-androideabi-4.8
-	X 		= $(NDKVER)/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
+
+	ifeq (emul,$(XARCH))
+		CC_ARCH  = x86-4.8
+		CC_PRE   = i686-linux-android
+		ARCH     = x86
+		SDK_ARCH = arch-x86
+		EXT 	 = _x86_android
+	else
+		CC_ARCH  = arm-linux-androideabi-4.8
+		CC_PRE   = arm-linux-androideabi
+		ARCH     = armeabi-v7a
+		SDK_ARCH = arch-arm
+		EXT 	 = _android
+		LDFLAGS	 += -march=armv7-a -mfloat-abi=softfp -Wl,--fix-cortex-a8
+	endif
+
+	NDKVER	= $(NDK)/toolchains/$(CC_ARCH)
+	X 		= $(NDKVER)/prebuilt/linux-x86_64/bin/$(CC_PRE)-
 	CXX	    = $(X)g++
 	STRIP   = $(X)strip
 	UPX     = echo $(X)upx.exe
-	EXT 	= _android
 	AND     = .so
-	ARCH    = armeabi-v7a
 	BUNDLE_APP = android_app
 	CLASS_NAME = $(subst \ ,,$(NAME))
 
 	CFLAGS += -DLUCE_ANDROID=1
 	CFLAGS += -DCLASS_NAME=$(CLASS_NAME)
 
-	CFLAGS += --sysroot $(NDK)/platforms/android-$(SDK_VER)/arch-arm
+	CFLAGS += --sysroot $(NDK)/platforms/android-$(SDK_VER)/$(SDK_ARCH)
 	CFLAGS += -I$(NDK)/sources/cxx-stl/gnu-libstdc++/4.8/include
 	CFLAGS += -I$(NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ARCH)/include
 	
 	CFLAGS += -fsigned-char -fexceptions -frtti -Wno-psabi
 
-	LDFLAGS += --sysroot $(NDK)/platforms/android-$(SDK_VER)/arch-arm
-	LDFLAGS	+= -march=armv7-a -mfloat-abi=softfp -Wl,--fix-cortex-a8
+	LDFLAGS += --sysroot $(NDK)/platforms/android-$(SDK_VER)/$(SDK_ARCH)
 	LDFLAGS += -L$(NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ARCH)
 
 	LDFLAGS += -shared
@@ -289,7 +302,7 @@ ifeq ($(XCROSS),android)
 	ifneq (,$(XSTATIC))
 		#STATIC_OBJS = /home/distances/src-private/luce/Builds/Android/libluce_and.a
 		STATIC_SH_OBJS = ./obj/and/libluce.so
-		EXTRALIBS += -L./obj/and -Lsources/android -lluce_jni
+		EXTRALIBS += -L./obj/and -Lsources/android -lluce_jni_$(ARCH)
 	endif
 
 else
@@ -379,10 +392,14 @@ luajit/src/luajit_android:
 	@echo "Compiling luajit for android..."
 	@cd luajit/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Android
 
+luajit/src/luajit_x86_android:
+	@echo "Compiling luajit for android (x86)..."
+	@cd luajit/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Androidx86
+
 main.o: main.cpp $(TARGET_JIT) oResult.h
 	@$(LUAC) -p $(LUA_MAIN)
 	@echo "Compiling main..."
-	@$(CXX) $(CFLAGS) -c -o $@ $<
+	$(CXX) $(CFLAGS) -c -o $@ $<
 
 squishy: $(SQUISHY)
 	@ln -sf $(SQUISHY) squishy
@@ -408,7 +425,7 @@ $(WRAPCPY): wrap_memcpy.c
 
 $(TARGET): main.o $(WRAPCPY) $(EXTRA_SOURCES) 
 	@echo "Linking... (static ? $(or $(and $(XSTATIC), yes), no))"
-	@$(LD) $(LDFLAGS) -o $(TARGET) $< $(WRAPCPY) $(EXTRA_SOURCES) $(STATIC_OBJS) $(LIBS) $(STATIC_LIBS)
+	$(LD) $(LDFLAGS) -o $(TARGET) $< $(WRAPCPY) $(EXTRA_SOURCES) $(STATIC_OBJS) $(LIBS) $(STATIC_LIBS)
 	@$(STRIP) $(STRIP_OPTIONS) $(TARGET)
 	-@$(UPX) $(TARGET)
 	@echo OK

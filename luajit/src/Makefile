@@ -44,7 +44,13 @@ ifeq (Android,$(TARGET_SYS))
 	CC 			= gcc
 	HOST_CC		= gcc -m32
 else
+ifeq (Androidx86,$(TARGET_SYS))
+	CC 			= gcc
+	HOST_CC		= gcc -m32
+else
 	CC			= gcc
+
+endif
 endif
 endif
 endif
@@ -240,10 +246,23 @@ ifeq (Android,$(TARGET_SYS))
 	#LUAJIT_TARGET=LUAJIT_ARCH_arm 
 	#LJ_ARCH_HASFPU=1 
 	#LJ_ABI_SOFTFP=1
+else
+ifeq (Androidx86,$(TARGET_SYS))
+	NDK 		:= /opt/android-ndk
+	NDKABI		:= 14
+	NDKVER		:= $(NDK)/toolchains/arm-linux-androideabi-4.8
+	X			:= $(NDKVER)/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
+	NDKF		:= --sysroot $(NDK)/platforms/android-$(NDKABI)/arch-x86
 
-endif
-endif
-endif
+	CROSS 		:= $(NDKVER)/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
+
+	TARGET_FLAGS = $(NDKF)
+
+endif # Darwin
+endif # iOS
+endif # Android
+endif # Android x86
+
 ### end
 
 -include Makefile.extra
@@ -427,6 +446,9 @@ else
   ifeq (Android,$(TARGET_SYS))
     TARGET_XLIBS+= -ldl
   endif
+  ifeq (Androidx86,$(TARGET_SYS))
+    TARGET_XLIBS+= -ldl
+  endif
   ifeq (GNU/kFreeBSD,$(TARGET_SYS))
     TARGET_XLIBS+= -ldl
   endif
@@ -444,6 +466,9 @@ ifneq ($(HOST_SYS),$(TARGET_SYS))
   ifeq (Android,$(TARGET_SYS))
 	#
   else
+  ifeq (Androidx86,$(TARGET_SYS))
+	#
+  else
   ifeq (Darwin,$(TARGET_SYS))
     HOST_XCFLAGS+= -DLUAJIT_OS=LUAJIT_OS_OSX
   else
@@ -451,6 +476,7 @@ ifneq ($(HOST_SYS),$(TARGET_SYS))
     HOST_XCFLAGS+= -DLUAJIT_OS=LUAJIT_OS_OSX
   else
     HOST_XCFLAGS+= -DLUAJIT_OS=LUAJIT_OS_OTHER
+  endif
   endif
   endif
   endif
@@ -638,6 +664,9 @@ ifeq (iOS,$(TARGET_SYS))
 endif
 ifeq (Android,$(TARGET_SYS))
   LUAJIT_T= luajit_android
+endif
+ifeq (Androidx86,$(TARGET_SYS))
+  LUAJIT_T= luajit_x86_android
 endif
 ifeq (SunOS,$(TARGET_SYS))
   BUILDMODE= static

@@ -3,14 +3,14 @@
 print("arg")
 local android = os.getenv('ANDROID_DATA') and true
 
-local out = (android) and io.open("/sdcard/outdebug.log", "wb") or io.stdout
+-- issue with KitKat, 3rd party apps can't write to external sdcard anymore
+local out = (android) and io.open("/data/data/org.peersuasive.luce.demo/outdebug.log", "wb") or io.stdout
 local function log(msg, ...)
     local msg = (msg or "").."\n"
     out:write(string.format(msg, ...))
     out:flush()
 end
 
-log("is android ? %s", android)
 local args = {...}
 
 local demos = {
@@ -115,28 +115,23 @@ end
 --if not(android) then dw, mc, demoHolder = start() end
 
 mainWindow:initialise(function(...)
-    log("initialise")
     dw, mc, demoHolder = start()
-    ---[[
-    log("add and make visible...")
     mc:addAndMakeVisible( demoHolder )
-    log("set bounds...")
     demoHolder:setBounds{ 0, 0, 800, 600 }
-    log("start demo...")
     demoHolder:startDemo()
-    --]]
-    log("set content owned...")
     dw:setContentOwned( mc, true )
-    log("centre with size...")
-    dw:centreWithSize{800, 600}
-    log("set visible... %s", dw.setVisible)
+    if(android)then
+        dw:setFullScreen(true)
+        --dw:setKioskMode(true,false) -- not implemented by JUCE
+    else
+        dw:centreWithSize{800, 600}
+    end
     dw:setVisible(true)
-    log("GO!!!!!!")
     return dw
 end)
 
 mainWindow:resumed(function(...)
-    log("lua: resuming!")
+    --
 end)
 
 local stop_now = false

@@ -34,9 +34,11 @@ LUA_MAIN        := $(shell cat $(SQUISHY) |grep '^\ *Main'|awk '{print $$NF}')
 EXTRA_SOURCES   = 
 
 ifeq (1,$(DEBUG))
+	XDEBUG=-D"DEBUG=1" -D"_DEBUG=1"
 	CONFIG=Debug
 	CFLAGS += -g
 else
+	XDEBUG=-D"NDEBUG=1" -D"_NDEBUG=1"
 	CONFIG=Release
 	#CFLAGS += -Os #size
 	CFLAGS += -O2 # speed, could try -O3
@@ -347,6 +349,7 @@ LD     = $(CXX)
 RM     = rm
 SQUISH = ./squish
 
+CFLAGS += $(XDEBUG)
 CFLAGS += -std=c++11
 CFLAGS += -fomit-frame-pointer -fno-stack-protector
 CFLAGS += -MMD

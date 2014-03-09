@@ -24,6 +24,7 @@
 
 package org.peersuasive.luce;
 
+import android.util.Log;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -419,6 +420,10 @@ public class luce extends Activity
             {
                 case KeyEvent.KEYCODE_VOLUME_UP:
                 case KeyEvent.KEYCODE_VOLUME_DOWN:
+                    return super.onKeyDown (keyCode, event);
+
+                case KeyEvent.KEYCODE_BACK:
+                    finish();
                     return super.onKeyDown (keyCode, event);
 
                 default: break;

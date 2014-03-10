@@ -3,7 +3,7 @@ Version=1.0
 Type=Application
 Name=%APP_NAME%
 Comment=
-Exec=./%EXEC_NAME%
+Exec=/usr/bin/%EXEC_NAME%
 
 Terminal=false
 Icon=%ICON%

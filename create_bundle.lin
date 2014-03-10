@@ -11,16 +11,17 @@ APP_NAME=${2:-$TARGET}
 TARGET_APP=$APP_NAME
 CONFIG=${3:-Release}
 VERSION=${4:-0.0.1}
+ARCH=${ARCH:-$5}
+ARCH=${ARCH:-$(uname -i)}
 DESC="Embedded Luce for $APP_NAME"
 
-
 DEST="build/${APP_NAME}/${CONFIG}/Linux"
-FDEST="$DEST"/usr
+FDEST="$DEST"/dist
 mkdir -p "${DEST}"
-mkdir -p "$FDEST"
-mkdir -p "${FDEST}"/{bin,share,lib}
-mkdir -p "${FDEST}"/share/{pixmaps,applications,doc,menu}
-mkdir -p "${FDEST}"/share/doc/"${APP_NAME}"
+mkdir -p "${FDEST}/usr"
+mkdir -p "${FDEST}"/usr/{bin,share,lib}
+mkdir -p "${FDEST}"/usr/share/{pixmaps,applications,doc,menu}
+mkdir -p "${FDEST}"/usr/share/doc/"${APP_NAME}"
 
 ext=.${TARGET##*.}; [[ "$ext" == .$TARGET ]] && ext=
 name="${APP_NAME//_sf}"
@@ -50,7 +51,7 @@ else
 fi
 chmod +x "$DEST"/"${APP_NAME}".desktop
 
-cp "$TARGET" "$DEST"/"$EXEC_NAME"
+cp "$TARGET" "$DEST"/"$EXEC_NAME" || exit 1
 if [[ -f "sources/lin/README" ]]
 then
     cp "sources/lin/README" "$DEST"
@@ -63,45 +64,47 @@ fi
 
 if [[ -f sources/lin/changelog ]]
 then
-    cp sources/lin/changelog > "$DEST"/changelog.Debian
+    cp sources/lin/changelog > "$FDEST"/changelog
 else
-    cp templates/lin/changelog.Debian "$DEST"/
+    cp templates/lin/changelog "$FDEST"/
 fi
 
 if [[ -f sources/lin/copyright ]]
 then
-    cp templates/lin/copyright "$DEST"/
-    cat sources/lin/copyright >> "$DEST"/copyright
+    cp templates/lin/copyright "$FDEST"/
+    cat sources/lin/copyright >> "$FDEST"/copyright
 else
-    cp templates/lin/copyright "$DEST"/
+    cp templates/lin/copyright "$FDEST"/
 fi
-sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/copyright
+sed -i "s,%APP_NAME%,${APP_NAME},g" "$FDEST"/copyright
 
-cp templates/lin/control "$DEST"/
-cp templates/lin/menu "$DEST"/
+cp templates/lin/control "$FDEST"/
+cp templates/lin/menu "$FDEST"/
 
-pushd "$DEST" &>/dev/null || exit 1
+pushd "$FDEST" &>/dev/null || exit 1
 
-ln -f *.png *.xpm usr/share/pixmaps/
-ln -f "${APP_NAME}" usr/bin
-ln -f README usr/share/doc/"${APP_NAME}"/
-ln -f *.desktop usr/share/applications/
+ln -f ../*.png ../*.xpm usr/share/pixmaps/
+ln -f ../"${APP_NAME}" usr/bin
+ln -f ../README usr/share/doc/"${APP_NAME}"/
+ln -f ../*.desktop usr/share/applications/
 ln -f copyright usr/share/doc/"${APP_NAME}"/
 
 DATE=$(LC_ALL=C date +"%a, %d %b %Y %X %z")
-sed -i "s,%APP_NAME%,${APP_NAME},g;s|%DATE%|${DATE}|g;s,%VERSION%,${VERSION},g;s,%DESC%,${DESC},g" changelog.Debian
-gzip -c changelog.Debian > usr/share/doc/${APP_NAME}/changelog.Debian.gz
+sed -i "s,%APP_NAME%,${APP_NAME},g;s|%DATE%|${DATE}|g;s,%VERSION%,${VERSION},g;s,%DESC%,${DESC},g" changelog
+gzip -c changelog > usr/share/doc/"${APP_NAME}"/changelog.Debian.gz
 
 sed -i "s,%APP_NAME%,${APP_NAME},g;s,%EXEC_NAME%,${EXEC_NAME},g;s,%DESC%,${DESC},g" menu
 ln -f menu usr/share/menu/"${APP_NAME}"
 
 SIZE=$(du -ks usr|cut -f 1)
-sed -i "s,%APP_NAME%,${APP_NAME},g;s,%VERSION%,${VERSION},g;s,%SIZE%,${SIZE},g;s,%DESC%,${DESC},g" control
+sed -i "s,%APP_NAME%,${APP_NAME},g;s,%VERSION%,${VERSION},g;\
+    s,%SIZE%,${SIZE},g;s,%DESC%,${DESC},g;s,%ARCH%,${ARCH},g" control
 
 tar czf data.tar.gz usr
 tar czf control.tar.gz control
 echo "2.0" > debian-binary
 
-ar r "${APP_NAME}".deb debian-binary control.tar.gz data.tar.gz
+ar r ../"${APP_NAME}-${VERSION}-1.${ARCH}".deb debian-binary control.tar.gz data.tar.gz
 
 popd &>/dev/null
+\rm -rf "$FDEST"

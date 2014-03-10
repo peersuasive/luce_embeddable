@@ -2,7 +2,7 @@ Package: %APP_NAME%
 Version: %VERSION%
 Section: user/hidden
 Priority: optional
-Architecture: amd64
+Architecture: %ARCH%
 Installed-Size: %SIZE%
 Maintainer: Christophe Berbizier (dbdl) <cberbizier@peersuasive.com>
 Description: %DESC%

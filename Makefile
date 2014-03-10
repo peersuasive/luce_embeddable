@@ -409,7 +409,7 @@ luajit/src/luajit_x86_android:
 main.o: main.cpp $(TARGET_JIT) oResult.h
 	@$(LUAC) -p $(LUA_MAIN)
 	@echo "Compiling main..."
-	$(CXX) $(CFLAGS) -c -o $@ $<
+	@$(CXX) $(CFLAGS) -c -o $@ $<
 
 squishy: $(SQUISHY)
 	@ln -sf $(SQUISHY) squishy
@@ -435,7 +435,8 @@ $(WRAPCPY): wrap_memcpy.c
 
 $(TARGET): main.o $(WRAPCPY) $(EXTRA_SOURCES) 
 	@echo "Linking... (static ? $(or $(and $(XSTATIC), yes), no))"
-	$(LD) $(LDFLAGS) -o $(TARGET) $< $(WRAPCPY) $(EXTRA_SOURCES) $(STATIC_OBJS) $(LIBS) $(STATIC_LIBS)
+	@echo "   (full static ? $(or $(and $(FULL_STATIC), yes), no))"
+	@$(LD) $(LDFLAGS) -o $(TARGET) $< $(WRAPCPY) $(EXTRA_SOURCES) $(STATIC_OBJS) $(LIBS) $(STATIC_LIBS)
 	@$(STRIP) $(STRIP_OPTIONS) $(TARGET)
 	-@$(UPX) $(TARGET)
 	@echo OK

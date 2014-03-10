@@ -22,6 +22,32 @@ having lua or luce installed.
 The interpreter can then be presented as an optional download sitting next to
 the applications itself.
 
+License
+=======
+
+Luce Embeddable is licensed under the terms of the `GPLv3 <http://www.gnu.org/licenses/gpl-3.0.html>`_
+for all open source applications.
+
+Luce is licensed under the terms of the `GPLv3 <http://www.gnu.org/licenses/gpl-3.0.html>`_,
+with some part being `AGPLv3 <http://www.gnu.org/licenses/agpl-3.0.html>`_
+for all open source applications.
+
+To release close-source applications with Luce Embedded and/or Luce, please contact us at
+
+``contact``
+
+``_at``
+
+``peersuasive``
+
+``_dot_``
+
+``com``.
+
+
+Luce Embeddable is (c) 2014, Peersuasive Technologies
+
+Luce is (c) 2014, Peersuasive Technologies
 
 Support
 =======
@@ -136,6 +162,12 @@ or none at all.
 
 To embed C/C++ modules, see `Embedding C Modules`_.
 
+.. note::
+
+   When updating the squishy file, take care of the resulting class being
+   written in a file named ``oResult.lua``.
+
+
 
 
 Available options
@@ -145,10 +177,10 @@ Available options
 
          can be one of:
 
-             - osx
-             - win
-             - ios
-             - android
+         - osx
+         - win
+         - ios
+         - android
           
 :STATIC: (default) statically compiled binary, with luce fully embedded
                  
@@ -157,7 +189,7 @@ Available options
 :LUA52: compile with lua52
                  (not fully tested on all platforms, works fine with win at least)
 
-:NAME: name of the binary (default: demo)
+:NAME: name of the binary (default: ``Luce Embedded Demo``)
 
        .. note:: 
           
@@ -167,24 +199,19 @@ Available options
 
              and when both are set, binary name results in ``$(NAME)52_s$(EXT)``
 
-             however, except for Linux, all target results can be found in their
-             bundled form inside ``build/``
+             Resulting bundled applications can be found in ``build/CONFIG/NAME/OS/``
 
-
-By default, will create a ``STATIC`` Linux glibc 2.13 compatible binary.
+By default, will create a ``STATIC`` Linux x86_64 glibc 2.13 compatible binary with a Debian package.
 
 
 
 .. note::
 
-   When updating the squishy file, take care of the resulting class being written in a file named ``oResult.lua``.
-
-
-.. note::
-
-   When you use luce_embeddable as a git submodule, if you don't want to add new commits in the submodule itself,
-   you can override or extend the default configuration with the helpers ``Makefile.config`` and ``Makefile.extra``
-   (see ``Makefile.config.example`` and ``Makefile.extra.example`` for more details)
+   When you use luce_embeddable as a git submodule, if you don't want to add
+   new commits in the submodule itself, you can override or extend the default
+   configuration with the helpers ``Makefile.config`` and ``Makefile.extra``
+   (see ``Makefile.config.example`` and ``Makefile.extra.example`` for more
+   details)
 
 
 Embedding C Modules
@@ -194,9 +221,9 @@ luce_embedded uses luajit when creating a static of semi-static interpreter.
 
 In order to add new modules to embed, inside ``luajit/src``, one must create and fill:
 
-    - ``Makefile.extra``,
-    - ``extra_lualib.h``,
-    - and ``extra_lib_init.c``
+- ``Makefile.extra``,
+- ``extra_lualib.h``,
+- and ``extra_lib_init.c``
       
 (see the ``*.example`` files for example usages) 
 
@@ -231,7 +258,7 @@ In order to add new modules to embed, inside ``luajit/src``, one must create and
 hack for iOS libc++
 ===================
 
-    May work... May not... Unfortunately, I did this in a hurry and didn't take notes during the process
+May work... May not... Unfortunately, I did this in a hurry and didn't take notes during the process
 
 More or less, follow the process of osxcross's ``build_libcxx.sh``
 
@@ -239,9 +266,9 @@ More or less, follow the process of osxcross's ``build_libcxx.sh``
 
 * inside the .sdk, remove any of these, if they exist:
 
-    - ``usr/include/c++/v1``
-    - ``usr/lib/libc++.dylib``
-    - ``usr/lib/libc++.*.dylib``
+- ``usr/include/c++/v1``
+- ``usr/lib/libc++.dylib``
+- ``usr/lib/libc++.*.dylib``
 
 * uncompress llvm's libcxx-3.4 in ``/opt/osx/ios/``
 
@@ -288,7 +315,8 @@ More or less, follow the process of osxcross's ``build_libcxx.sh``
     unset BUILD_LIBCXX
 
     ## test if it compiles
-    /opt/ios-apple-darwin-11/usr/bin/ios-clang++ -I../include test_libcxx.cpp -stdlib=libc++ -std=c++11 -Wall -o testx
+    /opt/ios-apple-darwin-11/usr/bin/ios-clang++ \
+        -I../include test_libcxx.cpp -stdlib=libc++ -std=c++11 -Wall -o testx
 
 
 test_libcxx.cpp

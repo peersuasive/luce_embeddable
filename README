@@ -143,8 +143,16 @@ Overall Status
 Requirements
 ============
 
-Besides the compilers for the wanted targets, Luce's static library must also be available, as well as the
-squished luce module.
+Besides the compilers for the wanted targets, Luce's static library must also
+be available (except for Android, where the shared library is required), as
+well as the squished luce module.
+
+Luce static library must exist in ``sources/[os]/libluce.a``, where ``os`` is
+one of ``lin``, ``osx``, ``win``, ``ios``.
+
+For Android, same place, with ``android`` as os name and
+``libluce_jni_[arch].so`` as lib name, where ``arch`` can be ``x86`` or
+``armeabi-v7a``.
 
 
 Usage

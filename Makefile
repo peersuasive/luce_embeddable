@@ -315,6 +315,7 @@ ifeq ($(XCROSS),android)
 
 else
 	UPX        = echo ./upx
+	BUNDLE_APP = linux_app
 	## force compatibility with glibc >= 2.12
 	GLIBCV    := $(shell [ `ldd --version|head -n1|awk '{print $$NF}'|cut -f2 -d.` -gt 13 ] && echo true)
 	ifeq ($(GLIBCV), true)
@@ -455,6 +456,11 @@ $(TARGET): main.o $(WRAPCPY) $(EXTRA_SOURCES)
 	@$(STRIP) $(STRIP_OPTIONS) $(TARGET)
 	-@$(UPX) $(TARGET)
 	@echo OK
+
+linux_app: $(TARGET) create_bundle
+	@echo "Creating bundle..."
+	-@$(RM) -rf build/$(CONFIG)/$(NAME)
+	@./create_bundle lin $(TARGET) $(NAME)
 
 osx_app: $(TARGET) create_bundle
 	@echo "Creating bundle..."

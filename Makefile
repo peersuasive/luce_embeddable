@@ -387,6 +387,22 @@ endef
 
 all: $(PREPARE_APP) $(TARGET) $(BUNDLE_APP)
 
+allplats:
+	@$(call echoc,$(BLUE),"Compiling for Linux...")
+	@$(MAKE) --no-print-directory
+
+	@$(call echoc,$(BLUE),"Compiling for Windows...")
+	@$(MAKE) --no-print-directory XCROSS=win
+
+	@$(call echoc,$(BLUE),"Compiling for OS X...")
+	@$(MAKE) --no-print-directory XCROSS=osx
+
+	@$(call echoc,$(BLUE),"Compiling for iOS...")
+	@$(MAKE) --no-print-directory XCROSS=ios
+
+	@$(call echoc,$(BLUE),"Compiling for Android...")
+	@$(MAKE) --no-print-directory XCROSS=android
+
 $(TARGET_JIT): luajit/src/luajit$(EXT)
 	@ln -sf luajit/src/libluajit.a .
 	@$(RM) -f jit

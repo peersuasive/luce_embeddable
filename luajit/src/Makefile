@@ -806,7 +806,7 @@ lj_folddef.h: $(BUILDVM_T) $(S)/lj_opt_fold.c
 %.o: %.s
 	$(E) "ASM       $@"
 	$(Q)$(TARGET_DYNCC) $(TARGET_ACFLAGS) -c -o $(@:.o=_dyn.o) $<
-	$(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
+	$(Q)$(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
 
 $(LUAJIT_O):
 	$(E) "CC        $@"

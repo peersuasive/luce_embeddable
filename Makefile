@@ -5,9 +5,10 @@
 ##       so that we can use this as a simple loader looking at specific folders
 ##       for specific files (say, luce/main.lua)
 
-STATIC ?= 1
+STATIC 			?= 1
 
-LUCE_HOME = $(HOME)/src-private/luce
+LUCE_HOME   	?= $(HOME)/src-private/luce
+LUCE_S_HOME 	?= $(HOME)/src-private/luce_squishable
 
 #OS 				= $(shell uname -a)
 CXX 			= g++
@@ -459,12 +460,12 @@ oResult.h: bin2c.bin $(ORESULT_MAIN)
 	@echo "Embedding luce (with main class $(ORESULT_MAIN))"
 	@$(BIN2C) $(ORESULT_MAIN) oResult.h oResult
 
-$(LUCE_HOME)/Source/lua/oluce.lua:
-	@cd "$(LUCE_HOME)/Source/lua" && make
+$(LUCE_S_HOME)/oluce.lua:
+	@cd "$(LUCE_S_HOME)" && make
 
-luce.lua: $(LUCE_HOME)/Source/lua/oluce.lua
+luce.lua: $(LUCE_S_HOME)/oluce.lua
 	@echo "Building embedded lua class..."
-	@cp -f $(LUCE_HOME)/Source/lua/oluce.lua luce.lua
+	@cp -f $(LUCE_S_HOME)/oluce.lua luce.lua
 
 $(WRAPCPY): wrap_memcpy.c
 	@echo "Adding memcpy wrapper..."

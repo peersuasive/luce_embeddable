@@ -369,6 +369,21 @@ LDFLAGS += -fvisibility=hidden
 
 TARGET ?= $(TNAME)$(EXT)
 
+BLACK  := 0
+RED    := 1
+GREEN  := 2
+YELLOW := 3
+BLUE   := 4
+MAG    := 5
+CYAN   := 6
+WHITE  := 7
+define echoc
+	@tput setaf $1
+	@tput bold
+	@echo $2
+	@tput sgr0
+endef
+
 all: $(PREPARE_APP) $(TARGET) $(BUNDLE_APP)
 
 $(TARGET_JIT): luajit/src/luajit$(EXT)

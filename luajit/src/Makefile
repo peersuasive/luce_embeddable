@@ -211,7 +211,7 @@ ifeq (Darwin,$(TARGET_SYS))
 	#TARGET_CFLAGS += -fnested-functions
 	TARGET_CFLAGS += -mmacosx-version-min=$(SDK_MIN)
 	TARGET_CFLAGS += -DSHA2_USE_INTTYPES_H -DBYTE_ORDER -DLITTLE_ENDIAN
-	TARGET_CFLAGS += -I/opt/zmq-osx/include -Isrc -I.
+	TARGET_CFLAGS += -Isrc -I.
 	#TARGET_SHLDFLAGS = -fnested-functions
 
 else

@@ -108,20 +108,22 @@ ifeq ($(XCROSS),win)
 			STATIC_LIBS += -lopengl32
 		endif
 		STATIC_LIBS += -lcomctl32 -Wl,--subsystem,windows
- 		STATIC_OBJS = obj/win$(IS52)/*.o
+		ifneq (,$(DEV))
+	 		STATIC_OBJS = obj/win$(IS52)/*.o
+		else
+	 		STATIC_OBJS = sources/win/libluce$(IS52).a
+		endif
 	endif
 
 else
 ifeq ($(XCROSS),osx)
-	#eval `/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/osxcross-env`
-	export PATH := $(PATH):/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin
-	export LD_LIBRARY_PATH := $(LD_LIBRAY_PATH):/usr/local/src/vcs/compiler/osxcross/target/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib
+	#eval `/opt/osxcross/target/bin/osxcross-env`
+	export PATH := $(PATH):/opt/osxcross/target/bin
+	export LD_LIBRARY_PATH := $(LD_LIBRAY_PATH):/opt/osxcross/target/bin/../lib:/usr/lib/llvm-3.3/lib
 
 	SDK_VER=10.8
 	SDK_MIN=10.6
-	## TODO: SHOULD create an .app, at least for non-static
 	unexport CODESIGN_ALLOCATE
-	#export CODESIGN_ALLOCATE=/home/distances/src-private/luce/Builds/iOS/tmp/u/usr/bin/arm-apple-darwin11-codesign_allocate
 	X 	= x86_64-apple-darwin12-
 	EXT = _osx
 	CXX = o64-clang++
@@ -159,15 +161,20 @@ ifeq ($(XCROSS),osx)
 			FRAMEWORKS += -framework OpenGL
 		endif
 		STATIC_LIBS = $(FRAMEWORKS)
- 		STATIC_OBJS = obj/osx$(IS52)/*.o
+		ifneq (,$(DEV))
+	 		STATIC_OBJS = obj/osx$(IS52)/*.o
+		else
+	 		STATIC_OBJS = sources/osx/libluce$(IS52).a
+		endif
 	endif
  	#EXTRA_SOURCES = osx_main.o
 
 else
 ifeq ($(XCROSS),ios)
-	#eval `/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/osxcross-env`
-	export PATH := $(PATH):/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin
-	export LD_LIBRARY_PATH := $(LD_LIBRAY_PATH):/usr/local/src/vcs/compiler/osxcross/target/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib:/usr/local/src/vcs/compiler/osxcross/target.manatsu/bin/../lib:/usr/lib/llvm-3.3/lib
+	#eval `/opt/osxcross/target/bin/osxcross-env`
+	export PATH := $(PATH):/opt/osxcross/target/bin
+	export LD_LIBRARY_PATH := $(LD_LIBRAY_PATH):/opt/osxcross/target/bin/../lib:/usr/lib/llvm-3.3/lib
+
 	## always static on ios
 	FULL_XSTATIC  = -DFULL_XSTATIC=1
 	XSTATIC 	  = -DXSTATIC=1
@@ -186,7 +193,7 @@ ifeq ($(XCROSS),ios)
 
 	## already signed, so better skip stripping,
 	## or resign with 
-	#export CODESIGN_ALLOCATE=/home/opt/ios.../usr/bin/arm-apple-darwin11-codesign_allocate; /opt/ios.../usr/bin/ldid -S demo_ios
+	#export CODESIGN_ALLOCATE=/opt/ios.../usr/bin/arm-apple-darwin11-codesign_allocate; /opt/ios.../usr/bin/ldid -S demo_ios
 	STRIP = echo
 	CFLAGS += -x objective-c++ 
 	#CFLAGS += -MMD -Wno-deprecated-register 
@@ -194,15 +201,12 @@ ifeq ($(XCROSS),ios)
 	CFLAGS += -miphoneos-version-min=$(SDK_MIN)
 	CFLAGS += -fpascal-strings -fmessage-length=0 -fasm-blocks -fstrict-aliasing -fvisibility-inlines-hidden 
 
-	## ??
-	CFLAGS += -I/usr/local/src/vcs/compiler/osxcross/ios/libcxx-3.4/include
-	## ??
+	## provides C++
+	CFLAGS += -I/opt/osxcross/ios/libcxx-3.4/include
+
 	CFLAGS += -arch armv7 
 	LDFGLAGS += -arch armv7
 	
-	## ??
-	#main.mm -o main.om
-
 	LDFLAGS += -stdlib=libc++ 
 	LDFLAGS += -fnested-functions -fmessage-length=0 -fpascal-strings -fstrict-aliasing -fasm-blocks -fobjc-link-runtime 
 	LDFLAGS += -miphoneos-version-min=$(SDK_MIN)
@@ -225,11 +229,14 @@ ifeq ($(XCROSS),ios)
 		EXTRALIBS += libluajit.a
 	endif
 
-
 	TNAME := $(NAME)
 	## always true, but if we were to compile luce as a framework, it might not be anymore -- TODO: check iOS doc
 	ifneq (,$(XSTATIC))
+	ifneq (,$(DEV))
  		STATIC_OBJS = obj/ios$(IS52)/juce_*.om obj/ios$(IS52)/luce*.om
+	else
+ 		STATIC_OBJS = sources/ios/libluce$(IS52).a
+	endif
 	endif
 else
 ifeq ($(XCROSS),android)
@@ -303,7 +310,6 @@ ifeq ($(XCROSS),android)
 
 	ifneq (,$(XSTATIC))
 		#STATIC_OBJS = /home/distances/src-private/luce/Builds/Android/libluce_and.a
-		STATIC_SH_OBJS = ./obj/and/libluce.so
 		EXTRALIBS += -L./obj/and -Lsources/android -lluajit_$(ARCH) -lluce_jni_$(ARCH)
 	endif
 
@@ -335,7 +341,11 @@ else
 		ifneq (,$(WITH_OPENGL))
 			STATIC_LIBS += -lGL
 		endif
- 		STATIC_OBJS = obj/lin$(IS52)/*.o
+		ifneq (,$(DEV))
+	 		STATIC_OBJS = obj/lin$(IS52)/*.o
+		else
+ 			STATIC_OBJS = sources/linux/libluce$(IS52).a
+		endif
 	endif
 
 endif # win
@@ -378,17 +388,14 @@ luajit/src/luajit:
 
 luajit/src/luajit.exe:
 	@echo "Compiling luajit for windows..."
-	@#cd luajit/src && make clean && make CC="gcc -m32" HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows BUILDMODE=static
 	@cd luajit/src && make clean && make CC="gcc -m32" HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows
 
 luajit/src/luajit_osx:
 	@echo "Compiling luajit for osx..."
-	@#cd luajit/src && make clean && make -f Makefile.cross-macosx clean && make -f Makefile.cross-macosx
 	@cd luajit/src && make clean && make CROSS=$(X) TARGET_SYS=Darwin
 
 luajit/src/luajit_ios:
 	@echo "Compiling luajit for ios..."
-	@#cd luajit/src && make clean && make -f Makefile.cross-ios clean && make -f Makefile.cross-ios
 	@cd luajit/src && make clean && make CROSS=$(X) TARGET_SYS=iOS
 
 luajit/src/luajit_android:
@@ -470,12 +477,14 @@ clean:
 	@$(RM) -f $(EXTRA_SOURCES) app_res.o
 
 extraclean: clean
-	@$(RM) -f luce.lua
 	@$(RM) -rf build
 
 distclean: extraclean
 	@cd ./luajit/src && make clean
 	@$(RM) -f libluajit.a libluajit.win.a jit bin2c.bin
+
+purge: distclean
+	@$(RM) -f luce.lua
 
 -include $(OBJECTS:%.o=%.d)
 

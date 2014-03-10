@@ -2,9 +2,14 @@
 
 print("arg")
 local android = os.getenv('ANDROID_DATA') and true
+local ios  = (os.getenv("HOME") or ""):match("^/var/mobile")
+local evos = (android or ios) and true
 
 -- issue with KitKat, 3rd party apps can't write to external sdcard anymore
-local out = (android) and io.open("/data/data/org.peersuasive.luce.demo/outdebug.log", "wb") or io.stdout
+local out = 
+        (android) and io.open("/data/data/org.peersuasive.luce.demo/outdebug.log", "wb") 
+        or (ios) and io.open("/tmp/outdebug.log", "wb")
+        or io.stdout
 local function log(msg, ...)
     local msg = (msg or "").."\n"
     out:write(string.format(msg, ...))
@@ -66,49 +71,33 @@ if(#args>0)then
     end
     end
 end
-log("1")
 local luce = require"luce"()
-log("2", luce)
 local mainWindow = luce:JUCEApplication()
-log("3", mainWindow)
 
 local dw, mc, demoHolder = nil, nil, nil
 local function start()
-    log("start")
     local dw = luce:DocumentWindow("Document Window")
-    log("4")
     local mc = luce:MainComponent("Main Component")
-    log("5")
     mc:setSize{1,1}
-    log("6")
-    ---[[
+    ---[[ full test
     local demoHolder = require"DemoHolder"(demo)
-    log("7")
     demoHolder.animations.animateRotation = animations.rotation
     demoHolder.animations.animatePosition = animations.position
     demoHolder.animations.animateShear    = animations.shear
     demoHolder.animations.animateSize     = animations.size
 
-    log("8")
     mc:resized(function()
         demoHolder:setBounds( luce:Rectangle(mc:getLocalBounds()) )
     end)
     --]]
-    --[[
+    --[[ quick test
     mc:paint(function(g)
-        log("***************** paint!!!!!!!!!!!!!!!!!!!!!!!!!")
-        log("1")
         g:fillAll(luce:Colour(0xffeeddff))
-        log("2")
         g:setFont(16.0)
-        log("3")
         g:setColour(luce:Colour(luce.Colours.black))
-        log("4")
         g:drawText("Hello World!", mc:getLocalBounds(), luce.JustificationType.centred, true);
-        log("5")
     end)
     --]]
-    log("9")
     return dw, mc, demoHolder
 end
 
@@ -120,9 +109,9 @@ mainWindow:initialise(function(...)
     demoHolder:setBounds{ 0, 0, 800, 600 }
     demoHolder:startDemo()
     dw:setContentOwned( mc, true )
-    if(android)then
+    if(android or ios)then
         dw:setFullScreen(true)
-        --dw:setKioskMode(true,false) -- not implemented by JUCE
+        --dw:setKioskMode(true,false) -- not implemented by JUCE for Android
     else
         dw:centreWithSize{800, 600}
     end
@@ -131,7 +120,7 @@ mainWindow:initialise(function(...)
 end)
 
 mainWindow:resumed(function(...)
-    --
+    -- Android start point
 end)
 
 local stop_now = false

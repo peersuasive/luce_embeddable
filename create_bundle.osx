@@ -7,7 +7,7 @@ APP_NAME=${2:-$TARGET}
 TARGET_APP="$APP_NAME".app
 CONFIG=${3:-Release}
 
-DEST="build/${CONFIG}/MacOSX/${TARGET_APP}"
+DEST="build/${APP_NAME}/${CONFIG}/MacOSX/${TARGET_APP}"
 mkdir -p "${DEST}/Contents/"{MacOS,Resources}
 
 INFO=

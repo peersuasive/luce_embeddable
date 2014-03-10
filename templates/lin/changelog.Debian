@@ -1,0 +1,6 @@
+%APP_NAME% (%VERSION%-1) unstable; urgency=low
+
+  * %DESC%
+
+ -- Christophe Berbizier (dbdl) <cberbizier@peersuasive.com>  %DATE%
+

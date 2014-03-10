@@ -1,0 +1,7 @@
+?package(%EXEC_NAME%): \
+    needs="X11" \
+    section="Applications/Graphics" \
+    title="%APP_NAME%" \
+    command="/usr/bin/%EXEC_NAME%" \
+    icon="/usr/share/pixmaps/%APP_NAME%.xpm" \
+    longtitle="%DESC%"

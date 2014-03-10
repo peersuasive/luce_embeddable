@@ -13,7 +13,7 @@ APP_NAME=${2:-$TARGET}
 TARGET_APP="$APP_NAME"
 CONFIG=${3:-Release}
 
-DEST="build/${CONFIG}/Win32/${TARGET_APP}"
+DEST="build/${APP_NAME}/${CONFIG}/Win32"
 mkdir -p "${DEST}"
 
 if ((PREPARE))

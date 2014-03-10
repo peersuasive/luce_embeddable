@@ -29,7 +29,7 @@ ANDROID_JAR="${AHOME}/platforms/android-${SDK_VER}/android.jar"
 ANNOT_JAR="${AHOME}/tools/support/annotations.jar"
 SDK_JAR="${AHOME}/tools/lib/sdklib.jar"
 
-DEST="build/${CONFIG}/Android/${APP_NAME}"
+DEST="build/${APP_NAME}/${CONFIG}/Android"
 BDEST="$DEST/build"
 rm -rf "$BDEST"
 mkdir -p "$BDEST"/{bin,res,obj,libs,gen}
@@ -140,4 +140,4 @@ jarsigner \
 
 "$ALIGN" -f 4 "$BDEST"/bin/luce-${CONFIG}-unaligned.apk "$DEST"/${APP_NAME}-${CONFIG}.apk || exit 1
 
-#\rm -rf "$BDEST"
+\rm -rf "$BDEST"

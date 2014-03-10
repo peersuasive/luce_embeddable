@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 ###
-### TODO
-###
+### TODO: sign deb
+###       create rpm
 
 (($# < 1)) && echo "Missing parameters" && exit 1
 
@@ -10,12 +10,17 @@ TARGET=$1
 APP_NAME=${2:-$TARGET}
 TARGET_APP=$APP_NAME
 CONFIG=${3:-Release}
+VERSION=${4:-0.0.1}
+DESC="Embedded Luce for $APP_NAME"
 
-## create Debian package
-## create rpm
 
-DEST="build/${CONFIG}/Linux/${TARGET_APP}"
+DEST="build/${APP_NAME}/${CONFIG}/Linux"
+FDEST="$DEST"/usr
 mkdir -p "${DEST}"
+mkdir -p "$FDEST"
+mkdir -p "${FDEST}"/{bin,share,lib}
+mkdir -p "${FDEST}"/share/{pixmaps,applications,doc,menu}
+mkdir -p "${FDEST}"/share/doc/"${APP_NAME}"
 
 ext=.${TARGET##*.}; [[ "$ext" == .$TARGET ]] && ext=
 name="${APP_NAME//_sf}"
@@ -25,9 +30,15 @@ EXEC_NAME="$name$ext"
 ICON="$name"
 if [[ -f sources/lin/icon.png ]]
 then
-    cp sources/lin/icon.png "$DEST"/"$ICON".png
+    convert -thumbnail 48x48 sources/lin/icon.png "$DEST"/"$ICON".png
 else
-    cp templates/lin/icon.png "$DEST"/"$ICON".png
+    cp templates/lin/icon.xpm "$DEST"/"$ICON".png
+fi
+if [[ -f sources/lin/icon.xpm ]]
+then
+    convert -thumbnail 48x48 sources/lin/icon.xpm "$DEST"/"$ICON".xpm
+else
+    cp templates/lin/icon.xpm "$DEST"/"$ICON".xpm
 fi
 
 if [[ -f sources/lin/default.desktop ]]
@@ -47,3 +58,50 @@ else
     cp "templates/README.tmpl" "$DEST"/README
     sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/README
 fi
+
+## debian package
+
+if [[ -f sources/lin/changelog ]]
+then
+    cp sources/lin/changelog > "$DEST"/changelog.Debian
+else
+    cp templates/lin/changelog.Debian "$DEST"/
+fi
+
+if [[ -f sources/lin/copyright ]]
+then
+    cp templates/lin/copyright "$DEST"/
+    cat sources/lin/copyright >> "$DEST"/copyright
+else
+    cp templates/lin/copyright "$DEST"/
+fi
+sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/copyright
+
+cp templates/lin/control "$DEST"/
+cp templates/lin/menu "$DEST"/
+
+pushd "$DEST" &>/dev/null || exit 1
+
+ln -f *.png *.xpm usr/share/pixmaps/
+ln -f "${APP_NAME}" usr/bin
+ln -f README usr/share/doc/"${APP_NAME}"/
+ln -f *.desktop usr/share/applications/
+ln -f copyright usr/share/doc/"${APP_NAME}"/
+
+DATE=$(LC_ALL=C date +"%a, %d %b %Y %X %z")
+sed -i "s,%APP_NAME%,${APP_NAME},g;s|%DATE%|${DATE}|g;s,%VERSION%,${VERSION},g;s,%DESC%,${DESC},g" changelog.Debian
+gzip -c changelog.Debian > usr/share/doc/${APP_NAME}/changelog.Debian.gz
+
+sed -i "s,%APP_NAME%,${APP_NAME},g;s,%EXEC_NAME%,${EXEC_NAME},g;s,%DESC%,${DESC},g" menu
+ln -f menu usr/share/menu/"${APP_NAME}"
+
+SIZE=$(du -ks usr|cut -f 1)
+sed -i "s,%APP_NAME%,${APP_NAME},g;s,%VERSION%,${VERSION},g;s,%SIZE%,${SIZE},g;s,%DESC%,${DESC},g" control
+
+tar czf data.tar.gz usr
+tar czf control.tar.gz control
+echo "2.0" > debian-binary
+
+ar r "${APP_NAME}".deb debian-binary control.tar.gz data.tar.gz
+
+popd &>/dev/null

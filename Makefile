@@ -17,7 +17,7 @@ BIN2C      		= ./bin2c
 UPX 		    = echo
 CFLAGS   		=
 EXTRALIBS 		= 
-NAME     		?= demo
+NAME     		?= Luce Embedded Demo
 X 				= 
 STRIP_OPTIONS 	= --strip-unneeded
 
@@ -370,6 +370,11 @@ LDFLAGS += -fvisibility=hidden
 
 TARGET ?= $(TNAME)$(EXT)
 
+space  :=
+space  +=
+TARGET := $(subst $(space),_,$(TARGET))
+XNAME  := $(subst $(space),_,$(NAME))
+
 BLACK  := 0
 RED    := 1
 GREEN  := 2
@@ -475,43 +480,43 @@ $(TARGET): main.o $(WRAPCPY) $(EXTRA_SOURCES)
 
 linux_app: $(TARGET) create_bundle
 	@echo "Creating bundle..."
-	-@$(RM) -rf build/$(CONFIG)/$(NAME)
-	@./create_bundle lin $(TARGET) $(NAME)
+	-@$(RM) -rf build/$(CONFIG)/"$(NAME)"
+	@./create_bundle lin $(TARGET) "$(NAME)"
 
 osx_app: $(TARGET) create_bundle
 	@echo "Creating bundle..."
-	-@$(RM) -rf build/$(CONFIG)/$(NAME).app
-	@./create_bundle osx $(TARGET) $(NAME)
+	-@$(RM) -rf build/$(CONFIG)/"$(NAME).app"
+	@./create_bundle osx $(TARGET) "$(NAME)"
 	
 ios_app: $(TARGET) create_bundle
 	@echo "Creating bundle..."
-	-@$(RM) -rf build/$(CONFIG)/$(NAME).app
-	@./create_bundle ios $(TARGET) $(NAME)
+	-@$(RM) -rf build/$(CONFIG)/"$(NAME).app"
+	@./create_bundle ios $(TARGET) "$(NAME)"
 
 android_app: $(TARGET) create_bundle
 	@echo "Creating bundle..."
-	-@$(RM) -rf build/$(CONFIG)/$(NAME)
-	@./create_bundle android "$(TARGET)" "$(NAME)" "$(CONFIG)" "$(ARCH)" "$(SDK_VER)" "$(SDK)"
+	-@$(RM) -rf build/$(CONFIG)/"$(NAME)"
+	@./create_bundle android $(TARGET) "$(NAME)" "$(CONFIG)" "$(ARCH)" "$(SDK_VER)" "$(SDK)"
 
 win_prep_app: create_bundle
 	@echo "Compiling windows resources..."
-	@./create_bundle win prepare $(TARGET) $(NAME)
+	@./create_bundle win prepare $(TARGET) "$(NAME)"
 
 win_app: $(TARGET) create_bundle
 	@echo "Creating windows application..."
-	-@$(RM) -rf build/$(CONFIG)/windows/$(NAME)
-	@./create_bundle win $(TARGET) $(NAME)
+	-@$(RM) -rf build/$(CONFIG)/windows/"$(NAME)"
+	@./create_bundle win $(TARGET) "$(NAME)"
 
 test: $(TARGET)
 	./$(TARGET)
 
 clean:
 	@$(RM) -f main.o oResult.h oResult.lua *.d $(WRAPCPY)
-	@$(RM) -f $(NAME) $(NAME)52 $(NAME)_s $(NAME)_s52 $(NAME)_sf $(NAME)_sf52
-	@$(RM) -f $(NAME)*.exe
-	@$(RM) -f $(NAME)*_osx
-	@$(RM) -f $(NAME)*_ios
-	@$(RM) -f $(NAME)*_android
+	@$(RM) -f "$(XNAME:$(space)=_)" "$(XNAME)52" "$(XNAME)_s" "$(XNAME)_s52" "$(XNAME)_sf" "$(XNAME)_sf52"
+	@$(RM) -f "$(XNAME)"*.exe
+	@$(RM) -f "$(XNAME)"*_osx
+	@$(RM) -f "$(XNAME)"*_ios
+	@$(RM) -f "$(XNAME)"*_android
 	@$(RM) -f $(EXTRA_SOURCES) app_res.o
 
 extraclean: clean

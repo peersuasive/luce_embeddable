@@ -16,6 +16,10 @@ case "$dest" in
     win*)
         exec bash create_bundle.win "$@"
         break;;
+
+    lin*)
+        exec bash create_bundle.lin "$@"
+        break;;
     *)
         echo "Unknown bundle target: $@"
         exit 1;

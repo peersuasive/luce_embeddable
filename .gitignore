@@ -17,6 +17,7 @@ demo_s
 demo_s.exe
 luce.lua
 local/
+tmp/
 build/
 *.d
 squishy

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=%APP_NAME%
+Comment=
+Exec=./%EXEC_NAME%
+
+Terminal=false
+Icon=%ICON%

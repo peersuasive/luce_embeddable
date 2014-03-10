@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+###
+### TODO
+###
+
+(($# < 1)) && echo "Missing parameters" && exit 1
+
+TARGET=$1
+APP_NAME=${2:-$TARGET}
+TARGET_APP=$APP_NAME
+CONFIG=${3:-Release}
+
+## create Debian package
+## create rpm
+
+DEST="build/${CONFIG}/Linux/${TARGET_APP}"
+mkdir -p "${DEST}"
+
+ext=.${TARGET##*.}; [[ "$ext" == .$TARGET ]] && ext=
+name="${APP_NAME//_sf}"
+name="${name//_s}"
+EXEC_NAME="$name$ext"
+
+ICON="$name"
+if [[ -f sources/lin/icon.png ]]
+then
+    cp sources/lin/icon.png "$DEST"/"$ICON".png
+else
+    cp templates/lin/icon.png "$DEST"/"$ICON".png
+fi
+
+if [[ -f sources/lin/default.desktop ]]
+then
+    cp sources/lin/default.desktop "$DEST"/"$APP_NAME".desktop
+else
+    cp templates/lin/default.desktop "$DEST"/"$APP_NAME".desktop
+    sed -i "s,%APP_NAME%,${APP_NAME},g;s,%ICON%,${ICON},g;s,%EXEC_NAME%,${EXEC_NAME},g" "$DEST/$APP_NAME".desktop
+fi
+chmod +x "$DEST"/"${APP_NAME}".desktop
+
+cp "$TARGET" "$DEST"/"$EXEC_NAME"
+if [[ -f "sources/lin/README" ]]
+then
+    cp "sources/lin/README" "$DEST"
+else
+    cp "templates/README.tmpl" "$DEST"/README
+    sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/README
+fi

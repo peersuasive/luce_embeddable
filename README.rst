@@ -52,7 +52,7 @@ Luce is (c) 2014, Peersuasive Technologies
 ``squish`` is is the work of Metthew Wild (who is also the creator of `Prosody
 <https://prosody.im/>`_, among many other things)
 
-sources and legal informations can be found at `http://matthewwild.co.uk/projects/squish/home`_
+sources and legal informations can be found at `squish <http://matthewwild.co.uk/projects/squish/home>`_
 
 Squish is (C) 2009-2010 Matthew Wild.
 
@@ -184,6 +184,19 @@ To embed C/C++ modules, see `Embedding C Modules`_.
    written in a file named ``oResult.lua``.
 
 
+to build for a specific platform, run
+
+    .. code:: bash
+
+        make [XCROSS=<plat>] [OPTIONS]
+
+
+to build for all platforms at once, use
+
+   .. code:: bash
+
+        make allplats [OPTIONS]
+   
 
 
 Available options
@@ -197,6 +210,8 @@ Available options
          - win
          - ios
          - android
+
+         without any specified ``XCROSS``, will build for linux.
           
 :STATIC: (default) statically compiled binary, with luce fully embedded
                  
@@ -218,7 +233,6 @@ Available options
              Resulting bundled applications can be found in ``build/CONFIG/NAME/OS/``
 
 By default, will create a ``STATIC`` Linux x86_64 glibc 2.13 compatible binary with a Debian package.
-
 
 
 .. note::

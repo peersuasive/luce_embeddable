@@ -105,7 +105,7 @@ iOS
   - accessible from ``/opt/osxcross``
 
   - cross-built llvm's libcxx-3.4 for iOS, requires a bit of hacking on the
-    original script (see the `hack`_ at the of this file)
+    original script (see the `hack`_ at the end of this file)
 
 Android
 -------

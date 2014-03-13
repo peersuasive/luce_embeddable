@@ -138,6 +138,6 @@ jarsigner \
     "$BDEST"/bin/luce-${CONFIG}-unaligned_.apk \
     "$ALIAS" || exit 1
 
-"$ALIGN" -f 4 "$BDEST"/bin/luce-${CONFIG}-unaligned.apk "$DEST"/${APP_NAME}-${CONFIG}.apk || exit 1
+"$ALIGN" -f 4 "$BDEST"/bin/luce-${CONFIG}-unaligned.apk "$DEST"/"${APP_NAME}-${CONFIG}".apk || exit 1
 
 \rm -rf "$BDEST"

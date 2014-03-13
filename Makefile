@@ -283,7 +283,7 @@ ifeq ($(XCROSS),android)
 	CLASS_NAME = $(subst \ ,,$(NAME))
 
 	CFLAGS += -DLUCE_ANDROID=1
-	CFLAGS += -DCLASS_NAME=$(CLASS_NAME)
+	CFLAGS += -D"CLASS_NAME=$(CLASS_NAME)"
 
 	CFLAGS += --sysroot $(NDK)/platforms/android-$(SDK_VER)/$(SDK_ARCH)
 	CFLAGS += -I$(NDK)/sources/cxx-stl/gnu-libstdc++/4.8/include

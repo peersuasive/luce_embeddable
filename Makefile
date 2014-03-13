@@ -1,11 +1,12 @@
 -include Makefile.config
 
-
 ## TODO: create a version with an optional oResult.h
 ##       so that we can use this as a simple loader looking at specific folders
 ##       for specific files (say, luce/main.lua)
 
 STATIC 			?= 1
+
+CCACHE 			?=
 
 LUCE_HOME   	?= $(HOME)/src-private/luce
 LUCE_S_HOME 	?= $(HOME)/src-private/luce_squishable
@@ -118,6 +119,10 @@ ifeq ($(XCROSS),win)
 
 else
 ifeq ($(XCROSS),osx)
+	ifdef $(CCACHE)
+		export CCACHE_CPP2 = yes
+		CCACHE := $(CCACHE) -Qunused-arguments -fcolor-diagnostics
+	endif
 	#eval `/opt/osxcross/target/bin/osxcross-env`
 	export PATH := $(PATH):/opt/osxcross/target/bin
 	export LD_LIBRARY_PATH := $(LD_LIBRAY_PATH):/opt/osxcross/target/bin/../lib:/usr/lib/llvm-3.3/lib
@@ -422,27 +427,32 @@ bin2c.bin: bin2c.c
 
 luajit/src/luajit:
 	@echo "Compiling luajit for linux..."
-	@cd luajit/src && make clean && make
+	@cd luajit/src && make clean && make CCACHE=$(CCACHE)
 
 luajit/src/luajit.exe:
 	@echo "Compiling luajit for windows..."
-	@cd luajit/src && make clean && make CC="gcc -m32" HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows
+	@cd luajit/src && make clean && \
+		make CCACHE=$(CCACHE) CC="gcc -m32" HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Windows
 
 luajit/src/luajit_osx:
 	@echo "Compiling luajit for osx..."
-	@cd luajit/src && make clean && make CROSS=$(X) TARGET_SYS=Darwin
+	@cd luajit/src && make clean && \
+		make CCACHE=$(CCACHE) CROSS=$(X) TARGET_SYS=Darwin
 
 luajit/src/luajit_ios:
 	@echo "Compiling luajit for ios..."
-	@cd luajit/src && make clean && make CROSS=$(X) TARGET_SYS=iOS
+	@cd luajit/src && make clean && \
+		make CCACHE=$(CCACHE) CROSS=$(X) TARGET_SYS=iOS
 
 luajit/src/luajit_android:
 	@echo "Compiling luajit for android..."
-	@cd luajit/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Android
+	@cd luajit/src && make clean && \
+		make CCACHE=$(CCACHE) HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Android
 
 luajit/src/luajit_x86_android:
 	@echo "Compiling luajit for android (x86)..."
-	@cd luajit/src && make clean && make HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Androidx86
+	@cd luajit/src && make clean && \
+		make CCACHE=$(CCACHE) HOST_CC="gcc -m32" CROSS=$(X) TARGET_SYS=Androidx86
 
 main.o: main.cpp $(TARGET_JIT) oResult.h
 	@$(LUAC) -p $(LUA_MAIN)

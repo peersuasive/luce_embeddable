@@ -29,6 +29,9 @@ NODOTABIVER= 51
 # with "make clean", followed by "make" if you change any options.
 #
 # LuaJIT builds as a native 32 or 64 bit binary by default.
+
+CCACHE =
+
 ifeq (Darwin,$(TARGET_SYS))
 	CC			:= gcc -m64
 else
@@ -801,32 +804,32 @@ lj_folddef.h: $(BUILDVM_T) $(S)/lj_opt_fold.c
 %.o: $(S)/%.c
 	$(E) "CC        $@"
 	$(Q)$(TARGET_DYNCC) $(TARGET_ACFLAGS) -c -o $(@:.o=_dyn.o) $<
-	$(Q)$(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
+	$(Q)$(CCACHE) $(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
 
 %.o: %.s
 	$(E) "ASM       $@"
 	$(Q)$(TARGET_DYNCC) $(TARGET_ACFLAGS) -c -o $(@:.o=_dyn.o) $<
-	$(Q)$(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
+	$(Q)$(CCACHE) $(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
 
 $(LUAJIT_O):
 	$(E) "CC        $@"
-	$(Q)$(TARGET_STCC) $(TARGET_ACFLAGS) -c -o $@ $<
+	$(Q)$(CCACHE) $(TARGET_STCC) $(TARGET_ACFLAGS) -c -o $@ $<
 
 %.o: %.c
 	$(E) "CC        $@"
 	$(Q)$(TARGET_DYNCC) $(TARGET_ACFLAGS) -c -o $(@:.o=_dyn.o) $<
-	$(Q)$(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
+	$(Q)$(CCACHE) $(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
 
 $(EXTRA_O): %.o: %.c
 
 $(LOCAL_O):
 	$(E) "CC        $@"
 	$(Q)$(TARGET_DYNCC) $(TARGET_ACFLAGS) -c -o $(@:.o=_dyn.o) $<
-	$(Q)$(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
+	$(Q)$(CCACHE) $(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
 
 $(HOST_O): %.o: $(S)/%.c
 	$(E) "HOSTCC    $@"
-	$(Q)$(HOST_CC) $(HOST_ACFLAGS) -c -o $@ $<
+	$(Q)$(CCACHE) $(HOST_CC) $(HOST_ACFLAGS) -c -o $@ $<
 
 include Makefile.dep
 

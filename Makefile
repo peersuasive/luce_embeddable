@@ -119,9 +119,9 @@ ifeq ($(XCROSS),win)
 
 else
 ifeq ($(XCROSS),osx)
-	ifdef $(CCACHE)
+	ifneq (,$(CCACHE))
 		export CCACHE_CPP2 = yes
-		CCACHE := $(CCACHE) -Qunused-arguments -fcolor-diagnostics
+		CFLAGS+= -Qunused-arguments -fcolor-diagnostics
 	endif
 	#eval `/opt/osxcross/target/bin/osxcross-env`
 	export PATH := $(PATH):/opt/osxcross/target/bin

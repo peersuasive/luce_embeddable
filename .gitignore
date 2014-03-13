@@ -38,3 +38,6 @@ sources
 *_ios
 app_res.o
 respring
+classes
+classes/
+main.lua

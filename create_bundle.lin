@@ -33,30 +33,30 @@ if [[ -f sources/lin/icon.png ]]
 then
     convert -thumbnail 48x48 sources/lin/icon.png "$DEST"/"$ICON".png
 else
-    cp templates/lin/icon.xpm "$DEST"/"$ICON".png
+    \cp -f templates/lin/icon.xpm "$DEST"/"$ICON".png
 fi
 if [[ -f sources/lin/icon.xpm ]]
 then
     convert -thumbnail 48x48 sources/lin/icon.xpm "$DEST"/"$ICON".xpm
 else
-    cp templates/lin/icon.xpm "$DEST"/"$ICON".xpm
+    \cp -f templates/lin/icon.xpm "$DEST"/"$ICON".xpm
 fi
 
 if [[ -f sources/lin/default.desktop ]]
 then
-    cp sources/lin/default.desktop "$DEST"/"$APP_NAME".desktop
+    \cp -f sources/lin/default.desktop "$DEST"/"$APP_NAME".desktop
 else
-    cp templates/lin/default.desktop "$DEST"/"$APP_NAME".desktop
+    \cp -f templates/lin/default.desktop "$DEST"/"$APP_NAME".desktop
     sed -i "s,%APP_NAME%,${APP_NAME},g;s,%ICON%,${ICON},g;s,%EXEC_NAME%,${EXEC_NAME},g" "$DEST/$APP_NAME".desktop
 fi
 chmod +x "$DEST"/"${APP_NAME}".desktop
 
-cp "$TARGET" "$DEST"/"$EXEC_NAME" || exit 1
+\cp -f "$TARGET" "$DEST"/"$EXEC_NAME" || exit 1
 if [[ -f "sources/lin/README" ]]
 then
-    cp "sources/lin/README" "$DEST"
+    \cp -f "sources/lin/README" "$DEST"
 else
-    cp "templates/README.tmpl" "$DEST"/README
+    \cp -f "templates/README.tmpl" "$DEST"/README
     sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/README
 fi
 
@@ -64,22 +64,22 @@ fi
 
 if [[ -f sources/lin/changelog ]]
 then
-    cp sources/lin/changelog > "$FDEST"/changelog
+    \cp -f sources/lin/changelog > "$FDEST"/changelog
 else
-    cp templates/lin/changelog "$FDEST"/
+    \cp -f templates/lin/changelog "$FDEST"/
 fi
 
 if [[ -f sources/lin/copyright ]]
 then
-    cp templates/lin/copyright "$FDEST"/
+    \cp -f templates/lin/copyright "$FDEST"/
     cat sources/lin/copyright >> "$FDEST"/copyright
 else
-    cp templates/lin/copyright "$FDEST"/
+    \cp -f templates/lin/copyright "$FDEST"/
 fi
 sed -i "s,%APP_NAME%,${APP_NAME},g" "$FDEST"/copyright
 
-cp templates/lin/control "$FDEST"/
-cp templates/lin/menu "$FDEST"/
+\cp -f templates/lin/control "$FDEST"/
+\cp -f templates/lin/menu "$FDEST"/
 
 pushd "$FDEST" &>/dev/null || exit 1
 

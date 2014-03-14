@@ -60,6 +60,13 @@ else
     sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/README
 fi
 
+if [[ -f sources/lin/mime.xml ]]
+then
+    mkdir -p "$FDEST"/usr/share/mime/packages
+    \cp -f sources/lin/mime.xml "$DEST/${APP_NAME}.xml"
+    \ln -f "$DEST/${APP_NAME}.xml" "$FDEST"/usr/share/mime/packages/"${APP_NAME}.xml"
+fi
+
 ## debian package
 
 if [[ -f sources/lin/changelog ]]

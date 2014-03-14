@@ -36,6 +36,7 @@ sources
 *.exe
 *_osx
 *_ios
+*_android
 app_res.o
 respring
 classes

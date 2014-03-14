@@ -75,8 +75,11 @@ int main(int argc, char *argv[]) {
     if(!status) {
         for(int i=1;i<argc;++i)
             lua_pushstring(L, argv[i]);
-        if ((status = lua_pcall(L, argc-1, 0, 0)) )
+        if ((status = lua_pcall(L, argc-1, 1, 0)) )
             lua_error(L);
+        else
+            status = lua_tonumber(L, -1);
+
     } else {
         fprintf(stderr, "Missing or error with main file: %s\n", "main.lua");
         lua_error(L);

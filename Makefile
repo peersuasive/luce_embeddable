@@ -4,8 +4,9 @@
 ##       so that we can use this as a simple loader looking at specific folders
 ##       for specific files (say, luce/main.lua)
 
-VERSION 		?= $(shell cd sources/;tag=`git describe 2>/dev/null`; \
-				   tag=$${tag%-*}; echo $${tag:-0.1};) 
+VERSION			?= $(shell cd sources/;\
+					tag=`git describe 2>/dev/null| sed -e 's|^[v]*\([0-9]\+[^-]\+[-][^-]\+\)[-][^-]\+$$|\1|'`;\
+				    echo "$${tag:-0.1}")
 
 STATIC 			?= 1
 
@@ -542,6 +543,9 @@ distclean: extraclean
 
 purge: distclean
 	@$(RM) -f luce.lua
+
+xtest:
+	@echo "v: '$(VERSION)'"
 
 -include $(OBJECTS:%.o=%.d)
 

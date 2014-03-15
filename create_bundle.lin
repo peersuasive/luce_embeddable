@@ -15,6 +15,11 @@ ARCH=${ARCH:-$5}
 ARCH=${ARCH:-$(uname -i)}
 DESC="Embedded Luce for $APP_NAME"
 
+if [[ "$ARCH" == x86_64 ]]
+then
+    ARCH=amd64
+fi
+
 DEST="build/${APP_NAME}/${CONFIG}/Linux"
 FDEST="$DEST"/dist
 mkdir -p "${DEST}"

@@ -4,7 +4,8 @@
 ##       so that we can use this as a simple loader looking at specific folders
 ##       for specific files (say, luce/main.lua)
 
-VERSION 		?= 0.1
+VERSION 		?= $(shell cd sources/;tag=`git describe 2>/dev/null`; \
+				   tag=$${tag%-*}; echo $${tag:-0.1};) 
 
 STATIC 			?= 1
 

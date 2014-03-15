@@ -6,6 +6,7 @@ TARGET=$1
 APP_NAME=${2:-$TARGET}
 TARGET_APP="$APP_NAME".app
 CONFIG=${3:-Release}
+VERSION=${4:-0.1}
 
 DEST="build/${APP_NAME}/${CONFIG}/iOS/${TARGET_APP}"
 mkdir -p "${DEST}"
@@ -24,6 +25,7 @@ else
     cp templates/ios/Info.plist.ios.tmpl "$INFO"
     sed -i "s,%TARGET%,${TARGET},g" "$INFO"
     sed -i "s,%APP_NAME%,${APP_NAME},g" "$INFO"
+    sed -i "s,%VERSION%,${VERSION},g" "$INFO"
 fi
 # any NIB
 #if [[ -f "sources/RecentFilesMenuTemplate.nib" ]]

@@ -12,6 +12,7 @@ TARGET=$1
 APP_NAME=${2:-$TARGET}
 TARGET_APP="$APP_NAME"
 CONFIG=${3:-Release}
+VERSION=${4:-0.1}
 
 DEST="build/${APP_NAME}/${CONFIG}/Win32"
 mkdir -p "${DEST}"
@@ -46,6 +47,7 @@ then
         sed -i "s,%ICON%,${ICON},g" "$RC"
         sed -i "s,%TARGET%,${TARGET},g" "$RC"
         sed -i "s,%APP_NAME%,${APP_NAME},g" "$RC"
+        sed -i "s,%VERSION%,${VERSION},g" "$RC"
         sed -i "/^\ *\/\/.*$/d" "$RC"
     fi
 

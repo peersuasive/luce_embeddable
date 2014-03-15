@@ -7,13 +7,16 @@ TARGET="${TARGET_%.so}"; TARGET="${TARGET#lib}"
 APP_NAME=${2:-$TARGET}
 CLASS_NAME=${APP_NAME// }
 CONFIG=${3:-Release}
-ARCH=${4:-armeabi}
-SDK_VER=${5:-8}
-AHOME=${6:-/opt/android-sdk}
-KSTORE=${7:-$HOME/.android/debug.keystore}
-SPWD=${8:-android}
-KPWD=${9:-android}
-ALIAS=${10:-androiddebugkey}
+VERSION=${4:-0.1}
+ARCH=${5:-armeabi}
+SDK_VER=${6:-8}
+AHOME=${7:-/opt/android-sdk}
+KSTORE=${8:-$HOME/.android/debug.keystore}
+SPWD=${9:-android}
+KPWD=${10:-android}
+ALIAS=${11:-androiddebugkey}
+
+VERSION_I=${VERSION//.}; VERSION_I=${VERSION_I#0}; VERSION_I=${VERSION_I#0}; VERSION_I=${VERSION_I#0}
 
 G=
 DEBUGMODE=
@@ -44,6 +47,8 @@ then
 else
     \cp -f templates/android/AndroidManifest.xml "$BDEST"/bin/
     sed -i "s,%CLASS_NAME%,${CLASS_NAME},g" "$BDEST"/bin/AndroidManifest.xml
+    sed -i "s,%VERSION_I%,${VERSION_I},g" "$BDEST"/bin/AndroidManifest.xml
+    sed -i "s,%VERSION%,${VERSION},g" "$BDEST"/bin/AndroidManifest.xml
 fi
 
 \cp -f templates/android/src/org/peersuasive/luce/luce.java "$BDEST"/src/org/peersuasive/luce/luce.java

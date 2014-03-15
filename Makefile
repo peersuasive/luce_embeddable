@@ -4,6 +4,8 @@
 ##       so that we can use this as a simple loader looking at specific folders
 ##       for specific files (say, luce/main.lua)
 
+VERSION 		?= 0.1
+
 STATIC 			?= 1
 
 CCACHE 			?=
@@ -492,31 +494,31 @@ $(TARGET): main.o $(WRAPCPY) $(EXTRA_SOURCES)
 linux_app: $(TARGET) create_bundle
 	@echo "Creating bundle..."
 	-@$(RM) -rf build/$(CONFIG)/"$(NAME)"
-	@./create_bundle lin $(TARGET) "$(NAME)"
+	@./create_bundle lin $(TARGET) "$(NAME)" "$(CONFIG)" "$(VERSION)"
 
 osx_app: $(TARGET) create_bundle
 	@echo "Creating bundle..."
 	-@$(RM) -rf build/$(CONFIG)/"$(NAME).app"
-	@./create_bundle osx $(TARGET) "$(NAME)"
+	@./create_bundle osx $(TARGET) "$(NAME)" "$(CONFIG)" "$(VERSION)"
 	
 ios_app: $(TARGET) create_bundle
 	@echo "Creating bundle..."
 	-@$(RM) -rf build/$(CONFIG)/"$(NAME).app"
-	@./create_bundle ios $(TARGET) "$(NAME)"
+	@./create_bundle ios $(TARGET) "$(NAME)" "$(CONFIG)" "$(VERSION)"
 
 android_app: $(TARGET) create_bundle
 	@echo "Creating bundle..."
 	-@$(RM) -rf build/$(CONFIG)/"$(NAME)"
-	@./create_bundle android $(TARGET) "$(NAME)" "$(CONFIG)" "$(ARCH)" "$(SDK_VER)" "$(SDK)"
+	@./create_bundle android $(TARGET) "$(NAME)" "$(CONFIG)" "$(VERSION)" "$(ARCH)" "$(SDK_VER)" "$(SDK)"
 
 win_prep_app: create_bundle
 	@echo "Compiling windows resources..."
-	@./create_bundle win prepare $(TARGET) "$(NAME)"
+	@./create_bundle win prepare $(TARGET) "$(NAME)" "$(CONFIG)" "$(VERSION)"
 
 win_app: $(TARGET) create_bundle
 	@echo "Creating windows application..."
 	-@$(RM) -rf build/$(CONFIG)/windows/"$(NAME)"
-	@./create_bundle win $(TARGET) "$(NAME)"
+	@./create_bundle win $(TARGET) "$(NAME)" "$(CONFIG)" "$(VERSION)"
 
 test: $(TARGET)
 	./$(TARGET)

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="%VERSION_I%" android:versionName="%VERSION%"
         package="org.peersuasive.luce.%CLASS_NAME%">
   <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true"/>
   <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="11"/>

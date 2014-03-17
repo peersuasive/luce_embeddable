@@ -9,6 +9,7 @@ VERSION			?= $(shell cd sources/;\
 				    echo "$${tag:-0.1}")
 
 STATIC 			?= 1
+DEBUG 			?=
 
 CCACHE 			?=
 
@@ -40,7 +41,7 @@ LUA_MAIN        := $(shell cat $(SQUISHY) |grep '^\ *Main'|awk '{print $$NF}')
 EXTRA_SOURCES   = 
 
 ifeq (1,$(DEBUG))
-	XDEBUG=-D"DEBUG=1" -D"_DEBUG=1"
+	XDEBUG=-D"DEBUG=1" -D"_DEBUG=1" -g
 	CONFIG=Debug
 	CFLAGS += -g
 else
@@ -117,7 +118,12 @@ ifeq ($(XCROSS),win)
 		ifneq (,$(DEV))
 	 		STATIC_OBJS = obj/win$(IS52)/*.o
 		else
-	 		STATIC_OBJS = sources/win/libluce$(IS52).a
+			ifeq (1,$(DEBUG))
+	 			STATIC_OBJS = sources/win/libluce$(IS52)_d.a
+				STRIP :=
+			else
+	 			STATIC_OBJS = sources/win/libluce$(IS52).a
+			endif
 		endif
 	endif
 
@@ -148,12 +154,14 @@ ifeq ($(XCROSS),osx)
 	CFLAGS += -stdlib=libc++ 
 	CFLAGS += -mmacosx-version-min=$(SDK_MIN)
 	CFLAGS += -fpascal-strings -fmessage-length=0 -fasm-blocks -fstrict-aliasing -fvisibility-inlines-hidden 
+	#CFLAGS += -fno-objc-arc
 
 	LDFLAGS += -stdlib=libc++ 
 	LDFLAGS += -pagezero_size 10000 -image_base 100000000 
 	LDFLAGS += -fnested-functions 
 	LDFLAGS += -mmacosx-version-min=$(SDK_MIN)
 	LDFLAGS += -demangle
+	#LDFLAGS += -fno-objc-arc
 
 	ifeq ($(LUA52),1)
 		CFLAGS += -I/opt/zmq-osx/include/lua5.2
@@ -174,7 +182,12 @@ ifeq ($(XCROSS),osx)
 		ifneq (,$(DEV))
 	 		STATIC_OBJS = obj/osx$(IS52)/*.o
 		else
-	 		STATIC_OBJS = sources/osx/libluce$(IS52).a
+			ifeq (1,$(DEBUG))
+	 			STATIC_OBJS = sources/osx/libluce$(IS52)_d.a
+				STRIP :=
+			else
+	 			STATIC_OBJS = sources/osx/libluce$(IS52).a
+			endif
 		endif
 	endif
  	#EXTRA_SOURCES = osx_main.o
@@ -355,7 +368,12 @@ else
 		ifneq (,$(DEV))
 	 		STATIC_OBJS = obj/lin$(IS52)/*.o
 		else
- 			STATIC_OBJS = sources/linux/libluce$(IS52).a
+			ifeq (1,$(DEBUG))
+ 				STATIC_OBJS = sources/linux/libluce$(IS52)_d.a
+				STRIP :=
+			else
+ 				STATIC_OBJS = sources/linux/libluce$(IS52).a
+			endif
 		endif
 	endif
 
@@ -377,6 +395,7 @@ CFLAGS += -MMD
 LIBS   += $(EXTRALIBS)
 LDFLAGS += -std=c++11
 LDFLAGS += -fvisibility=hidden
+LDFLAGS += $(XDEBUG)
 
 TARGET ?= $(TNAME)$(EXT)
 

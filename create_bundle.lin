@@ -65,6 +65,23 @@ else
     sed -i "s,%APP_NAME%,${APP_NAME},g" "$DEST"/README
 fi
 
+## assets
+if [[ -r "sources/lin/assets" ]]
+then
+    \cp -Lal "sources/lin/assets/" "$DEST"
+fi
+
+## assets
+if [[ -r "sources/lin/lib" ]]
+then
+    mkdir "$DEST/lib"
+    for f in sources/lin/lib/*; do
+        \cp "$f" "$DEST"/lib/
+    done
+    #\cp -H "./sources/lin/lib/*" "$DEST"/
+fi
+
+
 if [[ -f sources/lin/mime.xml ]]
 then
     mkdir -p "$FDEST"/usr/share/mime/packages

@@ -11,6 +11,15 @@
 
 *************************************************************/
 
+// realpath
+#ifndef __MINGW32__
+#include <limits.h> /* PATH_MAX */
+#include <stdio.h>
+#include <stdlib.h>
+#endif
+
+#include <iostream>
+
 #include <lua.hpp>
 #include <string>
 
@@ -58,6 +67,10 @@ int main(int argc, char *argv[]) {
         lua_error(L);
     }
 
+    // set relative path to resources
+    // TODO: guess os type to get path sep and .so ext
+    //       possibly extend to FULL_STATIC also
+    //       and set _CPATH as well
     #ifndef FULL_XSTATIC
     lua_getglobal( L, "package" );
     lua_getfield( L, -1, "path" );
@@ -73,9 +86,23 @@ int main(int argc, char *argv[]) {
     #endif
 
     if(!status) {
+        #ifdef __MINGW32__
+        const char *prog = argv[0];
+        #else
+        // get real path of program
+        char prog[PATH_MAX + 1];
+        char *res = realpath(argv[0], prog);
+        if (!res) {
+            perror("main: Failed to get program path.");
+            exit(EXIT_FAILURE);
+        }
+        #endif
+        lua_pushstring(L, prog);
+
         for(int i=1;i<argc;++i)
             lua_pushstring(L, argv[i]);
-        if ((status = lua_pcall(L, argc-1, 1, 0)) )
+
+        if ((status = lua_pcall(L, argc, 1, 0)) )
             lua_error(L);
         else
             status = lua_tonumber(L, -1);

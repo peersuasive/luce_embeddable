@@ -120,7 +120,8 @@ ifeq ($(XCROSS),win)
 		else
 			ifeq (1,$(DEBUG))
 	 			STATIC_OBJS = sources/win/libluce$(IS52)_d.a
-				STRIP :=
+				STRIP := echo
+				STRIP_OPTIONS :=
 			else
 	 			STATIC_OBJS = sources/win/libluce$(IS52).a
 			endif
@@ -184,7 +185,8 @@ ifeq ($(XCROSS),osx)
 		else
 			ifeq (1,$(DEBUG))
 	 			STATIC_OBJS = sources/osx/libluce$(IS52)_d.a
-				STRIP :=
+				STRIP := echo
+				STRIP_OPTIONS :=
 			else
 	 			STATIC_OBJS = sources/osx/libluce$(IS52).a
 			endif
@@ -370,7 +372,8 @@ else
 		else
 			ifeq (1,$(DEBUG))
  				STATIC_OBJS = sources/linux/libluce$(IS52)_d.a
-				STRIP :=
+				STRIP := echo
+				STRIP_OPTIONS :=
 			else
  				STATIC_OBJS = sources/linux/libluce$(IS52).a
 			endif

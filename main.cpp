@@ -16,6 +16,8 @@
 #include <limits.h> /* PATH_MAX */
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 #endif
 
 #include <iostream>
@@ -89,12 +91,19 @@ int main(int argc, char *argv[]) {
         #ifdef __MINGW32__
         const char *prog = argv[0];
         #else
-        // get real path of program
-        char prog[PATH_MAX + 1];
+        // get real path of program: WARNING: Linux only
+        // TODO: make it portable 
+        // @see: http://stackoverflow.com/questions/1023306/finding-current-executables-path-without-proc-self-exe
+        char prog[PATH_MAX + 1] = {0};
         char *res = realpath(argv[0], prog);
         if (!res) {
-            perror("main: Failed to get program path.");
-            exit(EXIT_FAILURE);
+            char proc[20];
+            sprintf( proc, "/proc/%d/exe", getpid() );
+            res = realpath(proc, prog);
+            if(!res) {
+                perror("main: Failed to get program path.");
+                exit(EXIT_FAILURE);
+            }
         }
         #endif
         lua_pushstring(L, prog);
